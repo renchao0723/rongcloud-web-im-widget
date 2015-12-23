@@ -1,0 +1,19 @@
+{
+  "name": "webim-widget",
+  "description": "Web IM Widget",
+  "main": "index.js",
+  "authors": [
+    "yangchuan"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "web",
+    "im",
+    "widget"
+  ],
+  "moduleType": [],
+  "homepage": "",
+  "dependencies": {
+    "angular": "~1.4.8"
+  }
+}
