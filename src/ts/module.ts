@@ -13,8 +13,31 @@ module WidgetModule {
         DOWNLOADED = 0x4
     }
 
-    enum SentStatus {
-
+    export enum SentStatus {
+        /**
+         * 发送中。
+         */
+        SENDING = 10,
+        /**
+         * 发送失败。
+         */
+        FAILED = 20,
+        /**
+         * 已发送。
+         */
+        SENT = 30,
+        /**
+         * 对方已接收。
+         */
+        RECEIVED = 40,
+        /**
+         * 对方已读。
+         */
+        READ = 50,
+        /**
+         * 对方已销毁。
+         */
+        DESTROYED = 60,
     }
 
     enum AnimationType {
@@ -50,6 +73,14 @@ module WidgetModule {
         }
     }
 
+    export class TimePanl extends ChatPanel {
+        sentTime: Date;
+        constructor(date: Date) {
+            super(PanelType.Time);
+            this.sentTime = date;
+        }
+    }
+
     export class GetHistoryPanel extends ChatPanel {
         constructor() {
             super(PanelType.getHistory);
@@ -70,11 +101,9 @@ module WidgetModule {
         }
     }
 
-    export class InformationPanel extends ChatPanel {
-        content: string;
-        constructor(content: string) {
+    export class InformationPanel extends Message {
+        constructor() {
             super(PanelType.getMore);
-            this.content = content;
         }
     }
 
@@ -86,10 +115,10 @@ module WidgetModule {
         messageDirection: MessageDirection;
         messageId: string;
         receivedStatus: ReceivedStatus;
-        receivedTime: number;
+        receivedTime: Date;
         senderUserId: string;
         sentStatus: SentStatus;
-        sentTime: number;
+        sentTime: Date;
         targetId: string;
         messageType: string;
         constructor(content?: any, conversationType?: string, extra?: string, objectName?: string, messageDirection?: MessageDirection, messageId?: string, receivedStatus?: ReceivedStatus, receivedTime?: number, senderUserId?: string, sentStatus?: SentStatus, sentTime?: number, targetId?: string, messageType?: string) {
@@ -104,10 +133,10 @@ module WidgetModule {
             msg.messageDirection = SDKmsg.messageDirection;
             msg.messageId = SDKmsg.messageId;
             msg.receivedStatus = SDKmsg.receivedStatus;
-            msg.receivedTime = SDKmsg.receivedTime;
+            msg.receivedTime = new Date(SDKmsg.receivedTime);
             msg.senderUserId = SDKmsg.senderUserId;
             msg.sentStatus = SDKmsg.sendStatusMessage;
-            msg.sentTime = SDKmsg.sentTime;
+            msg.sentTime = new Date(SDKmsg.sentTime);
             msg.targetId = SDKmsg.targetId;
             msg.messageType = SDKmsg.messageType;
 
@@ -165,6 +194,12 @@ module WidgetModule {
 
                     msg.content = location;
                     break;
+                case MessageType.InformationNotificationMessage:
+                    var info = new InformationPanel();
+                    info.content = SDKmsg.content.content;
+                    msg.content = info;
+                    break;
+
             }
 
             msg.content.userInfo = SDKmsg.content.userInfo;
@@ -230,6 +265,14 @@ module WidgetModule {
             this.targetType = targetType;
             this.targetId = targetId;
             this.title = title;
+        }
+    }
+
+    export class Helper {
+        static timeCompare(first: Date, second: Date) {
+            var pre = first.toString();
+            var cur = second.toString();
+            return pre.substring(0, pre.lastIndexOf(":")) == cur.substring(0, cur.lastIndexOf(":"))
         }
     }
 

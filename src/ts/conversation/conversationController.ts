@@ -15,7 +15,6 @@ conversationController.controller("conversationController", ["$scope", "conversa
         }
 
 
-
         $scope.currentConversation = <WidgetModule.Conversation>{
             title: "",
             targetId: "",
@@ -40,37 +39,47 @@ conversationController.controller("conversationController", ["$scope", "conversa
             //
             $scope.messageList.splice(0, $scope.messageList.length);
 
-            
-
-            RongIMLib.RongIMClient.getInstance().getHistoryMessages(+conversation.targetType, conversation.targetId, null, 5, {
-                onSuccess: function(list, has) {
-                    for (let i = 0; i < list.length; i++) {
-                        $scope.messageList.push(WidgetModule.Message.convert(list[i]));
-                    }
-                    adjustScrollbars();
+            var currenthis = conversationServer._cacheHistory[conversation.targetType + "_" + conversation.targetId] || [];
+            if (currenthis.length == 0) {
+                conversationServer._getHistoryMessages(+conversation.targetType, conversation.targetId, 3).then(function() {
+                    $scope.messageList = conversationServer._cacheHistory[conversation.targetType + "_" + conversation.targetId];
                     $scope.$apply();
-                },
-                onError: function() {
-
-                }
-            });
+                    adjustScrollbars();
+                });
+            } else {
+                $scope.messageList = conversationServer._cacheHistory[conversation.targetType + "_" + conversation.targetId];
+            }
 
         }
 
         conversationServer.onReceivedMessage = function(msg: WidgetModule.Message) {
-            console.log(msg);
-            if (msg.targetId === $scope.currentConversation.targetId) {
-                $scope.messageList.push(WidgetModule.Message.convert(msg));
+            $scope.messageList.splice(0, $scope.messageList.length);
+            if (msg.targetId == $scope.currentConversation.targetId && msg.conversationType == $scope.currentConversation.targetType) {
                 adjustScrollbars();
                 $scope.$apply();
             }
         }
 
+        $scope.getHistory = function() {
+            conversationServer._getHistoryMessages(+$scope.currentConversation.targetType, $scope.currentConversation.targetId, 20).then(function() {
+                $scope.messageList = conversationServer._cacheHistory[$scope.currentConversation.targetType + "_" + $scope.currentConversation.targetId];
+                $scope.$apply();
+                adjustScrollbars();
+            });
+        }
+
+        $scope.getMoreMessage = function() {
+            conversationServer._getHistoryMessages(+$scope.currentConversation.targetType, $scope.currentConversation.targetId, 20).then(function() {
+                $scope.messageList = conversationServer._cacheHistory[$scope.currentConversation.targetType + "_" + $scope.currentConversation.targetId];
+                $scope.$apply();
+                adjustScrollbars();
+            });
+        }
+
+
         function packDisplaySendMessage(msg: RongIMLib.MessageContent, messageType: string) {
             var ret = new RongIMLib.Message();
-
             ret.content = msg;
-
             ret.conversationType = $scope.currentConversation.targetType;
             ret.targetId = $scope.currentConversation.targetId;
             ret.senderUserId = conversationServer.loginUser.id;

@@ -66,6 +66,15 @@ widget.factory("WebimWidget", ["$q", "conversationServer", function($q: angular.
                 var msg = WidgetModule.Message.convert(data);
                 conversationServer.onReceivedMessage(msg);
 
+                if (msg instanceof RongIMLib.NotificationMessage) {
+                    // $scope.messageList.push(WidgetModule.Message.convert(msg));
+                    if (msg.messageType == WidgetModule.MessageType.InformationNotificationMessage) {
+                        addMessageAndOperation(msg);
+                    }
+                } else {
+                    addMessageAndOperation(msg);
+                }
+
                 if (WebimWidget.onReceivedMessage) {
                     WebimWidget.onReceivedMessage(data);
                 }
@@ -75,12 +84,17 @@ widget.factory("WebimWidget", ["$q", "conversationServer", function($q: angular.
 
     }
 
+    function addMessageAndOperation(msg: WidgetModule.Message) {
+        var hislist = conversationServer._cacheHistory[msg.conversationType + "_" + msg.targetId] = conversationServer._cacheHistory[msg.conversationType + "_" + msg.targetId] || []
+        if (hislist.length == 0) {
+            hislist.push(new WidgetModule.GetHistoryPanel());
+            hislist.push(new WidgetModule.TimePanl(msg.sentTime));
+        }
+        conversationServer._addHistoryMessages(msg);
+    }
+
     WebimWidget.setConversation = function(targetType: string, targetId: string, title: string) {
-        //加载时立即设置会话会有问题
-        //TODO:之后考虑怎么处理
-        setTimeout(function() {
-            conversationServer.onConversationChangged(new WidgetModule.Conversation(targetType, targetId, title));
-        }, 0);
+        conversationServer.onConversationChangged(new WidgetModule.Conversation(targetType, targetId, title));
     }
 
     return WebimWidget;
