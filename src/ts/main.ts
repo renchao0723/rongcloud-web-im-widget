@@ -116,6 +116,10 @@ interface WebimWidget {
 
     init(config: Config): void
 
+    show(): void
+    hidden(): void
+    display: boolean
+
     setConversation(targetType: string, targetId: string, title: string): void
 
     onConnectStatusChange(status: number): void
