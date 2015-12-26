@@ -1,7 +1,8 @@
-<div class="outer">
+<div class="outer am-fade-and-slide-top" ng-show="resoures.display" >
       <div class="main">
         <div class="title">
           <span>{{currentConversation.title}}</span>
+            <button style="float: right;margin: 10px;padding:3px" ng-click="resoures.display=false;"> X </button>
         </div>
         <div id="Messages" class="msgcontent">
             <div class="message" ng-repeat="item in messageList">

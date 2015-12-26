@@ -1,7 +1,7 @@
 /// <reference path="../../../typings/tsd.d.ts"/>
 var conversationController = angular.module("rongWebimWidget.conversationController", ["rongWebimWidget.conversationServer"]);
-conversationController.controller("conversationController", ["$scope", "conversationServer",
-    function ($scope, conversationServer) {
+conversationController.controller("conversationController", ["$scope", "conversationServer", "WebimWidget",
+    function ($scope, conversationServer, WebimWidget) {
         function adjustScrollbars() {
             setTimeout(function () {
                 var ele = document.getElementById("Messages");
@@ -17,6 +17,14 @@ conversationController.controller("conversationController", ["$scope", "conversa
         };
         $scope.messageList = [];
         $scope.messageContent = "";
+        $scope.resoures = WebimWidget;
+        console.log(WebimWidget);
+        WebimWidget.hidden = function () {
+            WebimWidget.display = false;
+        };
+        WebimWidget.show = function () {
+            WebimWidget.display = true;
+        };
         conversationServer.onConversationChangged = function (conversation) {
             conversationServer.current.title = conversation.title;
             conversationServer.current.targetId = conversation.targetId;
@@ -27,25 +35,38 @@ conversationController.controller("conversationController", ["$scope", "conversa
             //TODO:获取历史消息
             //
             $scope.messageList.splice(0, $scope.messageList.length);
-            RongIMLib.RongIMClient.getInstance().getHistoryMessages(+conversation.targetType, conversation.targetId, null, 5, {
-                onSuccess: function (list, has) {
-                    for (var i = 0; i < list.length; i++) {
-                        $scope.messageList.push(WidgetModule.Message.convert(list[i]));
-                    }
+            var currenthis = conversationServer._cacheHistory[conversation.targetType + "_" + conversation.targetId] || [];
+            if (currenthis.length == 0) {
+                conversationServer._getHistoryMessages(+conversation.targetType, conversation.targetId, 3).then(function () {
+                    $scope.messageList = conversationServer._cacheHistory[conversation.targetType + "_" + conversation.targetId];
+                    // $scope.$apply();
                     adjustScrollbars();
-                    $scope.$apply();
-                },
-                onError: function () {
-                }
-            });
+                });
+            }
+            else {
+                $scope.messageList = conversationServer._cacheHistory[conversation.targetType + "_" + conversation.targetId];
+            }
         };
         conversationServer.onReceivedMessage = function (msg) {
-            console.log(msg);
-            if (msg.targetId === $scope.currentConversation.targetId) {
-                $scope.messageList.push(WidgetModule.Message.convert(msg));
+            $scope.messageList.splice(0, $scope.messageList.length);
+            if (msg.targetId == $scope.currentConversation.targetId && msg.conversationType == $scope.currentConversation.targetType) {
                 adjustScrollbars();
                 $scope.$apply();
             }
+        };
+        $scope.getHistory = function () {
+            conversationServer._getHistoryMessages(+$scope.currentConversation.targetType, $scope.currentConversation.targetId, 20).then(function () {
+                $scope.messageList = conversationServer._cacheHistory[$scope.currentConversation.targetType + "_" + $scope.currentConversation.targetId];
+                $scope.$apply();
+                adjustScrollbars();
+            });
+        };
+        $scope.getMoreMessage = function () {
+            conversationServer._getHistoryMessages(+$scope.currentConversation.targetType, $scope.currentConversation.targetId, 20).then(function () {
+                $scope.messageList = conversationServer._cacheHistory[$scope.currentConversation.targetType + "_" + $scope.currentConversation.targetId];
+                $scope.$apply();
+                adjustScrollbars();
+            });
         };
         function packDisplaySendMessage(msg, messageType) {
             var ret = new RongIMLib.Message();
@@ -61,10 +82,10 @@ conversationController.controller("conversationController", ["$scope", "conversa
         $scope.send = function () {
             console.log($scope.currentConversation, conversationServer.loginUser);
             var msg = RongIMLib.TextMessage.obtain($scope.messageContent);
-            var userinfo = new RongIMLib.UserInfo();
-            userinfo.userId = conversationServer.loginUser.id;
-            userinfo.name = conversationServer.loginUser.name;
-            userinfo.portraitUri = conversationServer.loginUser.portraitUri;
+            var userinfo = new RongIMLib.UserInfo(conversationServer.loginUser.id, conversationServer.loginUser.name, conversationServer.loginUser.portraitUri);
+            // userinfo.userId = conversationServer.loginUser.id;
+            // userinfo.name = conversationServer.loginUser.name;
+            // userinfo.portraitUri = conversationServer.loginUser.portraitUri;
             msg.userInfo = userinfo;
             RongIMLib.RongIMClient.getInstance().sendMessage(+$scope.currentConversation.targetType, $scope.currentConversation.targetId, msg, null, {
                 onSuccess: function (retMessage) {
@@ -91,7 +112,7 @@ conversationDirective.directive("rongConversation", [function () {
     }]);
 /// <reference path="../../../typings/tsd.d.ts"/>
 var conversationServer = angular.module("rongWebimWidget.conversationServer", ["rongWebimWidget.conversationDirective"]);
-conversationServer.factory("conversationServer", [function () {
+conversationServer.factory("conversationServer", ["$q", function ($q) {
         var conversationServer = {};
         conversationServer.current = {
             targetId: "",
@@ -104,6 +125,42 @@ conversationServer.factory("conversationServer", [function () {
             portraitUri: ""
         };
         conversationServer._cacheHistory = {};
+        conversationServer._getHistoryMessages = function (targetType, targetId, number, reset) {
+            var defer = $q.defer();
+            RongIMLib.RongIMClient.getInstance().getHistoryMessages(targetType, targetId, reset ? 0 : null, number, {
+                onSuccess: function (data, has) {
+                    for (var i = 0; i < data.length; i++) {
+                        // if (data instanceof RongIMLib.NotificationMessage) {
+                        // } else {
+                        var msg = WidgetModule.Message.convert(data[i]);
+                        unshiftHistoryMessages(targetId, targetType, msg);
+                    }
+                    defer.resolve({ data: data, has: has });
+                },
+                onError: function (error) {
+                    defer.reject(error);
+                }
+            });
+            return defer.promise;
+        };
+        function unshiftHistoryMessages(id, type, item) {
+            var arr = conversationServer._cacheHistory[type + "_" + id] = conversationServer._cacheHistory[type + "_" + id] || [];
+            if (arr[0] && arr[0].sentTime && arr[0].panelType != WidgetModule.PanelType.Time && item.sentTime) {
+                if (WidgetModule.Helper.timeCompare(arr[0].sentTime, item.sentTime)) {
+                    arr.unshift(new WidgetModule.TimePanl(arr[0].sentTime));
+                }
+            }
+            arr.unshift(item);
+        }
+        conversationServer._addHistoryMessages = function (item) {
+            var arr = conversationServer._cacheHistory[item.conversationType + "_" + item.targetId] = conversationServer._cacheHistory[item.conversationType + "_" + item.targetId] || [];
+            if (arr[arr.length - 1] && arr[arr.length - 1].panelType != WidgetModule.PanelType.Time && arr[arr.length - 1].sendTime && item.sentTime) {
+                if (!WidgetModule.Helper.timeCompare(arr[arr.length - 1].sendTime, item.sentTime)) {
+                    arr.push(new WidgetModule.TimePanl(item.sentTime));
+                }
+            }
+            arr.push(item);
+        };
         conversationServer.onConversationChangged = function () {
             //提供接口由conversation controller实现具体操作
         };
@@ -113,7 +170,7 @@ conversationServer.factory("conversationServer", [function () {
         return conversationServer;
     }]);
 /// <reference path="../../typings/tsd.d.ts"/>
-var widget = angular.module("rongWebimWidget", ["rongWebimWidget.conversationServer"]);
+var widget = angular.module("rongWebimWidget", ["ngAnimate", "rongWebimWidget.conversationServer"]);
 widget.factory("WebimWidget", ["$q", "conversationServer", function ($q, conversationServer) {
         var WebimWidget = {};
         var messageList = {};
@@ -122,7 +179,11 @@ widget.factory("WebimWidget", ["$q", "conversationServer", function ($q, convers
             angular.extend(defaultconfig, config);
             // if (config)
             //
-            RongIMLib.RongIMClient.init(defaultconfig.appkey);
+            //
+            if (!RongIMLib || !RongIMLib.RongIMClient) {
+                throw new Error("please refer to RongIMLib");
+            }
+            RongIMLib.RongIMClient.init(defaultconfig.appkey, false);
             RongIMLib.RongIMClient.connect(defaultconfig.token, {
                 onSuccess: function (userId) {
                     console.log("connect success:" + userId);
@@ -162,18 +223,38 @@ widget.factory("WebimWidget", ["$q", "conversationServer", function ($q, convers
                 onReceived: function (data) {
                     var msg = WidgetModule.Message.convert(data);
                     conversationServer.onReceivedMessage(msg);
+                    if (msg instanceof RongIMLib.NotificationMessage) {
+                        // $scope.messageList.push(WidgetModule.Message.convert(msg));
+                        if (msg.messageType == WidgetModule.MessageType.InformationNotificationMessage) {
+                            addMessageAndOperation(msg);
+                        }
+                    }
+                    else {
+                        addMessageAndOperation(msg);
+                    }
                     if (WebimWidget.onReceivedMessage) {
                         WebimWidget.onReceivedMessage(data);
                     }
                 }
             });
         };
+        function addMessageAndOperation(msg) {
+            var hislist = conversationServer._cacheHistory[msg.conversationType + "_" + msg.targetId] = conversationServer._cacheHistory[msg.conversationType + "_" + msg.targetId] || [];
+            if (hislist.length == 0) {
+                hislist.push(new WidgetModule.GetHistoryPanel());
+                hislist.push(new WidgetModule.TimePanl(msg.sentTime));
+            }
+            conversationServer._addHistoryMessages(msg);
+        }
         WebimWidget.setConversation = function (targetType, targetId, title) {
-            //加载时立即设置会话会有问题
-            //TODO:之后考虑怎么处理
-            setTimeout(function () {
-                conversationServer.onConversationChangged(new WidgetModule.Conversation(targetType, targetId, title));
-            }, 0);
+            conversationServer.onConversationChangged(new WidgetModule.Conversation(targetType, targetId, title));
+        };
+        WebimWidget.display = false;
+        WebimWidget.hidden = function () {
+            WebimWidget.display = false;
+        };
+        WebimWidget.show = function () {
+            WebimWidget.display = true;
         };
         return WebimWidget;
     }]);
@@ -196,9 +277,33 @@ var WidgetModule;
         ReceivedStatus[ReceivedStatus["DOWNLOADED"] = 4] = "DOWNLOADED";
     })(WidgetModule.ReceivedStatus || (WidgetModule.ReceivedStatus = {}));
     var ReceivedStatus = WidgetModule.ReceivedStatus;
-    var SentStatus;
     (function (SentStatus) {
-    })(SentStatus || (SentStatus = {}));
+        /**
+         * 发送中。
+         */
+        SentStatus[SentStatus["SENDING"] = 10] = "SENDING";
+        /**
+         * 发送失败。
+         */
+        SentStatus[SentStatus["FAILED"] = 20] = "FAILED";
+        /**
+         * 已发送。
+         */
+        SentStatus[SentStatus["SENT"] = 30] = "SENT";
+        /**
+         * 对方已接收。
+         */
+        SentStatus[SentStatus["RECEIVED"] = 40] = "RECEIVED";
+        /**
+         * 对方已读。
+         */
+        SentStatus[SentStatus["READ"] = 50] = "READ";
+        /**
+         * 对方已销毁。
+         */
+        SentStatus[SentStatus["DESTROYED"] = 60] = "DESTROYED";
+    })(WidgetModule.SentStatus || (WidgetModule.SentStatus = {}));
+    var SentStatus = WidgetModule.SentStatus;
     var AnimationType;
     (function (AnimationType) {
         AnimationType[AnimationType["left"] = 1] = "left";
@@ -238,6 +343,15 @@ var WidgetModule;
         return ChatPanel;
     })();
     WidgetModule.ChatPanel = ChatPanel;
+    var TimePanl = (function (_super) {
+        __extends(TimePanl, _super);
+        function TimePanl(date) {
+            _super.call(this, PanelType.Time);
+            this.sentTime = date;
+        }
+        return TimePanl;
+    })(ChatPanel);
+    WidgetModule.TimePanl = TimePanl;
     var GetHistoryPanel = (function (_super) {
         __extends(GetHistoryPanel, _super);
         function GetHistoryPanel() {
@@ -263,15 +377,11 @@ var WidgetModule;
         return TimePanel;
     })(ChatPanel);
     WidgetModule.TimePanel = TimePanel;
-    var InformationPanel = (function (_super) {
-        __extends(InformationPanel, _super);
-        function InformationPanel(content) {
-            _super.call(this, PanelType.getMore);
-            this.content = content;
-        }
-        return InformationPanel;
-    })(ChatPanel);
-    WidgetModule.InformationPanel = InformationPanel;
+    // export class InformationPanel extends Message {
+    //     constructor() {
+    //         super(PanelType.getMore);
+    //     }
+    // }
     var Message = (function (_super) {
         __extends(Message, _super);
         function Message(content, conversationType, extra, objectName, messageDirection, messageId, receivedStatus, receivedTime, senderUserId, sentStatus, sentTime, targetId, messageType) {
@@ -285,10 +395,10 @@ var WidgetModule;
             msg.messageDirection = SDKmsg.messageDirection;
             msg.messageId = SDKmsg.messageId;
             msg.receivedStatus = SDKmsg.receivedStatus;
-            msg.receivedTime = SDKmsg.receivedTime;
+            msg.receivedTime = new Date(SDKmsg.receivedTime);
             msg.senderUserId = SDKmsg.senderUserId;
             msg.sentStatus = SDKmsg.sendStatusMessage;
-            msg.sentTime = SDKmsg.sentTime;
+            msg.sentTime = new Date(SDKmsg.sentTime);
             msg.targetId = SDKmsg.targetId;
             msg.messageType = SDKmsg.messageType;
             switch (msg.messageType) {
@@ -338,6 +448,7 @@ var WidgetModule;
                     location.poi = SDKmsg.content.poi;
                     msg.content = location;
                     break;
+                case WidgetModule.MessageType.InformationNotificationMessage:
             }
             msg.content.userInfo = SDKmsg.content.userInfo;
             return msg;
@@ -396,4 +507,15 @@ var WidgetModule;
         return Conversation;
     })();
     WidgetModule.Conversation = Conversation;
+    var Helper = (function () {
+        function Helper() {
+        }
+        Helper.timeCompare = function (first, second) {
+            var pre = first.toString();
+            var cur = second.toString();
+            return pre.substring(0, pre.lastIndexOf(":")) == cur.substring(0, cur.lastIndexOf(":"));
+        };
+        return Helper;
+    })();
+    WidgetModule.Helper = Helper;
 })(WidgetModule || (WidgetModule = {}));

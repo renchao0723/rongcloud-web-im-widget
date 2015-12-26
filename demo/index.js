@@ -3,6 +3,14 @@ var demo = angular.module("demo", ["rongWebimWidget"]);
 demo.controller("main", ["$scope", "WebimWidget", function($scope,
   WebimWidget) {
 
+  $scope.show = function() {
+    WebimWidget.show();
+  }
+
+  $scope.hidden = function() {
+    WebimWidget.hidden();
+  }
+  $scope.server = WebimWidget;
 
   angular.element(document).ready(function() {
 
@@ -13,8 +21,6 @@ demo.controller("main", ["$scope", "WebimWidget", function($scope,
         WebimWidget.setConversation("4", "cc", "呵呵");
       }
     });
-
   });
 
-  console.log("controller");
 }]);

@@ -2,8 +2,8 @@
 
 var conversationController = angular.module("rongWebimWidget.conversationController", ["rongWebimWidget.conversationServer"]);
 
-conversationController.controller("conversationController", ["$scope", "conversationServer",
-    function($scope: any, conversationServer: ConversationServer) {
+conversationController.controller("conversationController", ["$scope", "conversationServer", "WebimWidget",
+    function($scope: any, conversationServer: ConversationServer, WebimWidget: WebimWidget) {
 
         function adjustScrollbars() {
             setTimeout(function() {
@@ -14,7 +14,6 @@ conversationController.controller("conversationController", ["$scope", "conversa
             }, 0);
         }
 
-
         $scope.currentConversation = <WidgetModule.Conversation>{
             title: "",
             targetId: "",
@@ -24,6 +23,17 @@ conversationController.controller("conversationController", ["$scope", "conversa
         $scope.messageList = [];
 
         $scope.messageContent = "";
+
+        $scope.resoures = WebimWidget;
+        console.log(WebimWidget);
+
+        WebimWidget.hidden = function() {
+            WebimWidget.display = false;
+        }
+
+        WebimWidget.show = function() {
+            WebimWidget.display = true;
+        }
 
         conversationServer.onConversationChangged = function(conversation: WidgetModule.Conversation) {
 
@@ -43,7 +53,7 @@ conversationController.controller("conversationController", ["$scope", "conversa
             if (currenthis.length == 0) {
                 conversationServer._getHistoryMessages(+conversation.targetType, conversation.targetId, 3).then(function() {
                     $scope.messageList = conversationServer._cacheHistory[conversation.targetType + "_" + conversation.targetId];
-                    $scope.$apply();
+                    // $scope.$apply();
                     adjustScrollbars();
                 });
             } else {
@@ -59,6 +69,7 @@ conversationController.controller("conversationController", ["$scope", "conversa
                 $scope.$apply();
             }
         }
+
 
         $scope.getHistory = function() {
             conversationServer._getHistoryMessages(+$scope.currentConversation.targetType, $scope.currentConversation.targetId, 20).then(function() {
@@ -97,10 +108,10 @@ conversationController.controller("conversationController", ["$scope", "conversa
             console.log($scope.currentConversation, conversationServer.loginUser);
 
             var msg = RongIMLib.TextMessage.obtain($scope.messageContent);
-            var userinfo = new RongIMLib.UserInfo();
-            userinfo.userId = conversationServer.loginUser.id;
-            userinfo.name = conversationServer.loginUser.name;
-            userinfo.portraitUri = conversationServer.loginUser.portraitUri;
+            var userinfo = new RongIMLib.UserInfo(conversationServer.loginUser.id, conversationServer.loginUser.name, conversationServer.loginUser.portraitUri);
+            // userinfo.userId = conversationServer.loginUser.id;
+            // userinfo.name = conversationServer.loginUser.name;
+            // userinfo.portraitUri = conversationServer.loginUser.portraitUri;
             msg.userInfo = userinfo;
 
             RongIMLib.RongIMClient.getInstance().sendMessage(+$scope.currentConversation.targetType, $scope.currentConversation.targetId, msg, null, {

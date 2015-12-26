@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="./src/css/conversation.css">
 
     <script src="./RongIMLib.js"></script>
-    <script src="./angular.js"></script>
+    <script src="./src/angular.js"></script>
+    <script src="./src/angular-animate.min.js"></script>
 
   </head>
   <body ng-controller="main">
@@ -15,6 +16,9 @@
     <div>
       <rong-conversation style=""></rong-conversation>
     </div>
+    <button ng-click="show()">show</button>
+    <button ng-click="hidden()">hidden</button>
+    {{server.display}}
   </body>
   <script src="./src/index.js"></script>
   <script src="./index.js"></script>

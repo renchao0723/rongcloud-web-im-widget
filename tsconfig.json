@@ -21,6 +21,7 @@
     "!node_modules/**"
   ],
   "files": [
+    "demo/RongIMLib.d.ts",
     "src/lib/RongIMLib.d.ts",
     "src/ts/conversation/conversationController.ts",
     "src/ts/conversation/conversationDirective.ts",

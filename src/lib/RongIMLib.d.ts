@@ -1,9 +1,9 @@
 declare module RongIMLib {
-  class Expression {
-      static retrievalEmoji(a: any, b: any): string
-      static getEmojiObjByEnglishNameOrChineseName(obj: any): any
-      static getAllExpression(number: any, start: any): any
-  }
+    class Expression {
+        static retrievalEmoji(a: any, b: any): string
+        static getEmojiObjByEnglishNameOrChineseName(obj: any): any
+        static getAllExpression(number: any, start: any): any
+    }
     interface OperationCallback {
         onError(error: ErrorCode): void;
         onSuccess(info?: any): void;
@@ -82,8 +82,9 @@ declare module RongIMLib {
     }
     enum ConnectionChannel {
         XHR_POLLING = 0,
-        FLASH = 1,
-        WEBSOCKET = 2,
+        WEBSOCKET = 1,
+        HTTP = 0,
+        HTTPS = 1,
     }
     enum ConnectionStatus {
         /**
@@ -117,9 +118,6 @@ declare module RongIMLib {
          */
         NOTIFY = 1,
     }
-    /**
-     * @ignore
-     */
     enum ConversationType {
         NONE = -1,
         CHATROOM = 0,
@@ -147,10 +145,6 @@ declare module RongIMLib {
          * 未知原因失败。
          */
         UNKNOWN = -2,
-        /**
-         * 连接成功。
-         */
-        CONNECTED = 0,
         /**
          * 不在讨论组。
          */
@@ -320,6 +314,14 @@ declare module RongIMLib {
          */
         BIZ_ERROR_CONNECTING = 33006,
         /**
+         * 消息漫游服务未开通
+         */
+        MSG_ROAMING_SERVICE_UNAVAILABLE = 33007,
+        /**
+         * 群组被禁言
+         */
+        FORBIDDEN_IN_GROUP = 22408,
+        /**
          * 删除会话失败
          */
         CONVER_REMOVE_ERROR = 34001,
@@ -419,16 +421,6 @@ declare module RongIMLib {
          * 接收消息。
          */
         RECEIVE = 2,
-    }
-    enum PublicServiceType {
-        /**
-         * 应用公众服务。
-         */
-        APP_PUBLIC_SERVICE = 7,
-        /**
-         * 公共服务平台。
-         */
-        PUBLIC_SERVICE = 8,
     }
     enum RealTimeLocationErrorCode {
         /**
@@ -539,14 +531,6 @@ declare module RongIMLib {
          */
         DESTROYED = 60,
     }
-    enum DisconnectionStatus {
-        RECONNECT = 0,
-        OTHER_DEVICE_LOGIN = 1,
-        CLOSURE = 2,
-        UNKNOWN_ERROR = 3,
-        LOGOUT = 4,
-        BLOCK = 5,
-    }
     enum ConnectionState {
         ACCEPTED = 0,
         UNACCEPTABLE_PROTOCOL_VERSION = 1,
@@ -564,66 +548,39 @@ declare module RongIMLib {
         TOKEN_EXPIRE = 10,
         DEVICE_ERROR = 11,
     }
-    enum MessageType {
-        DiscussionNotificationMessage = 0,
-        TextMessage = 1,
-        ImageMessage = 2,
-        VoiceMessage = 3,
-        RichContentMessage = 4,
-        HandshakeMessage = 5,
-        UnknownMessage = 6,
-        SuspendMessage = 7,
-        LocationMessage = 8,
-        InformationNotificationMessage = 9,
-        ContactNotificationMessage = 10,
-        ProfileNotificationMessage = 11,
-        CommandNotificationMessage = 12,
-    }
-    enum SchemeType {
-        HSL = 0,
-        SSL = 1,
-        XHR = 0,
-        WS = 1,
-    }
 }
 declare module RongIMLib {
     class RongIMClient {
-        private lastReadTime;
-        static _token: string;
-        static isNotPullMsg: boolean;
-        static _storageProvider: StorageProvider;
         /**
          * [schemeType 选择连接方式]
-         * SSL需要设置schemeType为SchemeType.SSL
-         * HTTP或WS需要设置 schemeType为SchemeType.HSL(默认)
+         * SSL需要设置schemeType为ConnectionChannel.HTTPS
+         * HTTP或WS需要设置 schemeType为ConnectionChannel.HTTP(默认)
          * 若改变连接方式此属性必须在RongIMClient.init之前赋值
          * expmale:
-         * RongIMLib.RongIMClient.schemeType = RongIMLib.SchemeType.SSL
+         * RongIMLib.RongIMClient.schemeType = RongIMLib.ConnectionChannel.HTTP
          * @type {number}
          */
         static schemeType: number;
-        private static _instance;
-        private static _appKey;
-        private static _connectionChannel;
-        private static _dataAccessProvider;
-        private static publicServiceMap;
         static MessageType: {
             [s: string]: any;
         };
-        static conversationMap: ConversationMap;
-        static bridge: Bridge;
-        static listenerList: Array<any>;
-        /**
-         * 获取 RongIMClient 实例。
-         * 需在执行 init 方法初始化 SDK 后再获取，否则返回 null 值。
-         */
+        static RegisterMessage: {
+            [s: string]: any;
+        };
+        static _memoryStore: any;
+        static isNotPullMsg: boolean;
+        static _cookieHelper: CookieProvider;
+        static _dataAccessProvider: DataAccessProvider;
+        private static _instance;
+        private static bridge;
         static getInstance(): RongIMClient;
         /**
          * 初始化 SDK，在整个应用全局只需要调用一次。
-         *
          * @param appKey    开发者后台申请的 AppKey，用来标识应用。
+         * @param  choicePolling 是否选择comet方式连接，默认为false
+         * @param dataAccessProvider 必须是DataAccessProvider的实例
          */
-        static init(appKey: string): void;
+        static init(appKey: string, choicePolling: boolean, dataAccessProvider?: DataAccessProvider): void;
         /**
          * 连接服务器，在整个应用全局只需要调用一次，断线后 SDK 会自动重连。
          *
@@ -636,9 +593,9 @@ declare module RongIMLib {
          * 注册消息类型，用于注册用户自定义的消息。
          * 内建的消息类型已经注册过，不需要再次注册。
          * 自定义消息声明需放在执行顺序最高的位置（在RongIMClient.init(appkey)之后即可）
-         * @param objectName  用户数据信息。
+         * @param objectName  消息内置名称
          */
-        static registerMessageType(objectName: string, messageType: string, fieldName: Array<string>[]): void;
+        static registerMessageType(objectName: string, messageType: string, messageTag: MessageTag, messageContent: any): void;
         /**
          * 设置连接状态变化的监听器。
          *
@@ -652,6 +609,10 @@ declare module RongIMLib {
          */
         static setOnReceiveMessageListener(listener: OnReceiveMessageListener): void;
         /**
+         * 清理所有连接相关的变量
+         */
+        logout(): void;
+        /**
          * 断开连接。
          */
         disconnect(): void;
@@ -664,9 +625,9 @@ declare module RongIMLib {
          */
         getConnectionChannel(): ConnectionChannel;
         /**
-         * 获取当前使用的本地储存提供者。
+         * 获取当前使用的本地储存提供者。 TODO
          */
-        getStorageProvider(): StorageProvider;
+        getStorageProvider(): string;
         /**
          * 获取当前连接用户的 UserId。
          */
@@ -674,25 +635,21 @@ declare module RongIMLib {
         /**
          * [getCurrentUserInfo 获取当前用户信息]
          * @param  {ResultCallback<UserInfo>} callback [回调函数]
+         * TODO 待讨论
          */
         getCurrentUserInfo(callback: ResultCallback<UserInfo>): void;
         /**
          * 获得用户信息
          * @param  {string}                   userId [用户Id]
          * @param  {ResultCallback<UserInfo>} callback [回调函数]
+         * TODO 待讨论
          */
         getUserInfo(userId: string, callback: ResultCallback<UserInfo>): void;
-        /**
-         * 提交用户数据到服务器，以便后台业务（如：客服系统）使用。
-         *
-         * @param userData  用户数据信息。
-         * @param callback  操作成功或者失败的回调。
-         */
-        syncUserData(userData: UserData, callback: OperationCallback): void;
         /**
          * 获取本地时间与服务器时间的差值，单位为毫秒。
          *
          * @param callback  获取的回调，返回时间差值。
+         * TODO 问王平
          */
         getDeltaTime(callback: ResultCallback<number>): void;
         clearMessages(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
@@ -744,7 +701,6 @@ declare module RongIMLib {
          * @param  {ResultCallback<Message>} callback         [description]
          */
         insertMessage(conversationType: ConversationType, targetId: string, senderUserId: string, content: MessageContent, callback: ResultCallback<Message>): void;
-        resetGetHistoryMessages(conversationType: ConversationType, targetId: string): boolean;
         /**
          * [getHistoryMessages 拉取历史消息记录。]
          * @param  {ConversationType}          conversationType [会话类型]
@@ -754,7 +710,7 @@ declare module RongIMLib {
          * @param  {ResultCallback<Message[]>} callback         [回调函数]
          * @param  {string}                    objectName       [objectName]
          */
-        getHistoryMessages(conversationType: ConversationType, targetId: string, pullMessageTime: number, count: number, callback: ResultCallback<Message[]>, objectName?: string): void;
+        getHistoryMessages(conversationType: ConversationType, targetId: string, timestamp: number, count: number, callback: ResultCallback<Message[]>): void;
         /**
          * [getRemoteHistoryMessages 拉取某个时间戳之前的消息]
          * @param  {ConversationType}          conversationType [description]
@@ -763,49 +719,49 @@ declare module RongIMLib {
          * @param  {number}                    count            [description]
          * @param  {ResultCallback<Message[]>} callback         [description]
          */
-        getRemoteHistoryMessages(conversationType: ConversationType, targetId: string, dateTime: Date, count: number, callback: ResultCallback<Message[]>): void;
+        getRemoteHistoryMessages(conversationType: ConversationType, targetId: string, timestamp: number, count: number, callback: ResultCallback<Message[]>): void;
         /**
-         * [hasUnreadMessages 是否有未接收的消息，jsonp方法]
+         * [hasRemoteUnreadMessages 是否有未接收的消息，jsonp方法]
          * @param  {string}          appkey   [appkey]
          * @param  {string}          token    [token]
          * @param  {ConnectCallback} callback [返回值，参数回调]
          */
-        hasUnreadMessages(appkey: string, token: string, callback: ResultCallback<Boolean>): void;
-        getTotalUnreadCount(): number;
+        hasRemoteUnreadMessages(token: string, callback: ResultCallback<Boolean>): void;
+        getTotalUnreadCount(callback: ResultCallback<number>): void;
         /**
          * [getConversationUnreadCount 指定多种会话类型获取未读消息数]
          * @param  {ResultCallback<number>} callback             [返回值，参数回调。]
          * @param  {ConversationType[]}     ...conversationTypes [会话类型。]
          */
-        getConversationUnreadCount(conversationTypes: ConversationType[]): number;
+        getConversationUnreadCount(conversationTypes: ConversationType[], callback: ResultCallback<number>): void;
         /**
          * [getUnreadCount 指定用户、会话类型的未读消息总数。]
          * @param  {ConversationType} conversationType [会话类型]
          * @param  {string}           targetId         [用户Id]
          */
-        getUnreadCount(conversationType: ConversationType, targetId: string): number;
-        setMessageExtra(messageId: number, value: string, callback: ResultCallback<boolean>): void;
-        setMessageReceivedStatus(messageId: number, receivedStatus: ReceivedStatus, callback: ResultCallback<boolean>): void;
-        setMessageSentStatus(messageId: number, sentStatus: SentStatus, callback: ResultCallback<boolean>): void;
+        getUnreadCount(conversationType: ConversationType, targetId: string, callback: ResultCallback<number>): void;
+        setMessageExtra(messageId: string, value: string, callback: ResultCallback<boolean>): void;
+        setMessageReceivedStatus(messageId: string, receivedStatus: ReceivedStatus, callback: ResultCallback<boolean>): void;
+        setMessageSentStatus(messageId: string, sentStatus: SentStatus, callback: ResultCallback<boolean>): void;
         /**
          * clearTextMessageDraft 清除指定会话和消息类型的草稿。
          * @param  {ConversationType}        conversationType 会话类型
          * @param  {string}                  targetId         目标Id
          */
-        clearTextMessageDraft(conversationType: ConversationType, targetId: string): boolean;
+        clearTextMessageDraft(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
         /**
          * [getTextMessageDraft 获取指定消息和会话的草稿。]
          * @param  {ConversationType}       conversationType [会话类型]
          * @param  {string}                 targetId         [目标Id]
          */
-        getTextMessageDraft(conversationType: ConversationType, targetId: string): string;
+        getTextMessageDraft(conversationType: ConversationType, targetId: string, callback: ResultCallback<string>): void;
         /**
          * [saveTextMessageDraft description]
          * @param  {ConversationType}        conversationType [会话类型]
          * @param  {string}                  targetId         [目标Id]
          * @param  {string}                  value            [草稿值]
          */
-        saveTextMessageDraft(conversationType: ConversationType, targetId: string, value: string): boolean;
+        saveTextMessageDraft(conversationType: ConversationType, targetId: string, value: string, callback: ResultCallback<boolean>): void;
         clearConversations(callback: ResultCallback<boolean>, ...conversationTypes: ConversationType[]): void;
         /**
          * [getConversation 获取指定会话，此方法需在getConversationList之后执行]
@@ -813,14 +769,17 @@ declare module RongIMLib {
          * @param  {string}                       targetId         [目标Id]
          * @param  {ResultCallback<Conversation>} callback         [返回值，函数回调]
          */
-        getConversation(conversationType: ConversationType, targetId: string): Conversation;
+        getConversation(conversationType: ConversationType, targetId: string, callback: ResultCallback<Conversation>): void;
         /**
          * [pottingConversation 组装会话列表]
          * @param {any} tempConver [临时会话]
+         * conver_conversationType_targetId_no.
+         * msg_conversationType_targetId_no.
          */
         private pottingConversation(tempConver);
-        sortConversationList(conversationList: Array<Conversation>): Array<Conversation>;
-        getConversationList(callback: ResultCallback<Conversation[]>, ...conversationTypes: ConversationType[]): void;
+        private sortConversationList(conversationList);
+        getConversationList(callback: ResultCallback<Conversation[]>): void;
+        getRemoteConversationList(callback: ResultCallback<Conversation[]>, ...conversationTypes: ConversationType[]): void;
         /**
          * [createConversation 创建会话。]
          * @param  {number}  conversationType [会话类型]
@@ -830,7 +789,7 @@ declare module RongIMLib {
          */
         createConversation(conversationType: number, targetId: string, converTitle: string): Conversation;
         removeConversation(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
-        setConversationToTop(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): boolean;
+        setConversationToTop(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
         /**
          * [getConversationNotificationStatus 获取指定用户和会话类型免提醒。]
          * @param  {ConversationType}                               conversationType [会话类型]
@@ -939,7 +898,7 @@ declare module RongIMLib {
          * @param  {OperationCallback} callback   [返回值，函数回调]
          */
         quitChatRoom(chatroomId: string, callback: OperationCallback): void;
-        syncPublicServiceList(mpId?: string, conversationType?: number, pullMessageTime?: any, callback?: ResultCallback<PublicServiceProfile[]>): void;
+        getRemotePublicServiceList(mpId?: string, conversationType?: number, pullMessageTime?: any, callback?: ResultCallback<PublicServiceProfile[]>): void;
         /**
          * [getPublicServiceList ]获取已经的公共账号列表
          * @param  {ResultCallback<PublicServiceProfile[]>} callback [返回值，参数回调]
@@ -1329,6 +1288,8 @@ declare module RongIMLib {
         writeMessage(Out: any): void;
         readMessage(_in: any, msgLength: number): void;
         setStatus(x: any): void;
+        setTimestamp(timestamp: number): void;
+        setMessageUId(messageUId: string): void;
         getStatus(): any;
         getDate(): number;
         getTimestamp(): number;
@@ -1623,8 +1584,8 @@ declare module RongIMLib {
      */
     class MessageUtil {
         static schemeArrs: Array<any>;
+        static sign: any;
         static supportLargeStorage(): boolean;
-        static createStorageFactory(): StorageProvider;
         /**
          *4680000 为localstorage最小容量5200000字节的90%，超过90%将删除之前过早的存储
          */
@@ -1695,6 +1656,7 @@ declare module RongIMLib {
     }
     class ModelUtil {
         static modelClone(object: any): any;
+        static modleCreate(fields: string[]): any;
     }
 }
 declare module RongIMLib {
@@ -1718,7 +1680,7 @@ declare module RongIMLib {
     }
 }
 declare module RongIMLib {
-    class InformationNotificationMessage implements UserInfoAttachedMessage, ExtraAttachedMessage {
+    class InformationNotificationMessage implements NotificationMessage, UserInfoAttachedMessage, ExtraAttachedMessage {
         userInfo: UserInfo;
         content: string;
         extra: string;
@@ -1771,8 +1733,11 @@ declare module RongIMLib {
     }
     class DiscussionNotificationMessage implements MessageContent, NotificationMessage, UserInfoAttachedMessage, ExtraAttachedMessage {
         userInfo: UserInfo;
-        content: string;
         extra: string;
+        extension: string;
+        type: number;
+        isHasReceived: boolean;
+        operation: string;
         messageName: string;
         constructor(message: any);
         encode(): string;
@@ -1811,10 +1776,9 @@ declare module RongIMLib {
     class LocationMessage implements MessageContent, UserInfoAttachedMessage, ExtraAttachedMessage {
         userInfo: UserInfo;
         latiude: number;
-        content: string;
         longitude: number;
         poi: string;
-        imageUri: string;
+        imgUri: string;
         extra: string;
         messageName: string;
         constructor(message: any);
@@ -1914,8 +1878,6 @@ declare module RongIMLib {
         targetId: string;
         messageType: string;
         constructor(content?: MessageContent, conversationType?: ConversationType, extra?: string, objectName?: string, messageDirection?: MessageDirection, messageId?: string, receivedStatus?: ReceivedStatus, receivedTime?: number, senderUserId?: string, sentStatus?: SentStatus, sentTime?: number, targetId?: string, messageType?: string);
-        setObjectName(objectName: string): void;
-        setMessage(content: MessageContent): void;
     }
     class MessageTag {
         isCounted: boolean;
@@ -1929,16 +1891,7 @@ declare module RongIMLib {
         type: ConversationType;
         sunMenuItems: Array<PublicServiceMenuItem>;
         url: string;
-        getId(): string;
-        getName(): string;
-        getSubMenuItems(): Array<PublicServiceMenuItem>;
-        getUrl(): string;
-        getType(): ConversationType;
-        setId(id: string): void;
-        setType(type: ConversationType): void;
-        setName(name: string): void;
-        setSunMenuItems(sunMenuItems: Array<PublicServiceMenuItem>): void;
-        setUrl(url: string): void;
+        constructor(id?: string, name?: string, type?: ConversationType, sunMenuItems?: Array<PublicServiceMenuItem>, url?: string);
     }
     class PublicServiceProfile {
         conversationType: ConversationType;
@@ -1951,76 +1904,78 @@ declare module RongIMLib {
         isGlobal: boolean;
         constructor(conversationType?: ConversationType, introduction?: string, menu?: Array<PublicServiceMenuItem>, name?: string, portraitUri?: string, publicServiceId?: string, hasFollowed?: boolean, isGlobal?: boolean);
     }
-    class UserData {
-        accountInfo: UserData.AccountInfo;
-        appVersion: string;
-        clientInfo: UserData.ClientInfo;
-        contactInfo: UserData.ContactInfo;
-        extra: string;
-        personalInfo: UserData.PersonalInfo;
-        constructor(accountInfo: UserData.AccountInfo, appVersion: string, clientInfo: UserData.ClientInfo, contactInfo: UserData.ContactInfo, extra: string, personalInfo: UserData.PersonalInfo);
-    }
     class UserInfo {
         userId: string;
         name: string;
         portraitUri: string;
-        setUserId(userId: string): void;
-        setUserName(name: string): void;
-        setPortraitUri(portraitUri: string): void;
-        getUserId(): string;
-        getUserName(): string;
-        getPortaitUri(): string;
+        constructor(userId: string, name: string, portraitUri: string);
     }
-    module UserData {
-        class AccountInfo {
-            appUserId: string;
-            nickname: string;
-            username: string;
-            constructor(appUserId: string, nickname: string, username: string);
-        }
-        class ClientInfo {
-            carrier: string;
-            device: string;
-            mobilePhoneManufacturer: string;
-            network: string;
-            os: string;
-            systemVersion: string;
-            constructor(carrier: string, device: string, mobilePhoneManufacturer: string, network: string, os: string, systemVersion: string);
-        }
-        class ContactInfo {
-            address: string;
-            email: string;
-            qq: string;
-            tel: string;
-            weiBo: string;
-            weiXin: string;
-            constructor(address: string, email: string, qq: string, tel: string, weiBo: string, weiXin: string);
-        }
-        class PersonalInfo {
-            age: string;
-            birthday: string;
-            comment: string;
-            job: string;
-            portraitUri: string;
-            realName: string;
-            sex: string;
-            constructor(age: string, birthday: string, comment: string, job: string, portraitUri: string, realName: string, sex: string);
-        }
+}
+declare module RongIMLib {
+    class ServerDataProvider implements DataAccessProvider {
+        addConversation(conversation: Conversation, callback: ResultCallback<boolean>): void;
+        removeConversation(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
+        addMessage(conversationType: ConversationType, targetId: string, message: MessageContent, callback: ResultCallback<Message>): void;
+        removeMessage(conversationType: ConversationType, targetId: string, messageIds: number[], callback: ResultCallback<boolean>): void;
+        clearMessages(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
+        updateMessages(conversationType: ConversationType, targetId: string, key: string, value: any, callback: ResultCallback<boolean>): void;
+        getConversation(conversationType: ConversationType, targetId: string): Conversation;
+        getConversationList(callback: ResultCallback<Conversation[]>): void;
+        clearConversations(conversationTypes: ConversationType[], callback: ResultCallback<boolean>): void;
+        getHistoryMessages(conversationType: ConversationType, targetId: string, timestamp: number, count: number, callback: ResultCallback<Message[]>): void;
+        getTotalUnreadCount(callback: ResultCallback<number>): void;
+        getConversationUnreadCount(conversationTypes: ConversationType[], callback: ResultCallback<number>): void;
+        getUnreadCount(conversationType: ConversationType, targetId: string, callback: ResultCallback<number>): void;
+        setConversationToTop(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
+        setMessageExtra(messageId: string, value: string, callback: ResultCallback<boolean>): void;
+        setMessageReceivedStatus(messageId: string, receivedStatus: ReceivedStatus, callback: ResultCallback<boolean>): void;
+        setMessageSentStatus(messageId: string, sentStatus: SentStatus, callback: ResultCallback<boolean>): void;
+    }
+}
+declare module RongIMLib {
+    class WebSQLDataProvider implements DataAccessProvider {
+        addConversation(conversation: Conversation, callback: ResultCallback<boolean>): void;
+        removeConversation(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
+        addMessage(conversationType: ConversationType, targetId: string, message: MessageContent, callback: ResultCallback<Message>): void;
+        removeMessage(conversationType: ConversationType, targetId: string, messageIds: number[], callback: ResultCallback<boolean>): void;
+        clearMessages(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
+        updateMessages(conversationType: ConversationType, targetId: string, key: string, value: any, callback: ResultCallback<boolean>): void;
+        getConversation(conversationType: ConversationType, targetId: string): Conversation;
+        getConversationList(callback: ResultCallback<Conversation[]>): void;
+        clearConversations(conversationTypes: ConversationType[], callback: ResultCallback<boolean>): void;
+        getHistoryMessages(conversationType: ConversationType, targetId: string, timestamp: number, count: number, callback: ResultCallback<Message[]>): void;
+        getTotalUnreadCount(callback: ResultCallback<number>): void;
+        getConversationUnreadCount(conversationTypes: ConversationType[], callback: ResultCallback<number>): void;
+        getUnreadCount(conversationType: ConversationType, targetId: string, callback: ResultCallback<number>): void;
+        setConversationToTop(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
+        setMessageExtra(messageId: string, value: string, callback: ResultCallback<boolean>): void;
+        setMessageReceivedStatus(messageId: string, receivedStatus: ReceivedStatus, callback: ResultCallback<boolean>): void;
+        setMessageSentStatus(messageId: string, sentStatus: SentStatus, callback: ResultCallback<boolean>): void;
     }
 }
 declare module RongIMLib {
     interface DataAccessProvider {
-        addConversation(conversation: Conversation): void;
-        removeConversation(conversationType: ConversationType, targetId: string): void;
-        clearConversations(conversationType: ConversationType): void;
-        addMessage(conversationType: ConversationType, targetId: string, message: Message): void;
-        removeMessage(conversationType: ConversationType, targetId: string, messageId: number): void;
-        clearMessages(conversationType: ConversationType, targetId: string): void;
-        updateMessages(conversationType: ConversationType, targetId: string, key: string, value: any): void;
+        addConversation(conversation: Conversation, callback: ResultCallback<boolean>): void;
+        removeConversation(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
+        addMessage(conversationType: ConversationType, targetId: string, message: MessageContent, callback: ResultCallback<Message>): void;
+        removeMessage(conversationType: ConversationType, targetId: string, messageId: number[], callback: ResultCallback<boolean>): void;
+        clearMessages(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
+        updateMessages(conversationType: ConversationType, targetId: string, key: string, value: any, callback: ResultCallback<boolean>): void;
+        getConversation(conversationType: ConversationType, targetId: string): Conversation;
+        getConversationList(callback: ResultCallback<Conversation[]>): void;
+        clearConversations(conversationTypes: ConversationType[], callback: ResultCallback<boolean>): void;
+        getHistoryMessages(conversationType: ConversationType, targetId: string, timestamp: number, count: number, callback: ResultCallback<Message[]>): void;
+        getTotalUnreadCount(callback: ResultCallback<number>): void;
+        getConversationUnreadCount(conversationTypes: ConversationType[], callback: ResultCallback<number>): void;
+        getUnreadCount(conversationType: ConversationType, targetId: string, callback: ResultCallback<number>): void;
+        setConversationToTop(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
+        setMessageExtra(messageId: string, value: string, callback: ResultCallback<boolean>): void;
+        setMessageReceivedStatus(messageId: string, receivedStatus: ReceivedStatus, callback: ResultCallback<boolean>): void;
+        setMessageSentStatus(messageId: string, sentStatus: SentStatus, callback: ResultCallback<boolean>): void;
     }
 }
 declare module RongIMLib {
-    class CookieProvider implements StorageProvider {
+    class CookieProvider {
         _host: string;
         setItem(composedKey: string, object: any): void;
         getItem(composedKey: string): string;
@@ -2032,24 +1987,29 @@ declare module RongIMLib {
 }
 declare module RongIMLib {
     class LocalStorageProvider implements StorageProvider {
-        _host: string;
         setItem(composedKey: string, object: any): void;
         getItem(composedKey: string): string;
         removeItem(composedKey: string): void;
         clearItem(): void;
-        getItemKey(regStr: string): any;
+        getKeys(regStr: string, isUseDef?: boolean): string[];
+        getMsgKeys(regStr: string): string[];
         onOutOfQuota(): number;
     }
 }
 declare module RongIMLib {
     interface StorageProvider {
-        _host: string;
         setItem(composedKey: string, object: any): void;
         getItem(composedKey: string): string;
         removeItem(composedKey: string): void;
         clearItem(): void;
         onOutOfQuota(): number;
-        getItemKey(regStr: string): any;
+        /**
+         * 获取keys方法
+         * @param  {string}  regStr   正则表达式内容
+         * @param  {boolean} isUseDef 不传使用默认，传true使用自定义正则表达式
+         */
+        getKeys(regStr: string, isUseDef?: boolean): any;
+        getMsgKeys(regStr: string, isUseDef?: boolean): any;
     }
     interface ComposeKeyFunc {
         (object: any): string;

@@ -1,6 +1,6 @@
 /// <reference path="../../typings/tsd.d.ts"/>
 
-var widget = angular.module("rongWebimWidget", ["rongWebimWidget.conversationServer"]);
+var widget = angular.module("rongWebimWidget", ["ngAnimate", "rongWebimWidget.conversationServer"]);
 
 widget.factory("WebimWidget", ["$q", "conversationServer", function($q: angular.IQService, conversationServer: ConversationServer) {
 
@@ -19,8 +19,13 @@ widget.factory("WebimWidget", ["$q", "conversationServer", function($q: angular.
 
         // if (config)
         //
+        //
 
-        RongIMLib.RongIMClient.init(defaultconfig.appkey);
+        if (!RongIMLib || !RongIMLib.RongIMClient) {
+            throw new Error("please refer to RongIMLib");
+        }
+
+        RongIMLib.RongIMClient.init(defaultconfig.appkey, false);
 
         RongIMLib.RongIMClient.connect(defaultconfig.token, {
             onSuccess: function(userId: string) {
@@ -95,6 +100,15 @@ widget.factory("WebimWidget", ["$q", "conversationServer", function($q: angular.
 
     WebimWidget.setConversation = function(targetType: string, targetId: string, title: string) {
         conversationServer.onConversationChangged(new WidgetModule.Conversation(targetType, targetId, title));
+    }
+
+    WebimWidget.display = false;
+    WebimWidget.hidden = function() {
+        WebimWidget.display = false;
+    }
+
+    WebimWidget.show = function() {
+        WebimWidget.display = true;
     }
 
     return WebimWidget;

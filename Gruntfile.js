@@ -1,3 +1,4 @@
+;
 module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
@@ -27,10 +28,11 @@ module.exports = function(grunt) {
       },
       build: {
         files: [{
-          expand: true,
-          cwd: "./src/css/",
-          src: "./*.css",
-          dest: "./build/css"
+          src: "./bower_components/angular-animate/angular-animate.min.js",
+          dest: "./build/angular-animate.min.js"
+        }, {
+          src: "./bower_components/angular/angular.js",
+          dest: "./build/angular.js"
         }]
       }
     },
@@ -70,6 +72,15 @@ module.exports = function(grunt) {
         tasks: ["build", "clean:demo", "copy:demo"]
       }
     },
+    concat: {
+      build: {
+        src: ['src/css/conversation.css',
+          'bower_components/angular-motion/dist/angular-motion.css'
+        ],
+        dest: 'build/css/conversation.css',
+      },
+    },
+
 
     ngtemplates: {
       app: {
@@ -100,6 +111,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-typescript');
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-angular-templates');
 
   grunt.registerTask("default", function() {
@@ -107,7 +119,7 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask("build", ["clean:build", "typescript:build",
-    "copy:build", "ngtemplates:app"
+    "concat:build", "copy:build", "ngtemplates:app"
   ]);
 
 

@@ -85,4 +85,5 @@ interface ConversationServer {
     _cacheHistory: any
     _getHistoryMessages(targetType: number, targetId: string, number: number): angular.IPromise<any>
     _addHistoryMessages(msg: WidgetModule.Message): void
+
 }

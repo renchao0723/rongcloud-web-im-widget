@@ -101,11 +101,11 @@ module WidgetModule {
         }
     }
 
-    export class InformationPanel extends Message {
-        constructor() {
-            super(PanelType.getMore);
-        }
-    }
+    // export class InformationPanel extends Message {
+    //     constructor() {
+    //         super(PanelType.getMore);
+    //     }
+    // }
 
     export class Message extends ChatPanel {
         content: any;
@@ -195,10 +195,10 @@ module WidgetModule {
                     msg.content = location;
                     break;
                 case MessageType.InformationNotificationMessage:
-                    var info = new InformationPanel();
-                    info.content = SDKmsg.content.content;
-                    msg.content = info;
-                    break;
+                    // var info = new InformationPanel();
+                    // info.content = SDKmsg.content.content;
+                    // msg.content = info;
+                    // break;
 
             }
 
