@@ -72,6 +72,7 @@ module.exports = function(grunt) {
         tasks: ["build", "clean:demo", "copy:demo"]
       }
     },
+
     concat: {
       build: {
         src: ['src/css/conversation.css',

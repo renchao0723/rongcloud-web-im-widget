@@ -81,6 +81,9 @@ conversationController.controller("conversationController", ["$scope", "conversa
         }
         $scope.send = function () {
             console.log($scope.currentConversation, conversationServer.loginUser);
+            if (!$scope.currentConversation.targetId || !$scope.currentConvers.targetType) {
+                return;
+            }
             var msg = RongIMLib.TextMessage.obtain($scope.messageContent);
             var userinfo = new RongIMLib.UserInfo(conversationServer.loginUser.id, conversationServer.loginUser.name, conversationServer.loginUser.portraitUri);
             // userinfo.userId = conversationServer.loginUser.id;
@@ -95,7 +98,9 @@ conversationController.controller("conversationController", ["$scope", "conversa
                 }
             });
             var content = packDisplaySendMessage(msg, WidgetModule.MessageType.TextMessage);
-            $scope.messageList.push(WidgetModule.Message.convert(content));
+            var cmsg = WidgetModule.Message.convert(content);
+            conversationServer._addHistoryMessages(cmsg);
+            // $scope.messageList.push();
             adjustScrollbars();
             $scope.messageContent = "";
             // $scope.$apply();
@@ -117,7 +122,9 @@ conversationServer.factory("conversationServer", ["$q", function ($q) {
         conversationServer.current = {
             targetId: "",
             targetType: "",
-            title: ""
+            title: "",
+            portraitUri: "",
+            onLine: false
         };
         conversationServer.loginUser = {
             id: "",
@@ -222,6 +229,9 @@ widget.factory("WebimWidget", ["$q", "conversationServer", function ($q, convers
             RongIMLib.RongIMClient.setOnReceiveMessageListener({
                 onReceived: function (data) {
                     var msg = WidgetModule.Message.convert(data);
+                    if (WebimWidget.onReceivedMessage) {
+                        WebimWidget.onReceivedMessage(msg);
+                    }
                     conversationServer.onReceivedMessage(msg);
                     if (msg instanceof RongIMLib.NotificationMessage) {
                         // $scope.messageList.push(WidgetModule.Message.convert(msg));
@@ -231,9 +241,6 @@ widget.factory("WebimWidget", ["$q", "conversationServer", function ($q, convers
                     }
                     else {
                         addMessageAndOperation(msg);
-                    }
-                    if (WebimWidget.onReceivedMessage) {
-                        WebimWidget.onReceivedMessage(data);
                     }
                 }
             });
@@ -377,11 +384,6 @@ var WidgetModule;
         return TimePanel;
     })(ChatPanel);
     WidgetModule.TimePanel = TimePanel;
-    // export class InformationPanel extends Message {
-    //     constructor() {
-    //         super(PanelType.getMore);
-    //     }
-    // }
     var Message = (function (_super) {
         __extends(Message, _super);
         function Message(content, conversationType, extra, objectName, messageDirection, messageId, receivedStatus, receivedTime, senderUserId, sentStatus, sentTime, targetId, messageType) {
@@ -474,6 +476,12 @@ var WidgetModule;
         return TextMessage;
     })();
     WidgetModule.TextMessage = TextMessage;
+    var InformationPanel = (function () {
+        function InformationPanel() {
+        }
+        return InformationPanel;
+    })();
+    WidgetModule.InformationPanel = InformationPanel;
     var ImageMessage = (function () {
         function ImageMessage() {
         }

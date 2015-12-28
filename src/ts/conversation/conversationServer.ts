@@ -6,10 +6,12 @@ conversationServer.factory("conversationServer", ["$q", function($q: angular.IQS
 
     var conversationServer = <ConversationServer>{}
 
-    conversationServer.current = {
+    conversationServer.current = <WidgetModule.Conversation>{
         targetId: "",
         targetType: "",
-        title: ""
+        title: "",
+        portraitUri: "",
+        onLine: false
     }
 
     conversationServer.loginUser = {

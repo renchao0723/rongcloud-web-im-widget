@@ -69,6 +69,11 @@ widget.factory("WebimWidget", ["$q", "conversationServer", function($q: angular.
         RongIMLib.RongIMClient.setOnReceiveMessageListener({
             onReceived: function(data) {
                 var msg = WidgetModule.Message.convert(data);
+
+                if (WebimWidget.onReceivedMessage) {
+                    WebimWidget.onReceivedMessage(msg);
+                }
+
                 conversationServer.onReceivedMessage(msg);
 
                 if (msg instanceof RongIMLib.NotificationMessage) {
@@ -80,9 +85,7 @@ widget.factory("WebimWidget", ["$q", "conversationServer", function($q: angular.
                     addMessageAndOperation(msg);
                 }
 
-                if (WebimWidget.onReceivedMessage) {
-                    WebimWidget.onReceivedMessage(data);
-                }
+
             }
         });
 
@@ -123,6 +126,7 @@ interface Config {
     css: {
         height: number;
         width: number;
+        centent: boolean;
     }
 }
 
@@ -138,7 +142,7 @@ interface WebimWidget {
 
     onConnectStatusChange(status: number): void
 
-    onReceivedMessage(msg: RongIMLib.Message): void
+    onReceivedMessage(msg: WidgetModule.Message): void
 
-    onSentMessage(msg: RongIMLib.Message): void
+    onSentMessage(msg: WidgetModule.Message): void
 }

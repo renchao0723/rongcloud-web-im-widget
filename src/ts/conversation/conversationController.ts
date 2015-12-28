@@ -107,6 +107,10 @@ conversationController.controller("conversationController", ["$scope", "conversa
         $scope.send = function() {
             console.log($scope.currentConversation, conversationServer.loginUser);
 
+            if (!$scope.currentConversation.targetId || !$scope.currentConvers.targetType) {
+                return;
+            }
+
             var msg = RongIMLib.TextMessage.obtain($scope.messageContent);
             var userinfo = new RongIMLib.UserInfo(conversationServer.loginUser.id, conversationServer.loginUser.name, conversationServer.loginUser.portraitUri);
             // userinfo.userId = conversationServer.loginUser.id;
@@ -124,10 +128,13 @@ conversationController.controller("conversationController", ["$scope", "conversa
             });
 
             var content = packDisplaySendMessage(msg, WidgetModule.MessageType.TextMessage);
-            $scope.messageList.push(WidgetModule.Message.convert(content));
+
+            var cmsg = WidgetModule.Message.convert(content);
+            conversationServer._addHistoryMessages(cmsg);
+            // $scope.messageList.push();
 
             adjustScrollbars();
-            $scope.messageContent = "";
+            $scope.messageContent = ""
             // $scope.$apply();
         }
 

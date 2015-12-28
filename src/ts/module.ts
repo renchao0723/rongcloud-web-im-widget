@@ -101,11 +101,7 @@ module WidgetModule {
         }
     }
 
-    // export class InformationPanel extends Message {
-    //     constructor() {
-    //         super(PanelType.getMore);
-    //     }
-    // }
+
 
     export class Message extends ChatPanel {
         content: any;
@@ -195,10 +191,10 @@ module WidgetModule {
                     msg.content = location;
                     break;
                 case MessageType.InformationNotificationMessage:
-                    // var info = new InformationPanel();
-                    // info.content = SDKmsg.content.content;
-                    // msg.content = info;
-                    // break;
+                // var info = new InformationPanel();
+                // info.content = SDKmsg.content.content;
+                // msg.content = info;
+                // break;
 
             }
 
@@ -228,6 +224,9 @@ module WidgetModule {
             this.content = msg.content;
             this.userInfo = msg.userInfo;
         }
+    }
+    export class InformationPanel{
+
     }
 
     export class ImageMessage {
@@ -260,7 +259,10 @@ module WidgetModule {
     export class Conversation {
         targetType: string;
         targetId: string;
-        title: string
+        title: string;
+        portraitUri: string;
+        onLine: boolean;
+
         constructor(targetType: string, targetId: string, title: string) {
             this.targetType = targetType;
             this.targetId = targetId;
