@@ -25,8 +25,8 @@
     "src/ts/conversation/conversationController.ts",
     "src/ts/conversation/conversationDirective.ts",
     "src/ts/conversation/conversationServer.ts",
-    "src/ts/conversation/main.ts",
-    "src/ts/conversation/module.ts",
+    "src/ts/main.ts",
+    "src/ts/module.ts",
     "typings/angularjs/angular.d.ts",
     "typings/jquery/jquery.d.ts",
     "typings/tsd.d.ts"
