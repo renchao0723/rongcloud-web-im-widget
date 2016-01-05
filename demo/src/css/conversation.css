@@ -1,171 +1,1640 @@
-@charset "utf-8";
-/*
-	------------Reset--------------
-*/
+*,*:before,*:after {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box
+}
 * {
     padding: 0;
     margin: 0;
 }
 
-html, body {
-    background: #fff;
+body,h1,h2,h3,h4,html,img,li,p,pre,ul {
+    margin: 0;
+    padding: 0;
+    border: 0
+}
+body,button,input,pre,textarea {
+    font-family: "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
 }
 
-/** 清除内外边距 **/
-body, h1, h2, h3, h4, h5, h6, hr, p, blockquote, /* structural elements 结构元素 */
-dl, dt, dd, ul, ol, li, /* list elements 列表元素 */
-pre, /* text formatting elements 文本格式元素 */
-form, fieldset, legend, button, input, textarea, /* form elements 表单元素 */
-th, td /* table elements 表格元素 */
-{
+body,html {
+    font-size: 14px;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    overflow: hidden;
+    font-family: "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+}
+
+body {
+    background: #fff;
+    -webkit-text-size-adjust: none
+}
+
+h1,h2,h3,h4 {
+    font-weight: 400
+}
+
+ul {
+    list-style: none
+}
+
+a {
+    text-decoration: none;
+    outline: 0;
+    color: #0099ff;
+}
+
+img {
+    border: none;
+    vertical-align: middle;
+}
+
+textarea {
+    overflow: auto
+}
+
+.clearfix {
+    *zoom:1}
+
+.clearfix:after {
+    display: table;
+    line-height: 0;
+    content: "";
+    clear: both
+}
+.hide{
+    display: none;
+    visibility: hidden;
+}
+.pull-left{
+    float: left!important;
+}
+.pull-right{
+    float: right!important;
+}
+.badge {
+    display: inline-block;
+    min-width: 10px;
+    padding: 3px 7px;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    background-color: #999;
+    border-radius: 10px;
+}
+.Presence {
+    border-radius: 50%;
+    display: inline-block;
+    background-color: #c2cad2;
+}
+.Presence--stacked {
+    position: absolute;
+    right: -2px;
+    bottom: 2px;
+    margin: 0;
+    width: 8px;
+    height: 8px;
+    border: 1px solid #00a0ff;
+}
+.sprite{
+    background: url("../images/icon.png") 0 0/50px auto no-repeat;
+    display: inline-block;
+}
+.blueBg{
+    background: url(../images/webBg.png) 0 0/10px auto repeat;
+}
+.kefuBtnBox{
+    position: fixed;
+    z-index: 999;
+    box-sizing: border-box;
+    height: 50px;
+    width: 195px;
+    bottom: 0px;
+    text-align: center;
+    border-radius: 4px 4px 0px 0px;
+    right: 100px;
+    transition: all 0.3s ease-in-out 0.1s;
+}
+.kefuBtn{
+    text-decoration: none;
+    outline: none;
+    color: #fff;
+    font-size: 18px;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    border: none;
+    line-height: 50px;
+    float: none;
+}
+.kefuBtn .people{
+    vertical-align: middle;
+    width: 24px;
+    border: none;
+    height: 24px;
+}
+.kefuBtn .arrow-up{
+    background-position: 0 -34px;
+    vertical-align: middle;
+    width: 24px;
+    border: none;
+    height: 24px;
+    margin-left: 10px;
+    margin-right: -5px;
+}
+.kefuBtn>span{
+    color: #fff;
+    font-size: 16px;
     margin: 0;
     padding: 0;
 }
-
-font {
-    font-size: 12px;
+.kefuListBox{
+    width: 194px;
+    height: 470px;
+    position: fixed;
+    bottom: 0px;
+    overflow: hidden;
+    z-index: 999;
+    right: 50px;
+    box-shadow: 1px 1px #f9fafb;
+    /*transition: all 0.3s ease-in-out 0.1s;*/
+}
+#zhichiBtnBox .people{
+    background-position: 0 -411px;
+    width: 26px;
+    height: 32px;
+}
+#zhichiBtnBox .kefuBtn .arrow-up{
+    margin-left: 0;
 }
 
-/** 设置默认字体 **/
-body,
-button, input, select, textarea /* for ie */
-{
-    font-family: "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+.kefuListBox .kefuList{
+    border: 1px solid #cdd7db;
+    border-bottom: none;
+    border-radius: 5px 5px 0px 0px;
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+    box-sizing: border-box;
+}
+.kefuListBox.both .kefuList{
+     border-radius: 0px 5px 0px 0px;
+}
+.kefuListBox .kefuList .header{
+    height: 36px;
+}
+.kefuListBox .kefuList .toolBar{
+    text-align: center;
+    padding-top: 8px;
+}
+.kefuListBox .kefuList .people{
+     vertical-align: middle;
+     width: 20px;
+     border: none;
+     height: 20px;
+    background-size: 45px auto;
 }
 
-h1, h2, h3, h4, h5, h6 {
+.kefuListBox .kefuList .arrow-down{
+    background-position: 0 -65px;
+    vertical-align: middle;
+    width: 24px;
+    border: none;
+    height: 24px;
+    margin-left: 10px;
+    margin-right: -5px;
+}
+.kefuListBox .kefuList .recent{
+    color: #fff;
     font-size: 14px;
-    font-family: "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+    margin: 0;
+    padding: 0;
 }
-
-address, cite, dfn, em, var {
-    font-style: normal;
-}
-
-/* 将斜体扶正 */
-code, kbd, pre, samp {
-    font-family: courier new, courier, monospace;
-}
-
-/* 统一等宽字体 */
-small {
+.kefuListBox .kefuList .count{
+    color: #d0d4d7;
     font-size: 12px;
+    margin: 0;
+    padding: 0;
+}
+.kefuListBox .kefuList .content .netStatus{
+    height: 40px;
+    padding-left: 18px;
+    background-color: #ffafaf;
+    line-height: 40px;
+}
+.kefuListBox .kefuList .content .netStatus.online{
+    background-color: #d3f8d6;
+}
+.kefuListBox .kefuList .content .netStatus .sprite{
+    width: 20px;
+    height: 22px;
+    vertical-align: middle;
+    background-position: 0 -139px;
+}
+.kefuListBox .kefuList .content .netStatus.online .sprite{
+    background-position: 0 -100px;
+}
+.kefuListBox .kefuList .content .netStatus span{
+    font-size: 14px;
+    color: #fff;
+    vertical-align: middle;
+    padding-left: 2px;
+}
+.kefuListBox .kefuList .content .netStatus.online span{
+    color: #868686;
 }
 
-/* 小于 12px 的中文很难阅读，让 small 正常化 */
-
-/** 重置列表元素 **/
-ul, ol {
-    list-style: none;
+.kefuBtnBoxLMini,.kefuBtnBoxRMini,.kefuBtnBoxL,.kefuBtnBoxR{
+    position: fixed;
+    z-index: 999;
+    box-sizing: border-box;
+    top: 50%;
+    text-align: center;
+    border-radius: 4px 0 0 4px;
+    right: 0;
+    transition: all 0.3s ease-in-out 0.1s;
+    width: 50px;
+    height: 50px;
+    margin-top: -25px;
 }
-
-/** 重置文本格式元素 **/
-a {
-    text-decoration: none;
-    outline: none;
-    cursor: pointer;
+.kefuBtnBoxLMini,.kefuBtnBoxL{
+    left: 0;
+    border-radius: 0 4px 4px 0;
 }
-
-/* outline去除FF浏览器里的链接虚线 */
-a:hover, a:link, a:visited, a:focus, a:active {
-    text-decoration: none;
+.kefuBtnBoxL,.kefuBtnBoxR{
+    height: 195px;
+    margin-top: -97.5px;
 }
-
-sup {
-    vertical-align: text-top;
+.kefuBtnBoxRMini .kefuBtn ,.kefuBtnBoxLMini .kefuBtn{
+    line-height:normal;
+    font-size: 14px;
 }
-
-/* 重置，减少对行高的影响 */
-sub {
-    vertical-align: text-bottom;
+.kefuBtnBoxRMini .people ,.kefuBtnBoxLMini .people{
+    background-position: 0 -329px;
+    background-size: 40px auto;
+    width: 20px;
+    height: 24px;
+    margin-top: 5px;
+    position: relative;
 }
-
-/** 重置表单元素 **/
-legend {
-    color: #000;
+.kefuBtnBoxL .people,.kefuBtnBoxR .people{
+    background-position: 0 -411px;
+    width: 26px;
+    height: 32px;
+    margin-top: 5px;
+    margin-left: 2px;
 }
-
-/* for ie6 */
-fieldset, img {
+.Presence--Mini{
+    top: -2px;
+    right: -9px;
+    background-color: #ff4d58;
     border: 0;
 }
-
-/* img 搭车：让链接里的 img 无边框 */
-button, input, select, textarea {
-    font-size: 100%;
+.kefuBtnBoxRMini .recent,.kefuBtnBoxLMini .recent {
+    width: 40px;
 }
-
-/* 使得表单元素在 ie 下能继承字体大小 */
-/* 注：optgroup 无法扶正 */
-
-/** 重置表格元素 **/
-table {
-    border-collapse: collapse;
-    border-spacing: 0;
+.kefuBtnBoxL .recent,.kefuBtnBoxR .recent  {
+    width: 26px;
+    line-height: 1.6;
 }
-
-/*
-	------------Reset   End--------------
-*/
-.outer{
-    width: 500px;
-    height: 500px;
-
+.kefuBtnBoxL .remind,.kefuBtnBoxR .remind {
+    position: relative;
+    width: 26px;
+}
+.kefuBtnBoxL .remind .Presence,.kefuBtnBoxR .remind .Presence{
+    top: 5px;
+    left: 8px;
+}
+.kefuListBoxRMini,.kefuListBoxLMini{
+    width: 160px;
+    height: auto;
     position: absolute;
-    bottom: 20px;
-    right: 25px;
-    overflow: hidden;
-    border: 1px solid #888;
+    top: 0;
+    z-index: 999;
+    right: 65px;
+    box-shadow: 1px 1px #f9fafb;
 }
-      .main{
-        width: 100%;
-        position: absolute;
-        height: 100%;
-        min-width: 400px;
-        min-height: 400px;
-        background-color:#F3F3F3;
-        /*border: 1px solid #888;*/
-      }
-      .recieve{
-        background-color: white!important;
-      }
-      .title{
-        height: 50px;
-        background-color: #A4C8F6;
-        text-align: center;
-        line-height: 50px;
-      }
-      .send{
-        height: 80px;
-        width: 100%;
-        position: absolute;
-        bottom: 0px;
-        padding: 10px;
-        line-height: 80px;
-        /*margin: 0px;*/
-      }
-      .msgcontent{
-        position: absolute;
-        top:50px;
-        left: 0px;
-        right: 0px;
-        bottom: 100px;
-        overflow: auto;
-      }
-      .textarea{
-        width: 80%;
-        height: 80px;
-        position: relative;
-      }
+.kefuListBoxLMini{
+    left: 65px;
+}
+.kefuListRMini .no-remind,.kefuListLMini .no-remind{
+    display: none;
+}
+.kefuListRMini .chat_item .ext,.kefuListLMini .chat_item .ext {
+    min-width: 40px;
+}
+.kefuListBoxRMini ,.kefuListBoxLMini{
+    border: 1px solid #cdd7db;
+    border-radius:5px ;
+}
+.kefuListBoxRMini .chatList:last-child .chat_item,.kefuListBoxLMini .chatList:last-child .chat_item{
+    border-bottom: 0;
+}
+.kefuListBoxRMini .chatList:hover,.kefuListBoxLMini .chatList:hover{
+    background: #dde7f0;
+}
+.kefuListBoxRMini .chat_item .info .nickname_text,.kefuListBoxLMini .chat_item .info .nickname_text{
+    text-align: left;
+}
+.kefuListBoxRMini .chatList .arrow,.kefuListBoxLMini .chatList .arrow{
+    position: absolute;
+    top: 23px;
+    right: -15px;
+    width: 16px;
+    height: 12px;
+    background: url(../images/arrow-mini.png) 0 0/50% auto no-repeat;
+}
+.kefuListBoxLMini .chatList .arrow{
+    left: -15px;
+    transform: scale(-1,1);
+}
+.kefuListBoxRMini .chatList:hover .arrow,.kefuListBoxLMini .chatList:hover .arrow{
+    background: url(../images/arrow-mini2.png) 0 0/50% auto no-repeat;
+}
+.kefuListBoxL{
+    position:absolute;
+    left: -1px;
+    top: 220px;
+   /* height: 300px;*/
+    height: 238px;
+    border: 1px solid #cdd7db;
+    border-radius: 0 5px 5px 0;
+}
+.kefuListBoxR{
+    right: -1px;
+    position:absolute;
+    top: 220px;
+    /* height: 300px;*/
+    height: 238px;
+    border: 1px solid #cdd7db;
+    border-radius: 5px 0 0 5px;
+}
+.kefuBtnBoxR{
+    right: -1px;
+    border-radius:5px 0 0 5px;
+}
+.kefuListBoxL .kefuList{
+    border: 0;
+    border-radius: 0 5px 5px 0;
+}
+.kefuListBoxR .kefuList{
+    border: 0;
+    border-radius:5px 0 0 5px;
+}
+.kefuListBoxL .chatList:last-child .chat_item,.kefuListBoxR .chatList:last-child .chat_item{
+    border-bottom: 0;
+}
+.kefuListBoxL.kefuListBox .kefuList  .people,.kefuListBoxR.kefuListBox .kefuList  .people{
+    background-position: 0 -329px;
+    background-size: 40px auto;
+    width: 20px;
+    height: 24px;
+    margin-top: 0;
+}
+.kefuListBoxL.kefuListBox .kefuList .toolBar ,.kefuListBoxR.kefuListBox .kefuList .toolBar {
+    text-align: left;
+    padding-left: 15px;
+}
+.kefuListBoxL.kefuListBox ,.kefuListBoxR.kefuListBox {
+    width: 185px;
+}
+.kefuListBoxL.kefuListBox .kefuList .content .netStatus,.kefuListBoxR.kefuListBox .kefuList .content .netStatus  {
+    padding-left: 0;
+}
+.kefuListBoxL.kefuListBox .chatList,.kefuListBoxR.kefuListBox .chatList  {
+    height: 50px;
+}
+.kefuListBoxL.kefuListBox .chatList:hover ,.kefuListBoxR.kefuListBox .chatList:hover {
+    background: #dde7f0;
+}
+.kefuListBoxL.kefuListBox .chat_item,.kefuListBoxR.kefuListBox .chat_item   {
+    height: 41px;
+}
 
-      .message{
-        margin: 8px;
-      }
-      .content{
-        background-color: #98DEFF;
-        border-radius: 5px;
-        padding: 3px;
-      }
+
+
+
+.chatList{
+    padding: 10px 0 10px 12px;
+    cursor: pointer;
+    position: relative;
+    height: 56px;
+}
+.chat_item {
+    border-bottom: 1px solid #e1e9f1;
+    height: 46px;
+}
+
+.chat_item .photo {
+    float: left;
+    margin-right: 10px;
+    position: relative;
+    margin-top: 2px;
+}
+
+.chat_item .photo .img {
+    display: block;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+}
+
+.Presence--mainBox {
+    left: 2px;
+    top: 0px;
+    border-color: #f4f8fc;
+}
+
+.offline .Presence {
+    background-color: #8e969f;
+}
+
+.chat_item .info {
+    overflow: hidden
+}
+
+.chat_item .info .nickname {
+    font-weight: 400;
+    color: #000;
+    margin: 0;
+    height: 36px;
+    line-height: 36px;
+    font-size: 16px;
+}
+
+.chat_item .info .nickname_text {
+    display: inline-block;
+    *display: inline;
+    *zoom: 1;
+    vertical-align: top;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-wrap: normal;
+    color: #606164;
+    text-align: left;
+}
+
+.chat_item .ext {
+    float: right;
+    color: #6b6f7c;
+    font-size: 13px;
+    text-align: right;
+    min-width: 55px;
+}
+
+.chat_item .ext .attr {
+    height: 22px;
+    line-height: 1.5;
+    font-size: 12px;
+    margin-top: 10px;
+}
+
+.no-remind {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    float: right;
+    background-position: 0 -177px;
+}
+
+
+.chatList .badge{
+    float: left;
+    background-color:#0099ff ;
+    font-weight:normal;
+}
+.chatList .chat_item.online .Presence {
+    background: #20e600;
+}
+.kefuChatBox{
+    width: 450px;
+    height: 470px;
+    position: fixed;
+    bottom: 0px;
+    border-radius: 5px 5px 0 0;
+    overflow: hidden;
+    z-index: 999;
+    right: 248px;
+    opacity: 0;
+    transition: all 0.3s ease-in-out 0.1s;
+}
+.kefuChatBox.both{
+    border-radius: 5px 0 0 0;
+    opacity: 1;
+}
+.kefuChatBox.fullScreen{
+    width: 100%;
+    height: 100%;
+    position: static;
+}
+.kefuChatBox.fullScreen .infoBar{
+    margin-left: 50%;
+    -webkit-transform: translateX(-45px);
+    -moz-transform: translateX(-45px);
+    transform: translateX(-45px);
+}
+.kefuChat{
+    border: 1px solid #cdd7db;
+}
+.kefuChat .header{
+    height: 36px;
+}
+.kefuChat .header .infoBar{
+    height: 36px;
+    line-height: 36px;
+}
+.kefuChat .header .infoBarTit{
+    position: relative;
+}
+.kefuChat .header .Presence{
+    border-radius: 50%;
+    width: 8px;
+    height: 8px;
+    top: 14px;
+    left: 16px;
+    border: 0;
+}
+.kefuChat .header.online .Presence{
+    background-color: #20e600;
+}
+.kefuChat .header .kefuName{
+    color: #fff;
+    padding-left: 33px;
+}
+.kefuChat .header .toolBar{
+    margin-right: 10px;
+}
+.kefuChat .header .toolBar a{
+    width: 20px;
+    height: 20px;
+    margin-top: 9px;
+}
+.kefuChat .header .toolBar .kefuChatBoxMin{
+    background-position: 0 -252px;
+}
+.kefuChat .header .toolBar .kefuChatBoxMax{
+    background-position: 0 -213px;
+}
+.kefuChat .header .toolBar .kefuChatBoxClose{
+    background-position: 0 -291px;
+}
+#Messages {
+    background-color: #f9fbfd;
+    width: 100%;
+    overflow: auto;
+    padding: 0 20px;
+    position: relative;
+}
+
+#Messages.empty .emptyBox {
+    display: block;
+}
+
+#Messages.empty .MessagesInner {
+    display: none;
+}
+
+#Messages .emptyBox {
+    display: none;
+    font-size: 14px;
+    color: #8e969f;
+    text-align: center;
+    height: 20px;
+    line-height: 20px;
+    margin-top: -10px;
+    position: absolute;
+    top: 50%;
+    width: 100px;
+    margin-left: -50px;
+    left: 50%;
+}
+/*.MessagesInner{
+    position: relative;
+}*/
+.kefuChat .outlineBox {
+    height: 40px;
+    padding-left: 18px;
+    background-color: #ffafaf;
+    line-height: 40px;
+}
+.kefuChat .outlineBox .sprite {
+    width: 20px;
+    height: 22px;
+    vertical-align: middle;
+    background-position: 0 -139px;
+}
+.kefuChat .outlineBox span {
+    font-size: 14px;
+    color: #fff;
+    vertical-align: middle;
+    padding-left: 2px;
+}
+
+.Messages-date {
+    text-align: center;
+    padding: 10px 20px;
+    border-bottom: 1px solid #e4e7ea;
+    margin-bottom: 30px;
+    height: 10px;
+}
+
+.Messages-date b {
+    font-size: 9pt;
+    font-weight: normal;
+    color: #8e969f;
+    background-color: #f9fbfd;
+    display: inline-block;
+    padding: 0 20px;
+}
+
+.Message-wrapper > div:last-child {
+    padding-bottom: 10px;
+}
+
+.Message {
+    position: relative;
+    padding-left: 3pc;
+    word-wrap: break-word;
+    word-break: break-all;
+    border-spacing: 1px;
+}
+
+.Message-header {
+    margin-top: 15px;;
+}
+
+.avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+}
+
+.Message img {
+    max-width: 250px;
+    max-height: 250px;
+}
+
+.Message-avatar {
+    position: absolute;
+    margin-left: -3pc;
+    width: 34px;
+    height: 34px;
+}
+
+.Message-author {
+    display: inline-block;
+    position: relative;
+    padding-right: 30px;
+}
+
+.Message-author {
+    display: inline-block;
+    position: relative;
+    padding-right: 30px;
+}
+
+.Message-author .author, .Message-author .time {
+    display: block;
+    float: left;
+    line-height: 1pc;
+}
+
+.Message-author > .author {
+    color: #8e969f;
+}
+
+.Message-author > .time {
+    color: #8e969f;
+    font-size: 9pt;
+    margin-left: 9pt;
+}
+
+.Message-body {
+    position: relative;
+    /*margin-right: 70px;*/
+    font-size: 14px;
+    line-height: 18px;
+    color: #444;
+}
+
+#Messages .Message-text, #Messages .file-text {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+}
+
+#Messages .Message-text pre {
+    font-size: 14px;
+    line-height: 18px;
+    color: rgb(68, 68, 68);;
+    word-break: break-all;
+    word-wrap: break-word;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    font-family: "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+}
+
+.Message-entry {
+    display: inline-block;
+    max-width: 100%;
+}
+
+.Message-entry p {
+    margin-bottom: 5px;
+}
+
+.Message-entry a {
+    text-decoration: none;
+}
+
+#Messages .Message-img img {
+    border-radius: 5px;
+}
+/* 语音消息 */
+#Messages .Message-audio .Message-entry{
+    overflow:hidden;
+}
+#Messages .Message-audio .Message-entry>span{
+    float: left;
+}
+#Messages .Message-audio .audioBox {
+    display: inline-block;
+    background: url(../images/audioBg.png) 0 0/170px auto no-repeat;
+    width: 165px;
+    height: 36px;
+    padding: 3px 0 3px 15px;
+}
+#Messages .Message-audio .audioBox i{
+    float: left;
+    display: inline-block;
+    width: 4px;
+    height: 26px;
+    opacity: 1;
+    -webkit-transition: all 1s ease;
+    -moz-transition: all 1s ease;
+    -ms-transition: all 1s ease;
+    -o-transition: all 1s ease;
+    transition: all 1s ease;
+}
+#Messages .Message-audio .audioBox i:nth-child(1){
+    background: url(../images/audioBg.png) 0px -40px/170px auto no-repeat;
+}
+#Messages .Message-audio .audioBox i:nth-child(2){
+    background: url(../images/audioBg.png) -7px -40px/170px auto no-repeat;
+}
+#Messages .Message-audio .audioBox i:nth-child(3){
+    background: url(../images/audioBg.png) -14px -40px/170px auto no-repeat;
+}
+
+#Messages .Message-audio .audioBox.animate i:nth-child(2){
+    animation: audioAnimate 1s linear 0s infinite ;
+    /* Firefox: */
+    -moz-animation: audioAnimate 1s linear 0s infinite ;
+    /* Safari 和 Chrome: */
+    -webkit-animation: audioAnimate 1s linear 0s infinite ;
+    /* Opera: */
+    -o-animation: audioAnimate 1s linear 0s infinite ;
+}
+#Messages .Message-audio .audioBox.animate i:nth-child(3){
+    animation: audioAnimate 1s linear 0s infinite ;
+    /* Firefox: */
+    -moz-animation: audioAnimate 1s linear 0s infinite ;
+    /* Safari 和 Chrome: */
+    -webkit-animation: audioAnimate 1s linear 0s infinite ;
+    /* Opera: */
+    -o-animation: audioAnimate 1s linear 0s infinite ;
+}
+@keyframes audioAnimate
+{
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@-moz-keyframes audioAnimate /* Firefox */
+{
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@-webkit-keyframes audioAnimate /* Safari 和 Chrome */
+{
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@-o-keyframes audioAnimate /* Opera */
+{
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+#Messages .Message-audio .audioTimer{
+    margin-top: 5px;
+    margin-left: 10px;
+    color: #8e969f;
+}
+#Messages .Message-audio .audioState{
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    background-color: #ff7373;
+    margin-top: 13px;
+    border-radius: 5px;
+}
+/* 地图消息 */
+.mapBox{
+    position: relative;
+    border-radius: 5px;
+    overflow: hidden;
+}
+.mapBox img{
+    width: 250px;
+    height: 140px;
+}
+.mapBox span{
+    display: inline-block;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 250px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    background: rgba(0,0,0,.5);
+    color: #fff;
+}
+/* 单图文消息 */
+.image-textBox{
+    width: 355px;
+    padding-left: 15px;
+    border-left: 2px solid #0099ff;
+}
+.image-textBox h4{
+    height: 24px;
+    font-size: 16px;
+}
+.image-textBox .cont img{
+    float: left;
+    width: 100px;
+    height:100px;
+    border-radius: 5px;
+}
+.image-textBox .cont div{
+    display: -webkit-box!important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-all;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp:5;
+    float: left;
+    margin-left: 10px;
+    line-height: 20px;
+    color: #8e969f;
+    font-size: 13px;
+    max-width: 225px;
+    /*max-height: 100px;*/
+
+}
+.sys-tips{
+    text-align: center;
+    padding: 10px 0;
+    margin-top: 10px;
+}
+.sys-tips>span{
+    padding:7px 10px;
+    background: #e7ecf2;
+    border-radius: 3px;
+    font-size: 14px;
+    color: #8e969f;
+}
+.footer {
+    background: #fff;
+    display: none;
+    height: 114px;
+}
+.footer-con {
+    border-top: 1px solid #cdd7db;
+}
+.text-layout {
+    margin: 0 10px;
+}
+.funcPanel {
+    line-height: 22px;
+    height: 22px;
+    position: relative;
+    margin-top: 5px;
+}
+.funcPanel .mode1{
+    float: left;
+
+}
+.funcPanel .mode2{
+    float: right;
+}
+.funcPanel .mode2 a{
+    color: #0099ff;
+}
+.robotMode {
+    display: block;
+}
+.text {
+    width: 100%;
+    height: 40px;
+    margin: 5px 0 0;
+    padding: 0;
+    border: 0;
+    color: #999;
+    resize: none;
+    font-size: 9pt;
+}
+.text:focus {
+    outline: 0;
+}
+.powBox {
+    position: relative;
+    width: 100%;
+    height: 24px;
+}
+.send-btn {
+    position: absolute;
+    right: 10px;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    border: none;
+    width: 60px;
+    height: 24px;
+    border-radius: 40px;
+    font-size: 9pt;
+    color: rgb(255, 255, 255);
+    background: #0099ff;
+}
+.MessageForm-tool {
+    position: relative;
+    margin-right: 8px;
+    float: left;
+}
+.MessageForm-tool i {
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    cursor: pointer;
+    display: inline-block;
+}
+.MessageForm-tool i.iconfont-smile {
+    background-size: 45px;
+    background-position: 0 -297px;
+}
+.expressionWrap {
+    border: 1px solid #D9DADC;
+    width: 410px;
+    padding: 5px 8px;
+    position: absolute;
+    left: -2px;
+    top: -198px;
+    background: #fff;
+    z-index: 1100;
+}
+.MessageForm-tool i.iconfont-upload {
+    width: 24px;
+    background-size: 45px;
+    background-position: 0 -333px;
+}
+.expressionWrap .arrow {
+    position: absolute;
+    left: 5px;
+    bottom: -9px;
+    display: inline-block;
+    width: 10px;
+    height: 9px;
+    background: url(../images/arrow.png);
+}
+.expressionWrap span {
+    margin: 0 2px;
+}
+
+
+/* 评价 */
+.allBlackBox,.surveyBox {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-color: rgba(0,0,0,0);
+    z-index: 999;
+    left: 0;
+    top: 0;
+    font-family: "Microsoft Yahei",Arial,sans-serif;
+    display: none;
+}
+
+.surveyBox .surveyRobot {
+    width: 260px;
+    padding: 10px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -75pt 0 0 -140px;
+    border: 1px solid #13c9cb;
+    background-color: #fff;
+    -webkit-transition: all .5s cubic-bezier(.86,0,.07,1);
+    transition: all .5s cubic-bezier(.86,0,.07,1);
+    display: none;
+    box-shadow: 0 1px 9pt #C7C9CA;
+    border-top: 2px solid #13c9cb;
+    border-radius: 2px
+}
+
+.surveyBox .surTop .surTip {
+    color: #a4a3a3;
+    margin-right: 8px
+}
+
+.surveyBox .surTop a {
+    color: #13c9cb;
+    display: inline-block;
+    margin: 0 5px
+}
+
+.surveyBox .surTop {
+    border-bottom: 1px solid #e3e5e5;
+    line-height: 24px;
+    font-size: 9pt;
+    padding-bottom: 8px
+}
+
+.surveyBox .surTop .surtipbg {
+    background: url(../img/bglist.png) no-repeat;
+    width: 15px;
+    height: 15px;
+    display: inline-block;
+    background-position: -3pc -26px;
+    vertical-align: middle;
+    margin-top: -4px
+}
+
+.surveyBox .surmidQus {
+    font-size: 18px;
+    text-align: center;
+    margin: 20px 0;
+    line-height: 30px
+}
+
+.surveyBox .surmid {
+    text-align: center
+}
+
+.surveyBox .surveyRobot .surmid .chackyes {
+    display: inline-block
+}
+
+.surveyBox .surveyRobot .surmid .chackyes a {
+    width: 66px;
+    height: 66px;
+    display: inline-block;
+    border-radius: 3px;
+    color: #a4a3a3;
+    margin: 0 10px
+}
+
+.surveyBox .surveyRobot .surmid .chackyes a span {
+    width: 28px;
+    height: 18px;
+    display: inline-block;
+    background: url(../img/bglist.png) no-repeat;
+    margin: 15px 15px 6px 15px
+}
+
+.surveyBox .surveyRobot .surmid .chackyes .checked .spanYes {
+    background-position: -183px -2px
+}
+
+.surveyBox .surveyRobot .surmid .chackyes .checked .spanNo {
+    background-position: -90pt -2px
+}
+
+.surveyBox .surveyRobot .surmid .chackyes a .spanYes {
+    background-position: -149px -2px
+}
+
+.surveyBox .surveyRobot .surmid .chackyes a .spanNo {
+    background-position: -1in -2px
+}
+
+.surveyBox .surveyRobot .surmid .chackyes a:hover {
+    background-color: #eef2f2
+}
+
+.surveyBox .surquick {
+    text-align: center;
+    display: none;
+    -webkit-transition: all .5s cubic-bezier(.86,0,.07,1);
+    transition: all .5s cubic-bezier(.86,0,.07,1)
+}
+
+.surveyBox .surquick .surqList span {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+    color: #a4a3a3;
+    margin-bottom: 5px;
+    margin-right: 10px;
+    cursor: pointer
+}
+
+.surveyBox .surquick .surquickp1 {
+    line-height: 30px;
+    margin: 10px 0
+}
+
+.surveyBox .surquick .surText .surTextInput {
+    resize: none;
+    border: 1px solid #e6e6e6;
+    border-radius: 4px;
+    color: #a4a3a3;
+    width: 254px;
+    height: 68px;
+    padding: 3px
+}
+
+.surveyBox .surquick .surText {
+    margin: 15px 0 10px 0
+}
+
+.surveyBox .surquick .surText .surqBtn {
+    color: #fff;
+    padding: 3px 15px;
+    background-color: #13c9cb;
+    margin-top: 20px;
+    display: inline-block;
+    border-radius: 4px
+}
+
+.surveyBox .surveyPeople {
+    width: 260px;
+    padding: 10px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -75pt 0 0 -140px;
+    border: 1px solid #13c9cb;
+    background-color: #fff;
+    -webkit-transition: all .5s cubic-bezier(.86,0,.07,1);
+    transition: all .5s cubic-bezier(.86,0,.07,1);
+    display: none;
+    box-shadow: 0 1px 9pt #C7C9CA;
+    border-radius: 2px;
+    border-top: 2px solid #13c9cb
+}
+
+.surveyBox .surveyPeople .chackStart span {
+    background: url(../img/bglist.png) no-repeat;
+    width: 30px;
+    height: 30px;
+    display: inline-block;
+    background-position: -218px 0;
+    cursor: pointer
+}
+
+.surveyBox .surveyPeople .chackStart .chose {
+    background-position: -253px 0
+}
+
+.surveyBox .surveyPeople .chackStart {
+    margin-bottom: 10px
+}
+
+.allBlackBox .addCallBox,.allBlackBox .callMsgBox,.surveyBox .isClose,.surveyBox .surThanks {
+    border: 1px solid #13c9cb;
+    width: 280px;
+    height: 62px;
+    background-color: #fff;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: -31px 0 0 -140px;
+    display: none;
+    -webkit-transition: all .5s cubic-bezier(.86,0,.07,1);
+    transition: all .5s cubic-bezier(.86,0,.07,1);
+    box-shadow: 0 1px 9pt #C7C9CA;
+    border-top: 2px solid #13c9cb;
+    border-radius: 2px
+}
+
+.surveyBox .surThanks p {
+    text-align: center;
+    font-size: 18px;
+    margin-top: 15px
+}
+
+.surveyBox .isClose p {
+    text-align: center;
+    font-size: 18px;
+    margin: 20px 0;
+    line-height: 30px
+}
+
+.surveyBox .isClose .iscloseDiv a {
+    display: inline-block;
+    width: 88px;
+    height: 30px;
+    line-height: 30px;
+    background-color: #fff;
+    border-radius: 3px;
+    border: 1px solid #d6d6d6;
+    color: #5f5e5e;
+    font-size: 14px;
+    margin-right: 20px
+}
+
+.surveyBox .isClose {
+    height: 140px;
+    margin-top: -90px;
+    text-align: center
+}
+
+.surveyBox .isClose .iscloseDiv .surEndBtn {
+    margin-left: 20px;
+    background-color: #13c9cb;
+    border: none 0;
+    color: #fff
+}
+
+.allBlackBox .addCallBox {
+    height: 75pt
+}
+
+.allBlackBox .addCallBox p {
+    height: 30px;
+    margin-bottom: 10px;
+    color: #b1b6b4;
+    line-height: 30px;
+    text-align: center
+}
+
+.allBlackBox .addCallBox .addCall a {
+    *display: inline;
+    zoom:1}
+
+.allBlackBox .addCallBox .addCall input {
+    text-indent: 6px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    line-height: 26px;
+    width: 130px;
+    height: 26px;
+    margin-left: 15px
+}
+
+.allBlackBox .addCallBox .addCall .sendCallBtn {
+    border-radius: 5px;
+    background-color: #09aeb0;
+    color: #fff;
+    padding: 5px 10px;
+    margin-left: 15px;
+    margin-right: 5px
+}
+
+.allBlackBox .addCallBox .addCall .addCallClose {
+    border-radius: 5px;
+    background-color: #999;
+    color: #fff;
+    padding: 5px 10px
+}
+
+.allBlackBox .addCallBox .addCallMsg {
+    display: none;
+    text-align: left;
+    padding-left: 20px;
+    color: #B94545
+}
+
+.allBlackBox .callMsgBox {
+    height: 40px
+}
+
+.allBlackBox .callMsgBox p {
+    text-align: center;
+    line-height: 30px;
+    height: 30px;
+    margin-top: 5px
+}
+
+.defaultMode {
+    display: block
+}
+
+.defaultMode .addCallBox {
+    display: block
+}
+
+.defaultMode .addCallBox .addCallMsg {
+    display: none
+}
+
+.defaultMode .callMsgBox {
+    display: none
+}
+
+.failMode {
+    display: block
+}
+
+.failMode .addCallBox {
+    display: block
+}
+
+.failMode .addCallBox .addCallMsg {
+    display: block
+}
+
+.failMode .callMsgBox {
+    display: none
+}
+
+.successMode {
+    display: block
+}
+
+.successMode .addCallBox {
+    display: none
+}
+
+.successMode .addCallBox .addCallMsg {
+    display: none;
+    z-index: -1
+}
+
+.successMode .callMsgBox {
+    display: block
+}
+
+.commonMode {
+    display: block
+}
+
+.commonMode .surveyRobot {
+    display: none
+}
+
+.commonMode .surveyPeople {
+    display: none
+}
+
+.commonMode .surThanks {
+    display: none
+}
+
+.commonMode .isClose {
+    display: block
+}
+
+.robotMode {
+    display: block;
+}
+
+.robotMode .surveyRobot {
+    display: block
+}
+
+.robotMode .surveyPeople {
+    display: none
+}
+
+.robotMode .surThanks {
+    display: none
+}
+
+.robotMode .isClose {
+    display: none
+}
+
+.robotMsgMode {
+    display: block
+}
+
+.robotMsgMode .surveyRobot {
+    display: block
+}
+
+.robotMsgMode .surquick {
+    display: block
+}
+
+.robotMsgMode .surveyPeople {
+    display: none
+}
+
+.robotMsgMode .surThanks {
+    display: none
+}
+
+.robotMsgMode .isClose {
+    display: none
+}
+
+.manualMode {
+    display: block
+}
+
+.manualMode .surveyRobot {
+    display: none
+}
+
+.manualMode .surveyPeople {
+    display: block
+}
+
+.manualMode .surThanks {
+    display: none
+}
+
+.manualMode .isClose {
+    display: none
+}
+
+.manualMsgMode {
+    display: block
+}
+
+.manualMsgMode .surveyRobot {
+    display: none
+}
+
+.manualMsgMode .surquick {
+    display: block
+}
+
+.manualMsgMode .surveyPeople {
+    display: block
+}
+
+.manualMsgMode .surThanks {
+    display: none
+}
+
+.manualMsgMode .isClose {
+    display: none
+}
+
+.singlePage {
+    max-width: 50pc;
+    margin: 0 auto;
+    background-color: #f7fafa;
+    box-shadow: 0 0 20px 2px #afb6b8
+}
+
+@-webkit-keyframes animations-shake {
+    0%,100% {
+        -webkit-transform: translateY(0);
+        transform: translateY(0)
+    }
+
+    10%,30%,50%,70%,90% {
+        -webkit-transform: translateY(-20px);
+        transform: translateY(-20px)
+    }
+
+    20%,40%,60%,80% {
+        -webkit-transform: translateY(20px);
+        transform: translateY(20px)
+    }
+}
+
+@keyframes animations-shake {
+    0%,100% {
+        -webkit-transform: translateY(0);
+        transform: translateY(0)
+    }
+
+    10%,30%,50%,70%,90% {
+        -webkit-transform: translateY(-20px);
+        transform: translateY(-20px)
+    }
+
+    20%,40%,60%,80% {
+        -webkit-transform: translateY(20px);
+        transform: translateY(20px)
+    }
+}
+
+.effect-shake {
+    -webkit-animation: animations-shake 2s ease-out;
+    animation: animations-shake 2s ease-out
+}
+
+@-webkit-keyframes animations-rolling {
+    0% {
+        -webkit-transform: rotate(0)
+    }
+
+    30% {
+        -webkit-transform: rotate(30deg)
+    }
+
+    70% {
+        -webkit-transform: rotate(-30deg)
+    }
+
+    100% {
+        -webkit-transform: rotate(0)
+    }
+}
+
+.effect-rolling {
+    -webkit-transform-origin: center bottom;
+    -ms-transform-origin: center bottom;
+    transform-origin: center bottom;
+    -webkit-animation: animations-rolling 2s ease-out;
+    animation: animations-rolling 2s ease-out
+}
+
+@-webkit-keyframes animations-flip {
+    0% {
+        -webkit-transform: rotateY(0)
+    }
+
+    50% {
+        -webkit-transform: rotateY(180deg)
+    }
+
+    100% {
+        -webkit-transform: rotateY(0)
+    }
+}
+
+.effect-flip {
+    -webkit-animation: animations-flip 2s ease-out;
+    animation: animations-flip 2s ease-out
+}
+
+@-webkit-keyframes animations-zoomIn {
+    0% {
+        -webkit-transform: scale(1)
+    }
+
+    50% {
+        -webkit-transform: scale(1.2)
+    }
+
+    100% {
+        -webkit-transform: scale(1)
+    }
+}
+
+.effect-zoomIn {
+    -webkit-animation: animations-zoomIn 2s ease-out;
+    animation: animations-zoomIn 2s ease-out
+}
+
+@-webkit-keyframes animations-zoomOut {
+    0% {
+        -webkit-transform: scale(1)
+    }
+
+    50% {
+        -webkit-transform: scale(.8)
+    }
+
+    100% {
+        -webkit-transform: scale(1)
+    }
+}
+
+.effect-zoomOut {
+    -webkit-animation: animations-zoomOut 2s ease-out;
+    animation: animations-zoomOut 2s ease-out
+}
+
+@-webkit-keyframes animations-openDoor {
+    0% {
+        -webkit-transform: rotateY(0)
+    }
+
+    50% {
+        -webkit-transform: rotateY(-180deg)
+    }
+
+    100% {
+        -webkit-transform: rotateY(0)
+    }
+}
+
+.effect-openDoor {
+    -webkit-transform-origin: right;
+    -webkit-animation: animations-flip 2s ease-out;
+    animation: animations-flip 2s ease-out
+}
 
 /**
  * angular-motion

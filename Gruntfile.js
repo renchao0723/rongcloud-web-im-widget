@@ -5,15 +5,16 @@ module.exports = function(grunt) {
 
     clean: {
       build: {
-        src: [
-          "./build/*"
-        ]
+        src: ["./build/*"]
       },
       demo: {
         src: [
           "./demo/src/**/*",
           "./demo/src/**"
         ]
+      },
+      release:{
+        src:["./dist/*"]
       }
     },
 
@@ -33,6 +34,12 @@ module.exports = function(grunt) {
         }, {
           src: "./bower_components/angular/angular.js",
           dest: "./build/angular.js"
+        },
+        {
+          expand: true,
+          cwd: "./src/images/",
+          src: "./**",
+          dest: "./build/images/"
         }]
       }
     },
