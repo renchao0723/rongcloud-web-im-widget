@@ -17,6 +17,11 @@ demo.controller("main", ["$scope", "WebimWidget", function($scope,
     WebimWidget.init({
       appkey: "3argexb6rv4ke",
       token: "ugTjYqCDS7xBzGde5bTSSp1YDkt/uRq44MP/ipJKA9cfVLy6nm4MoxxKL/2x4Sar6IlYgy39BOk=",
+      css:{
+        left:"100px",
+        width:"600px",
+        background: "black",
+      },
       onSuccess: function() {
         WebimWidget.setConversation("4", "cc", "呵呵");
       }

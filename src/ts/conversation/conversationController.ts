@@ -5,6 +5,8 @@ var conversationController = angular.module("rongWebimWidget.conversationControl
 conversationController.controller("conversationController", ["$scope", "conversationServer", "WebimWidget",
     function($scope: any, conversationServer: ConversationServer, WebimWidget: WebimWidget) {
 
+        // $scope.fullScreen=
+
         function adjustScrollbars() {
             setTimeout(function() {
                 var ele = document.getElementById("Messages");
@@ -25,15 +27,9 @@ conversationController.controller("conversationController", ["$scope", "conversa
         $scope.messageContent = "";
 
         $scope.resoures = WebimWidget;
+        
         console.log(WebimWidget);
 
-        WebimWidget.hidden = function() {
-            WebimWidget.display = false;
-        }
-
-        WebimWidget.show = function() {
-            WebimWidget.display = true;
-        }
 
         conversationServer.onConversationChangged = function(conversation: WidgetModule.Conversation) {
 

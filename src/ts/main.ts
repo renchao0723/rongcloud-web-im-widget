@@ -9,6 +9,13 @@ widget.factory("WebimWidget", ["$q", "conversationServer", function($q: angular.
 
     var messageList = {};
 
+    //TODO:是否要加限制可用css
+    var availableCssConfig = {
+        height: true, width: true, top: true, left: true, right: true,
+        bottom: true, margin: true, "margin-top": true,
+        "margin-left": true, "margin-right": true, "margin-bottom": true
+    }
+
     var defaultconfig = <Config>{
 
     }
@@ -19,10 +26,17 @@ widget.factory("WebimWidget", ["$q", "conversationServer", function($q: angular.
 
         // if (config)
         //
-        //
 
         if (!RongIMLib || !RongIMLib.RongIMClient) {
             throw new Error("please refer to RongIMLib");
+        }
+        var ele = document.getElementById("rongcloud-conversation");
+        if (config.css) {
+            for (var s in config.css) {
+                if (typeof config.css[s] === "string" && availableCssConfig[s]) {
+                    ele.style[s] = config.css[s];
+                }
+            }
         }
 
         RongIMLib.RongIMClient.init(defaultconfig.appkey, false);
@@ -111,8 +125,10 @@ widget.factory("WebimWidget", ["$q", "conversationServer", function($q: angular.
     }
 
     WebimWidget.show = function() {
+        WebimWidget.fullScreen = false;
         WebimWidget.display = true;
     }
+
 
     return WebimWidget;
 }]);
@@ -137,6 +153,7 @@ interface WebimWidget {
     show(): void
     hidden(): void
     display: boolean
+    fullScreen: boolean
 
     setConversation(targetType: string, targetId: string, title: string): void
 
@@ -145,4 +162,7 @@ interface WebimWidget {
     onReceivedMessage(msg: WidgetModule.Message): void
 
     onSentMessage(msg: WidgetModule.Message): void
+
+    onClose(): void
+    onCloseBefore(): boolean
 }
