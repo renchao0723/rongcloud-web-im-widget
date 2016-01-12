@@ -1,11 +1,11 @@
 /// <reference path="../../typings/tsd.d.ts"/>
 
-var widget = angular.module("rongWebimWidget", ["ngAnimate", "rongWebimWidget.conversationServer"]);
+var widget = angular.module("rongWebimWidget", ["rongWebimWidget.conversationServer"]);
 
-widget.factory("WebimWidget", ["$q", "conversationServer", function($q: angular.IQService, conversationServer: ConversationServer) {
+widget.factory("WebIMWidget", ["$q", "conversationServer", function($q: angular.IQService, conversationServer: ConversationServer) {
 
 
-    var WebimWidget = <WebimWidget>{};
+    var WebimWidget = <WebIMWidget>{};
 
     var messageList = {};
 
@@ -17,12 +17,17 @@ widget.factory("WebimWidget", ["$q", "conversationServer", function($q: angular.
     }
 
     var defaultconfig = <Config>{
-
+        css: {
+            width: "450px",
+            height: "470px"
+        }
     }
 
     WebimWidget.init = function(config: Config) {
 
+        var defaultcss = defaultconfig.css;
         angular.extend(defaultconfig, config);
+        angular.extend(defaultcss, config.css);
 
         // if (config)
         //
@@ -31,20 +36,28 @@ widget.factory("WebimWidget", ["$q", "conversationServer", function($q: angular.
             throw new Error("please refer to RongIMLib");
         }
         var ele = document.getElementById("rongcloud-conversation");
-        if (config.css) {
-            for (var s in config.css) {
-                if (typeof config.css[s] === "string" && availableCssConfig[s]) {
-                    ele.style[s] = config.css[s];
+        if (defaultcss) {
+            for (var s in defaultcss) {
+                if (typeof defaultcss[s] === "string" && availableCssConfig[s]) {
+                    ele.style[s] = defaultcss[s];
                 }
+            }
+
+            if (defaultcss.center) {
+                ele.style["top"] = "50%";
+                ele.style["left"] = "50%";
+                ele.style["margin-top"] = "-" + parseInt(defaultcss.height) / 2 + "px";
+                ele.style["margin-left"] = "-" + parseInt(defaultcss.width) / 2 + "px";
+                ele.style["position"] = "fixed";
             }
         }
 
-        RongIMLib.RongIMClient.init(defaultconfig.appkey, false);
+        RongIMLib.RongIMClient.init(defaultconfig.appkey);
 
         RongIMLib.RongIMClient.connect(defaultconfig.token, {
             onSuccess: function(userId: string) {
                 console.log("connect success:" + userId);
-                if (defaultconfig.onSuccess) {
+                if (defaultconfig.onSuccess && typeof defaultconfig.onSuccess == "function") {
                     defaultconfig.onSuccess(userId);
                 }
 
@@ -61,14 +74,17 @@ widget.factory("WebimWidget", ["$q", "conversationServer", function($q: angular.
                 });
 
             },
-            onTokenIncorrect: function(error) {
-                console.log("connect error:" + error);
-                if (defaultconfig.onError) {
+            onTokenIncorrect: function() {
+                if (defaultconfig.onError && typeof defaultconfig.onError == "function") {
+                    defaultconfig.onError(0);
+                }
+                console.log("token 无效");
+            },
+            onError: function(error) {
+                if (defaultconfig.onError && typeof defaultconfig.onError == "function") {
                     defaultconfig.onError(error);
                 }
-            },
-            onError: function() {
-                //由于使用RongIMLib typescript原因，onError没有使用但必须加上
+                console.log("connect error:" + error);
             }
         });
 
@@ -82,16 +98,29 @@ widget.factory("WebimWidget", ["$q", "conversationServer", function($q: angular.
 
         RongIMLib.RongIMClient.setOnReceiveMessageListener({
             onReceived: function(data) {
+                console.log(data);
                 var msg = WidgetModule.Message.convert(data);
 
-                if (WebimWidget.onReceivedMessage) {
-                    WebimWidget.onReceivedMessage(msg);
+                switch (data.messageType) {
+                    case WidgetModule.MessageType.ContactNotificationMessage:
+                        //好友通知自行处理
+                        break;
+                    case WidgetModule.MessageType.TextMessage:
+                    case WidgetModule.MessageType.VoiceMessage:
+                    case WidgetModule.MessageType.LocationMessage:
+                    case WidgetModule.MessageType.ImageMessage:
+                    case WidgetModule.MessageType.RichContentMessage:
+                        addMessageAndOperation(msg);
+                        break;
+                    case WidgetModule.MessageType.UnknownMessage:
+                        //未知消息自行处理
+                        break;
+                    default:
+                        //未捕获的消息类型
+                        break;
                 }
 
-                conversationServer.onReceivedMessage(msg);
-
                 if (msg instanceof RongIMLib.NotificationMessage) {
-                    // $scope.messageList.push(WidgetModule.Message.convert(msg));
                     if (msg.messageType == WidgetModule.MessageType.InformationNotificationMessage) {
                         addMessageAndOperation(msg);
                     }
@@ -99,7 +128,10 @@ widget.factory("WebimWidget", ["$q", "conversationServer", function($q: angular.
                     addMessageAndOperation(msg);
                 }
 
-
+                if (WebimWidget.onReceivedMessage) {
+                    WebimWidget.onReceivedMessage(msg);
+                }
+                conversationServer.onReceivedMessage(msg);
             }
         });
 
@@ -133,6 +165,24 @@ widget.factory("WebimWidget", ["$q", "conversationServer", function($q: angular.
     return WebimWidget;
 }]);
 
+widget.filter('trustHtml', function($sce: angular.ISCEService) {
+    return function(str: any) {
+        return $sce.trustAsHtml(str);
+    }
+});
+widget.filter("historyTime", ["$filter", function($filter: angular.IFilterService) {
+    return function(time: Date) {
+        var today = new Date();
+        if (time.toDateString() === today.toDateString()) {
+            return $filter("date")(time, "HH:mm");
+        } else if (time.toDateString() === new Date(today.setTime(today.getTime() - 1)).toDateString()) {
+            return "昨天" + $filter("date")(time, "HH:mm");
+        } else {
+            return $filter("date")(time, "yyyy-MM-dd HH:mm");
+        }
+    };
+}]);
+
 interface Config {
     appkey: string;
     token: string;
@@ -140,13 +190,13 @@ interface Config {
     onError(error: any): void;
     animation: number;
     css: {
-        height: number;
-        width: number;
-        centent: boolean;
+        height: string;
+        width: string;
+        center: boolean;
     }
 }
 
-interface WebimWidget {
+interface WebIMWidget {
 
     init(config: Config): void
 
@@ -157,12 +207,13 @@ interface WebimWidget {
 
     setConversation(targetType: string, targetId: string, title: string): void
 
-    onConnectStatusChange(status: number): void
-
     onReceivedMessage(msg: WidgetModule.Message): void
 
     onSentMessage(msg: WidgetModule.Message): void
 
     onClose(): void
+
     onCloseBefore(): boolean
+
+    onConnectStatusChange(status: number): void
 }

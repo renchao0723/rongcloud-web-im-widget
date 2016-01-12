@@ -15,6 +15,9 @@ module.exports = function(grunt) {
       },
       release:{
         src:["./dist/*"]
+      },
+      temp:{
+        src:['./temp']
       }
     },
 
@@ -28,10 +31,8 @@ module.exports = function(grunt) {
         }]
       },
       build: {
-        files: [{
-          src: "./bower_components/angular-animate/angular-animate.min.js",
-          dest: "./build/angular-animate.min.js"
-        }, {
+        files: [
+        {
           src: "./bower_components/angular/angular.js",
           dest: "./build/angular.js"
         },
@@ -40,7 +41,12 @@ module.exports = function(grunt) {
           cwd: "./src/images/",
           src: "./**",
           dest: "./build/images/"
-        }]
+        },
+        {
+          src:"./src/css/conversation.css",
+          dest:"./build/css/conversation.css"
+        }
+      ]
       }
     },
 
@@ -66,7 +72,7 @@ module.exports = function(grunt) {
           sourceMap: true,
           declaration: false
         },
-        dest: "./build/index.js"
+        dest: "./temp/main.js"
       }
     },
 
@@ -82,10 +88,12 @@ module.exports = function(grunt) {
 
     concat: {
       build: {
-        src: ['src/css/conversation.css',
-          'bower_components/angular-motion/dist/angular-motion.css'
-        ],
-        dest: 'build/css/conversation.css',
+        files:[
+          {
+            src:['./temp/main.js','./temp/myAppHTMLCache.js'],
+            dest:'./build/main.js'
+          }
+        ]
       },
     },
 
@@ -93,7 +101,7 @@ module.exports = function(grunt) {
     ngtemplates: {
       app: {
         src: ["./src/ts/**/*.tpl.html"],
-        dest: "./build/myAppHTMLCache.js",
+        dest: "./temp/myAppHTMLCache.js",
         options: {
           module: 'rongWebimWidget', //name of our app
           htmlmin: {
@@ -127,7 +135,7 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask("build", ["clean:build", "typescript:build",
-    "concat:build", "copy:build", "ngtemplates:app"
+    "ngtemplates:app","concat:build", "copy:build","clean:temp"
   ]);
 
 

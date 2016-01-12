@@ -94,10 +94,10 @@ module WidgetModule {
     }
 
     export class TimePanel extends ChatPanel {
-        sendTime: Date
+        sentTime: Date
         constructor(time: Date) {
             super(PanelType.Time);
-            this.sendTime = time;
+            this.sentTime = time;
         }
     }
 
@@ -225,7 +225,7 @@ module WidgetModule {
             this.userInfo = msg.userInfo;
         }
     }
-    export class InformationPanel{
+    export class InformationPanel {
 
     }
 
@@ -270,11 +270,46 @@ module WidgetModule {
         }
     }
 
+    var userAgent = window.navigator.userAgent;
+
     export class Helper {
         static timeCompare(first: Date, second: Date) {
             var pre = first.toString();
             var cur = second.toString();
             return pre.substring(0, pre.lastIndexOf(":")) == cur.substring(0, cur.lastIndexOf(":"))
+        }
+        static browser = {
+            version: (userAgent.match(/.+(?:rv|it|ra|chrome|ie)[\/: ]([\d.]+)/) || [0, '0'])[1],
+            safari: /webkit/.test(userAgent),
+            opera: /opera|opr/.test(userAgent),
+            msie: /msie|trident/.test(userAgent) && !/opera/.test(userAgent),
+            chrome: /chrome/.test(userAgent),
+            mozilla: /mozilla/.test(userAgent) && !/(compatible|webkit|like gecko)/.test(userAgent)
+        }
+        static getFocus = function(obj: any) {
+            obj.focus();
+            if (obj.createTextRange) {//ie
+                var rtextRange = obj.createTextRange();
+                rtextRange.moveStart('character', obj.value.length);
+                rtextRange.collapse(true);
+                rtextRange.select();
+            }
+            else if (obj.selectionStart) {//chrome "<input>"、"<textarea>"
+                obj.selectionStart = obj.value.length;
+            } else if (window.getSelection && obj.lastChild) {
+
+                var sel = window.getSelection();
+
+                var tempRange = document.createRange();
+                if (WidgetModule.Helper.browser.msie) {
+                    tempRange.setStart(obj.lastChild, obj.lastChild.length);
+                } else {
+                    tempRange.setStart(obj.firstChild, obj.firstChild.length);
+                }
+
+                sel.removeAllRanges();
+                sel.addRange(tempRange);
+            }
         }
     }
 

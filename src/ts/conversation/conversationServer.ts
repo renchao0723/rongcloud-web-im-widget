@@ -1,6 +1,6 @@
 /// <reference path="../../../typings/tsd.d.ts"/>
 
-var conversationServer = angular.module("rongWebimWidget.conversationServer", ["rongWebimWidget.conversationDirective"]);
+var conversationServer = angular.module("rongWebIMWidget.conversationServer", ["rongWebIMWidget.conversationDirective"]);
 
 conversationServer.factory("conversationServer", ["$q", function($q: angular.IQService) {
 
@@ -27,13 +27,12 @@ conversationServer.factory("conversationServer", ["$q", function($q: angular.IQS
 
         RongIMLib.RongIMClient.getInstance().getHistoryMessages(targetType, targetId, reset ? 0 : null, number, {
             onSuccess: function(data, has) {
-                for (let i = 0; i < data.length; i++) {
-                    // if (data instanceof RongIMLib.NotificationMessage) {
-                    // } else {
-                    var msg = WidgetModule.Message.convert(data[i]);
+                var msglen = data.length;
+                while (msglen--) {
+                    var msg = WidgetModule.Message.convert(data[msglen]);
                     unshiftHistoryMessages(targetId, targetType, msg);
-                    // }
                 }
+
                 defer.resolve({ data: data, has: has });
             },
             onError: function(error) {
@@ -47,7 +46,7 @@ conversationServer.factory("conversationServer", ["$q", function($q: angular.IQS
     function unshiftHistoryMessages(id: string, type: number, item: any) {
         var arr = conversationServer._cacheHistory[type + "_" + id] = conversationServer._cacheHistory[type + "_" + id] || [];
         if (arr[0] && arr[0].sentTime && arr[0].panelType != WidgetModule.PanelType.Time && item.sentTime) {
-            if (WidgetModule.Helper.timeCompare(arr[0].sentTime, item.sentTime)) {
+            if (!WidgetModule.Helper.timeCompare(arr[0].sentTime, item.sentTime)) {
                 arr.unshift(new WidgetModule.TimePanl(arr[0].sentTime));
             }
         }
@@ -57,8 +56,8 @@ conversationServer.factory("conversationServer", ["$q", function($q: angular.IQS
     conversationServer._addHistoryMessages = function(item: WidgetModule.Message) {
         var arr = conversationServer._cacheHistory[item.conversationType + "_" + item.targetId] = conversationServer._cacheHistory[item.conversationType + "_" + item.targetId] || [];
 
-        if (arr[arr.length - 1] && arr[arr.length - 1].panelType != WidgetModule.PanelType.Time && arr[arr.length - 1].sendTime && item.sentTime) {
-            if (!WidgetModule.Helper.timeCompare(arr[arr.length - 1].sendTime, item.sentTime)) {
+        if (arr[arr.length - 1] && arr[arr.length - 1].panelType != WidgetModule.PanelType.Time && arr[arr.length - 1].sentTime && item.sentTime) {
+            if (!WidgetModule.Helper.timeCompare(arr[arr.length - 1].sentTime, item.sentTime)) {
                 arr.push(new WidgetModule.TimePanl(item.sentTime));
             }
         }

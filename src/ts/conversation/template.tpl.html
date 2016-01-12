@@ -29,7 +29,9 @@
                     <div class="MessagesInner">
 
                         <div ng-repeat="item in messageList" ng-switch="item.panelType">
-                            <div class="Messages-date" ng-switch-when="104"><b class="">2015 年 8 月 6日</b></div>
+                            <div class="Messages-date" ng-switch-when="104"><b class="">{{item.sentTime|historyTime}}</b></div>
+                            <div class="Messages-date" ng-switch-when="105"><b class="" ng-click="getHistory()">获取历史消息</b></b></div>
+                            <div class="Messages-date" ng-switch-when="106"><b class="" ng-click="getMoreMessage()">获取更多消息</b></div>
                             <div class="sys-tips" ng-switch-when="2"><span>会话已结束</span></div>
                             <div class="Message" ng-switch-when="1">
                                 <div class="Messages-unreadLine"></div>
@@ -58,8 +60,11 @@
                         <div id="funcPanel" class="funcPanel robotMode">
                             <div class="mode1">
                                 <div class="MessageForm-tool" id="expressionWrap">
-                                    <i class="sprite iconfont-smile"></i>
-                                    <div class="expressionWrap" style="display: none;"><i class="arrow"></i></div>
+                                    <i class="sprite iconfont-smile"  ng-click="showemoji=!showemoji"></i>
+
+                                    <div class="expressionWrap" ng-show="showemoji"><i class="arrow"></i>
+                                      <emoji ng-repeat="item in emojiList" item="item" content="msgvalue"></emoji>
+                                    </div>
                                 </div>
                                 <div class="MessageForm-tool"><i class="sprite iconfont-upload" id="upload-file" style="position: relative; z-index: 1;"></i>
                                     <div class="moxie-shim moxie-shim-html5" style="position: absolute; top: 5px; left: 0px; width: 20px; height: 15px; overflow: hidden; z-index: 0;">
@@ -67,12 +72,17 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="mode2"><a href="javascript:;" id="chatSwitch" class="chatSwitch">转人工服务</a></div>
+                            <div class="mode2 hide"><a href="javascript:;" id="chatSwitch" class="chatSwitch">转人工服务</a></div>
                         </div>
-                        <textarea cols="50" rows="5" id="inputMsg" class="text grey">请输入...</textarea>
+                        <!-- <textarea cols="50" rows="5" id="inputMsg" class="text grey" ng-model="currentConversation.messageContent">请输入...</textarea> -->
+                        <pre id="inputMsg" class="text grey" contenteditable contenteditable-dire
+                        ng-focus="showemoji=fase"
+                        style='background-color: rgba(0,0,0,0);color:black;'
+                        ctrl-enter-keys fun="send()" ctrlenter="false" placeholder="请输入文字..." ondrop="return false;"
+                        ng-model="currentConversation.messageContent"></pre>
                     </div>
                     <div class="powBox">
-                        <button type="button" class="btn send-btn" id="sendBtn">发送</button>
+                        <button type="button" class="btn send-btn" id="sendBtn" ng-click="send()">发送</button>
                     </div>
                 </div>
             </div>

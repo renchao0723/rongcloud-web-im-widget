@@ -22,13 +22,18 @@
   ],
   "files": [
     "src/lib/RongIMLib.d.ts",
+    "src/lib/window.d.ts",
     "src/ts/conversation/conversationController.ts",
     "src/ts/conversation/conversationDirective.ts",
     "src/ts/conversation/conversationServer.ts",
+    "src/ts/conversationlist/conversationListController.ts",
     "src/ts/main.ts",
     "src/ts/module.ts",
     "typings/angularjs/angular.d.ts",
     "typings/jquery/jquery.d.ts",
     "typings/tsd.d.ts"
-  ]
+  ],
+  "atom": {
+    "rewriteTsconfig": true
+  }
 }

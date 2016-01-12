@@ -6,23 +6,24 @@
 
     <link rel="stylesheet" href="./src/css/conversation.css">
 
-    <script src="./RongIMLib.js"></script>
-    <!-- <script src="http://cdn.ronghub.com/RongIMLib-2.0.0.beta.min.js"></script> -->
+    <!-- <script src="./RongIMLib.js"></script> -->
+    <script src="http://cdn.ronghub.com/RongIMLib-2.0.2.beta.min.js"></script>
+    <script src="./emoji-0.9.2.js"></script>
     <script src="./src/angular.js"></script>
-    <script src="./src/angular-animate.min.js"></script>
+    <!-- <script src="./src/angular-animate.min.js"></script> -->
 
   </head>
   <body ng-controller="main">
     <h1>{{title}}</h1>
     <button ng-click="show()">show</button>
     <button ng-click="hidden()">hidden</button>
+    <button ng-click="setconversation()">设置会话</button>
     {{server.display}}
     <div>
       <rong-conversation style=""></rong-conversation>
     </div>
 
   </body>
-  <script src="./src/index.js"></script>
+  <script src="./src/main.js"></script>
   <script src="./index.js"></script>
-  <script src="./src/myAppHTMLCache.js"></script>
 </html>
