@@ -174,7 +174,7 @@ conversationController.controller("conversationController", ["$scope", "conversa
             var obj = document.getElementById("inputMsg");
             WidgetModule.Helper.getFocus(obj);
         };
-        uploadFileInit();
+        // uploadFileInit()
         function uploadFileInit() {
             var qiniuuploader = Qiniu.uploader({
                 // runtimes: 'html5,flash,html4',
@@ -683,8 +683,9 @@ widget.run(["$http", function ($http) {
         loadScript1("http://jssdk.demo.qiniu.io/js/plupload/plupload.full.min.js", function () {
         });
         loadScript1("http://jssdk.demo.qiniu.io/js/qiniu.js");
-        loadScript("./RongIMLib.js");
-        loadScript("./emoji-2.0.0.js");
+        // loadScript1("./RongIMLib.js");
+        loadScript1("http://cdn.ronghub.com/RongIMLib-2.0.5.beta.min.js");
+        loadScript1("./emoji-2.0.0.js");
     }]);
 widget.factory("providerdata", [function () {
         return {};
@@ -1081,12 +1082,13 @@ var WidgetModule;
                     var content = SDKmsg.content.content;
                     if (RongIMLib.Expression && RongIMLib.Expression.retrievalEmoji) {
                         var a = document.createElement("span");
-                        content = RongIMLib.Expression.retrievalEmoji(content, function (img) {
-                            a.appendChild(img.img);
-                            var str = '<span class="RongIMexpression_' + img.englishName + '" title="' + img.chineseName + '">' + a.innerHTML + '</span>';
-                            a.innerHTML = "";
-                            return str;
-                        });
+                        // content = RongIMLib.Expression.retrievalEmoji(content, function(img: any) {
+                        //     a.appendChild(img.img);
+                        //     var str = '<span class="RongIMexpression_' + img.englishName + '" title="' + img.chineseName + '">' + a.innerHTML + '</span>';
+                        //     a.innerHTML = "";
+                        //     return str;
+                        // });
+                        content = RongIMLib.RongIMEmoji.retrievalEmoji(content);
                     }
                     texmsg.content = content;
                     msg.content = texmsg;

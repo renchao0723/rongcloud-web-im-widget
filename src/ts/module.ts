@@ -150,12 +150,14 @@ module WidgetModule {
                     var content = SDKmsg.content.content;
                     if (RongIMLib.Expression && RongIMLib.Expression.retrievalEmoji) {
                         var a = document.createElement("span");
-                        content = RongIMLib.Expression.retrievalEmoji(content, function(img: any) {
-                            a.appendChild(img.img);
-                            var str = '<span class="RongIMexpression_' + img.englishName + '" title="' + img.chineseName + '">' + a.innerHTML + '</span>';
-                            a.innerHTML = "";
-                            return str;
-                        });
+                        // content = RongIMLib.Expression.retrievalEmoji(content, function(img: any) {
+                        //     a.appendChild(img.img);
+                        //     var str = '<span class="RongIMexpression_' + img.englishName + '" title="' + img.chineseName + '">' + a.innerHTML + '</span>';
+                        //     a.innerHTML = "";
+                        //     return str;
+                        // });
+
+                        content=RongIMLib.RongIMEmoji.retrievalEmoji(content);
                     }
                     texmsg.content = content;
 

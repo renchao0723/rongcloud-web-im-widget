@@ -44,8 +44,9 @@ widget.run(["$http",function($http:angular.IHttpService) {
     loadScript1("http://jssdk.demo.qiniu.io/js/plupload/plupload.full.min.js",function(){
     })
     loadScript1("http://jssdk.demo.qiniu.io/js/qiniu.js");
-    loadScript("./RongIMLib.js");
-    loadScript("./emoji-2.0.0.js");
+    // loadScript1("./RongIMLib.js");
+    loadScript1("http://cdn.ronghub.com/RongIMLib-2.0.5.beta.min.js");
+    loadScript1("./emoji-2.0.0.js");
 
 }]);
 

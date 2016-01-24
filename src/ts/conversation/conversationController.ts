@@ -215,7 +215,7 @@ conversationController.controller("conversationController", ["$scope", "conversa
             WidgetModule.Helper.getFocus(obj);
         }
 
-        uploadFileInit()
+        // uploadFileInit()
 
 
         function uploadFileInit() {
