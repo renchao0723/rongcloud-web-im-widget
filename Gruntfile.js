@@ -103,7 +103,7 @@ module.exports = function(grunt) {
         src: ["./src/ts/**/*.tpl.html"],
         dest: "./temp/myAppHTMLCache.js",
         options: {
-          module: 'rongWebimWidget', //name of our app
+          module: 'RongWebIMWidget', //name of our app
           htmlmin: {
             collapseBooleanAttributes: true,
             collapseWhitespace: true,

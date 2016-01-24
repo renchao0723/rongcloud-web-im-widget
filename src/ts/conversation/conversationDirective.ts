@@ -1,6 +1,6 @@
 /// <reference path="../../../typings/tsd.d.ts"/>
 
-var conversationDirective = angular.module("rongWebIMWidget.conversationDirective", ["rongWebIMWidget.conversationController"]);
+var conversationDirective = angular.module("RongWebIMWidget.conversationDirective", ["RongWebIMWidget.conversationController"]);
 
 conversationDirective.directive("rongConversation", [function() {
 
@@ -20,14 +20,12 @@ conversationDirective.directive("emoji", [function() {
         },
         template: "",
         link: function(scope: any, ele: angular.IRootElementService, attr: angular.IAttributes) {
-            var span = document.createElement("span");
-            span.className = "expression_" + scope.item.englishName;
-            span.appendChild(scope.item.img);
-            ele.append(span);
+
+            ele.append(scope.item);
             ele.on("click", function() {
                 scope.$parent.currentConversation.messageContent = scope.$parent.currentConversation.messageContent || "";
-                scope.$parent.currentConversation.messageContent = scope.$parent.currentConversation.messageContent.replace(/\n$/, "");
-                scope.$parent.currentConversation.messageContent = scope.$parent.currentConversation.messageContent + "[" + scope.item.chineseName + "]";
+                scope.$parent.currentConversation.messageContent = scope.$parent.currentConversation.draftMsg.replace(/\n$/, "");
+                scope.$parent.currentConversation.messageContent = scope.$parent.currentConversation.draftMsg + scope.item.children[0].getAttribute("name");
                 scope.$parent.$apply();
                 var obj = document.getElementById("inputMsg");
                 WidgetModule.Helper.getFocus(obj);

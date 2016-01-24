@@ -156,11 +156,11 @@ textarea {
 .kefuListBox{
     width: 194px;
     height: 470px;
-    position: fixed;
+    position: absolute;
     bottom: 0px;
+    top:0px;
     overflow: hidden;
     z-index: 999;
-    right: 50px;
     box-shadow: 1px 1px #f9fafb;
     /*transition: all 0.3s ease-in-out 0.1s;*/
 }
@@ -175,12 +175,16 @@ textarea {
 
 .kefuListBox .kefuList{
     border: 1px solid #cdd7db;
-    border-bottom: none;
+    /*border-bottom: none;*/
     border-radius: 5px 5px 0px 0px;
     overflow: hidden;
     position: relative;
-    height: 100%;
+    /*height: 100%;*/
     box-sizing: border-box;
+    position: absolute;
+    top:0px;
+    bottom: 0px;
+    width: 194px;
 }
 .kefuListBox.both .kefuList{
      border-radius: 0px 5px 0px 0px;
@@ -516,14 +520,18 @@ textarea {
     background: #20e600;
 }
 .kefuChatBox{
-    width: 450px;
-    height: 470px;
+    /*width: 450px;*/
+    /*height: 470px;*/
     position: absolute;
     border-radius: 5px 5px 0 0;
-    overflow: hidden;
-    z-index: 999;
+    /*overflow: hidden;*/
+    z-index: 1000;
     opacity: 0;
     transition: all 0.3s ease-in-out 0.1s;
+    left:195px;
+    right: 0px;
+    top:0px;
+    bottom: 0px;
 }
 .kefuChatBox.both{
     border-radius: 5px 0 0 0;
@@ -1019,11 +1027,11 @@ textarea {
 }
 .expressionWrap {
     border: 1px solid #D9DADC;
-    width: 410px;
+    width: 380px;
     padding: 5px 8px;
     position: absolute;
     left: -2px;
-    top: -198px;
+    top: -215px;
     background: #fff;
     z-index: 1100;
 }
@@ -1656,4 +1664,10 @@ textarea {
     -webkit-transform-origin: right;
     -webkit-animation: animations-flip 2s ease-out;
     animation: animations-flip 2s ease-out
+}
+
+#rong-widget-box {
+  position: absolute;
+  width: 600px;
+  min-height: 470px;
 }

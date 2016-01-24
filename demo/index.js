@@ -1,33 +1,58 @@
-var demo = angular.module("demo", ["rongWebimWidget"]);
+var demo = angular.module("demo", ["RongWebIMWidget"]);
 
-demo.controller("main", ["$scope", "WebimWidget", function($scope,
-  WebimWidget) {
+demo.controller("main", ["$scope", "WebIMWidget", function($scope,
+  WebIMWidget) {
 
   $scope.show = function() {
-    WebimWidget.show();
+    WebIMWidget.show();
   }
 
   $scope.hidden = function() {
-    WebimWidget.hidden();
+    WebIMWidget.hidden();
   }
 
-  $scope.server = WebimWidget;
+  $scope.server = WebIMWidget;
+  $scope.targetType=1;
 
   $scope.setconversation=function(){
-    WebimWidget.setConversation("4", "cc", "张三");
+    WebIMWidget.setConversation(Number($scope.targetType), $scope.targetId, "自定义");
   }
 
   angular.element(document).ready(function() {
 
-    WebimWidget.init({
-      appkey: "bmdehs6pdw0ss",
-      token: "b0oOjj+U9fb3LYky1D2K4bgtZuR3CES6Xp+I56nDnYRbr6K9RiBhz+gi5pgBW9mb/7AB2yLRdGivTecpF41gzw==",
-      css:{
+    WebIMWidget.init({
+      appkey: "3argexb6r934e",
+      token: "BRrW9ZoxW5pkra92UQK+e5UnU/cREmEFuMhOJuGv5bP+dl6CkOlF+VrK3U6TbotAVT4eqyf00Itg2Mh5WIasRw==",
+      style:{
         right:"0px",
         bottom:"0px",
-        width:"600px"
+        left:"0px",
+        width:"600px",
+      },
+      displayConversationList:true,
+      conversationListPosition:WebIMWidget.EnumConversationListPosition.right,
+      onError:function(error){
+        console.log("error:"+error);
       }
     });
+
+    WebIMWidget.show();
+
+    WebIMWidget.setUserInfoProvider(function(targetId,obj){
+        obj.onSuccess({name:"陌："+targetId});
+    });
+
+    // WebIMWidget.onCloseBefore=function(obj){
+    //   console.log("关闭前");
+    //   setTimeout(function(){
+    //     obj.close();
+    //   },1000)
+    // }
+
+    WebIMWidget.onClose=function(){
+      console.log("已关闭");
+    }
+
 
     //设置会话
     //WebimWidget.setConversation("4", "cc", "呵呵");

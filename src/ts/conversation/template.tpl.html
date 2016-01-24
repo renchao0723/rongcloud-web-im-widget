@@ -1,5 +1,5 @@
 
-    <div id="rongcloud-conversation" class="kefuChatBox both am-fade-and-slide-top" ng-class="{'fullScreen':resoures.fullScreen}" ng-show="resoures.display" ><!-- fullScreen 全屏class -->
+    <div id="rong-conversation" class="kefuChatBox both am-fade-and-slide-top" ng-class="{'fullScreen':resoures.fullScreen}" ><!-- fullScreen 全屏class -->
 
         <div class="kefuChat">
             <div id="header" class="header blueBg online">
@@ -13,7 +13,7 @@
                 <div class="toolBar headBtn pull-right">
                     <a href="javascript:;" class="kefuChatBoxMin sprite" ng-show="resoures.fullScreen" ng-click="resoures.fullScreen=false;" title="最小化"></a>
                     <a href="javascript:;" class="kefuChatBoxMax sprite" ng-show="!resoures.fullScreen" ng-click="resoures.fullScreen=true;" title="最大化"></a>
-                    <a href="javascript:;" class="kefuChatBoxClose sprite" ng-click="resoures.display=false" title="结束对话"></a>
+                    <a href="javascript:;" class="kefuChatBoxClose sprite" ng-click="close()" title="结束对话"></a>
                 </div>
             </div>
                 <!-- outline -->
@@ -36,7 +36,7 @@
                             <div class="Message" ng-switch-when="1">
                                 <div class="Messages-unreadLine"></div>
                                 <div>
-                                    <div class="Message-header "><img class="img u-isActionable Message-avatar avatar" ng-src="{{item.content.userInfo.portraitUri||'./src/images/webBg.png'}}" alt="">
+                                    <div class="Message-header "><img class="img u-isActionable Message-avatar avatar" ng-src="{{item.content.userInfo.portraitUri||'./images/webBg.png'}}" alt="">
 
                                         <div class="Message-author clearfix">
                                           <a class="author u-isActionable">{{item.content.userInfo.name}}</a>

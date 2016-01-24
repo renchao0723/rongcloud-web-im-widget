@@ -7,4 +7,10 @@ declare module RongIMLib {
     class voice {
         static play(content: string, time: any): void
     }
+    class RongIMEmoji {
+        static initExpression(num: number, fun: any): void
+        static getExpressions(str: string): string
+        static retrievalEmoji(str: string): string
+        static retrievalName(str: string): string
+    }
 }

@@ -2,6 +2,14 @@
 
 module WidgetModule {
 
+    export enum EnumConversationListPosition {
+        left = 0, right = 1
+    }
+
+    export enum EnumConversationType {
+        PRIVATE = 1, DISCUSSION = 2, GROUP = 3, CHATROOM = 4, CUSTOMER_SERVICE = 5, SYSTEM = 6, APP_PUBLIC_SERVICE = 7, PUBLIC_SERVICE = 8
+    }
+
     export enum MessageDirection {
         SEND = 1,
         RECEIVE = 2,
@@ -216,6 +224,17 @@ module WidgetModule {
         }
     }
 
+    export class GroupInfo {
+        userId: string;
+        name: string;
+        portraitUri: string;
+        constructor(userId: string, name: string, portraitUri?: string) {
+            this.userId = userId;
+            this.name = name;
+            this.portraitUri = portraitUri;
+        }
+    }
+
     export class TextMessage {
         userInfo: UserInfo;
         content: string;
@@ -257,16 +276,31 @@ module WidgetModule {
     }
 
     export class Conversation {
-        targetType: string;
+        targetType: number;
         targetId: string;
         title: string;
         portraitUri: string;
+        unreadMessageCount: number
+
         onLine: boolean;
 
-        constructor(targetType: string, targetId: string, title: string) {
+        constructor(targetType?: number, targetId?: string, title?: string) {
             this.targetType = targetType;
             this.targetId = targetId;
             this.title = title;
+        }
+
+        static onvert(item: RongIMLib.Conversation) {
+            var conver = new Conversation();
+
+            conver.targetId = item.targetId;
+            conver.targetType = item.conversationType;
+            conver.title = item.conversationTitle;
+            conver.portraitUri = item.senderPortraitUri;
+
+            conver.unreadMessageCount = item.unreadMessageCount;
+
+            return conver;
         }
     }
 

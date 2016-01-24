@@ -2,8 +2,9 @@
 
 var conversationController = angular.module("RongWebIMWidget.conversationController", ["RongWebIMWidget.conversationServer"]);
 
-conversationController.controller("conversationController", ["$scope", "conversationServer", "WebIMWidget",
-    function($scope: any, conversationServer: ConversationServer, WebIMWidget: WebIMWidget) {
+conversationController.controller("conversationController", ["$scope", "conversationServer", "WebIMWidget", "conversationListServer",
+    function($scope: any, conversationServer: ConversationServer, WebIMWidget: WebIMWidget, conversationListServer: conversationListServer) {
+        console.log("conversation controller");
 
         function adjustScrollbars() {
             setTimeout(function() {
@@ -17,7 +18,7 @@ conversationController.controller("conversationController", ["$scope", "conversa
         $scope.currentConversation = <WidgetModule.Conversation>{
             title: "",
             targetId: "",
-            targetType: ""
+            targetType: 0
         }
 
         $scope.messageList = [];
@@ -38,22 +39,37 @@ conversationController.controller("conversationController", ["$scope", "conversa
             }
         });
 
-        $scope.emojiList = RongIMLib.Expression.getAllExpression(81, 0);
+        $scope.$watch("showemoji", function(newVal, oldVal) {
+            if (newVal === oldVal)
+                return;
+            if (!$scope.emojiList || $scope.emojiList.length == 0) {
+                // $scope.emojiList = RongIMLib.Expression.getAllExpression(81, 0);
+                RongIMLib.RongIMEmoji.initExpression(81, function(data) {
+                    $scope.emojiList = data;
+                })
+            }
+        });
 
 
         conversationServer.onConversationChangged = function(conversation: WidgetModule.Conversation) {
+            if (!conversation || !conversation.targetId) {
+                $scope.messageList = [];
+                conversationServer.current = null;
+                setTimeout(function() {
+                    $scope.$apply();
+                })
+                return;
+            }
+            conversationServer.current = conversation;
+            $scope.currentConversation = conversation;
 
-            conversationServer.current.title = conversation.title;
-            conversationServer.current.targetId = conversation.targetId;
-            conversationServer.current.targetType = conversation.targetType;
-
-            $scope.currentConversation.title = conversation.title;
-            $scope.currentConversation.targetId = conversation.targetId;
-            $scope.currentConversation.targetType = conversation.targetType;
+            if (!conversationListServer.getConversation(conversation.targetType, conversation.targetId)) {
+                conversationListServer.addConversation(conversation);
+            }
 
             //TODO:获取历史消息
             //
-            $scope.messageList.splice(0, $scope.messageList.length);
+
             conversationServer._cacheHistory[conversation.targetType + "_" + conversation.targetId] = conversationServer._cacheHistory[conversation.targetType + "_" + conversation.targetId] || []
 
             var currenthis = conversationServer._cacheHistory[conversation.targetType + "_" + conversation.targetId] || [];
@@ -72,15 +88,18 @@ conversationController.controller("conversationController", ["$scope", "conversa
 
             //TODO:获取草稿
             $scope.currentConversation.messageContent = RongIMLib.RongIMClient.getInstance().getTextMessageDraft(+$scope.currentConversation.targetType, $scope.currentConversation.targetId) || "";
+            setTimeout(function() {
+                $scope.$apply();
+            })
         }
 
-        $scope.$watch("currentConversation.draftMsg", function(newVal: string, oldVal: string) {
+        $scope.$watch("currentConversation.messageContent", function(newVal: string, oldVal: string) {
             if (newVal === oldVal)
                 return;
 
             RongIMLib.RongIMClient.getInstance().saveTextMessageDraft(+$scope.currentConversation.targetType, $scope.currentConversation.targetId, newVal)
-            //mainDataServer.conversation.setDraft($scope.currentConversation.targetType, $scope.currentConversation.targetId, newVal);
-        })
+
+        });
 
         conversationServer.onReceivedMessage = function(msg: WidgetModule.Message) {
             // $scope.messageList.splice(0, $scope.messageList.length);
@@ -126,6 +145,28 @@ conversationController.controller("conversationController", ["$scope", "conversa
             return ret;
         }
 
+        $scope.close = function() {
+            if (WebIMWidget.onCloseBefore && typeof WebIMWidget.onCloseBefore === "function") {
+                var isClose = WebIMWidget.onCloseBefore({
+                    close: function() {
+                        $scope.resoures.display = false;
+                        setTimeout(function() {
+                            $scope.$apply();
+                        })
+                        if (WebIMWidget.onClose && typeof WebIMWidget.onClose === "function") {
+                            WebIMWidget.onClose();
+                        }
+                    }
+                });
+            } else {
+                $scope.resoures.display = false;
+                if (WebIMWidget.onClose && typeof WebIMWidget.onClose === "function") {
+                    WebIMWidget.onClose();
+                }
+            }
+
+        }
+
 
 
         $scope.send = function() {
@@ -133,6 +174,7 @@ conversationController.controller("conversationController", ["$scope", "conversa
 
             if (!$scope.currentConversation.targetId || !$scope.currentConversation.targetType) {
                 console.log("请设置会话");
+                alert("请先选择一个会话目标。")
                 return;
             }
             if ($scope.currentConversation.messageContent == "") {
@@ -154,8 +196,8 @@ conversationController.controller("conversationController", ["$scope", "conversa
                 onSuccess: function(retMessage: RongIMLib.Message) {
                     console.log("send success");
                 },
-                onError: function() {
-
+                onError: function(error) {
+                    console.log(error);
                 }
             });
 

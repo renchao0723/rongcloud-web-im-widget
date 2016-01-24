@@ -742,6 +742,10 @@ declare module RongIMLib {
          * @param  {string}           targetId         [用户Id]
          */
         getUnreadCount(conversationType: ConversationType, targetId: string, callback: ResultCallback<number>): void;
+
+
+        clearUnreadCount(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
+
         setMessageExtra(messageId: string, value: string, callback: ResultCallback<boolean>): void;
         setMessageReceivedStatus(messageId: string, receivedStatus: ReceivedStatus, callback: ResultCallback<boolean>): void;
         setMessageSentStatus(messageId: string, sentStatus: SentStatus, callback: ResultCallback<boolean>): void;

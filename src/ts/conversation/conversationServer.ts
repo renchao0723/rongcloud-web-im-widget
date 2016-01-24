@@ -1,6 +1,6 @@
 /// <reference path="../../../typings/tsd.d.ts"/>
 
-var conversationServer = angular.module("rongWebIMWidget.conversationServer", ["rongWebIMWidget.conversationDirective"]);
+var conversationServer = angular.module("RongWebIMWidget.conversationServer", ["RongWebIMWidget.conversationDirective"]);
 
 conversationServer.factory("conversationServer", ["$q", function($q: angular.IQService) {
 
@@ -8,7 +8,7 @@ conversationServer.factory("conversationServer", ["$q", function($q: angular.IQS
 
     conversationServer.current = <WidgetModule.Conversation>{
         targetId: "",
-        targetType: "",
+        targetType: 0,
         title: "",
         portraitUri: "",
         onLine: false
@@ -41,6 +41,10 @@ conversationServer.factory("conversationServer", ["$q", function($q: angular.IQS
         })
 
         return defer.promise;
+    }
+
+    function adduserinfo(){
+
     }
 
     function unshiftHistoryMessages(id: string, type: number, item: any) {

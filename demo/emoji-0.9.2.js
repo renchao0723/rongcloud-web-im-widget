@@ -890,4 +890,5 @@
       "Please load RongIMClient.min.js,http://res.websdk.rong.io/RongIMClient.min.js"
     )
   }
+  console.log("load emoji");
 })(window);
