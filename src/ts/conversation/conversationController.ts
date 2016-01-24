@@ -181,9 +181,11 @@ conversationController.controller("conversationController", ["$scope", "conversa
                 return;
             }
 
-            var con = $scope.currentConversation.messageContent.replace(/\[.+?\]/g, function(x: any) {
-                return RongIMLib.Expression.getEmojiObjByEnglishNameOrChineseName(x.slice(1, x.length - 1)).tag || x;
-            });
+            // var con = $scope.currentConversation.messageContent.replace(/\[.+?\]/g, function(x: any) {
+            //     return RongIMLib.Expression.getEmojiObjByEnglishNameOrChineseName(x.slice(1, x.length - 1)).tag || x;
+            // });
+
+            var con=RongIMLib.RongIMEmoji.getExpressions($scope.currentConversation.messageContent);
 
             var msg = RongIMLib.TextMessage.obtain(con);
             var userinfo = new RongIMLib.UserInfo(conversationServer.loginUser.id, conversationServer.loginUser.name, conversationServer.loginUser.portraitUri);
@@ -213,5 +215,76 @@ conversationController.controller("conversationController", ["$scope", "conversa
             WidgetModule.Helper.getFocus(obj);
         }
 
+        uploadFileInit()
+
+
+        function uploadFileInit() {
+            var qiniuuploader = Qiniu.uploader({
+                // runtimes: 'html5,flash,html4',
+                runtimes: 'html5,html4',
+                browse_button: 'upload-file',
+                container: 'MessageForm',
+                drop_element: 'Message',
+                max_file_size: '100mb',
+                // flash_swf_url: 'js/plupload/Moxie.swf',
+                dragdrop: true,
+                chunk_size: '4mb',
+                // uptoken_url: "http://webim.demo.rong.io/getUploadToken",
+                uptoken: "",
+                domain: "",
+                get_new_uptoken: false,
+                unique_names: true,
+                filters: {
+                    mime_types: [{ title: "Image files", extensions: "jpg,gif,png" }],
+                    prevent_duplicates: false
+                },
+                multi_selection: false,
+                auto_start: true,
+                init: {
+                    'FilesAdded': function(up: any, files: any) {
+                        console.log(up, files);
+                    },
+                    'BeforeUpload': function(up: any, file: any) {
+                        console.log(up, file);
+                    },
+                    'UploadProgress': function(up: any, file: any) {
+                        console.log(up, file);
+                    },
+                    'UploadComplete': function() {
+                        console.log("wan cheng");
+                    },
+                    'FileUploaded': function(up: any, file: any, info: any) {
+                        !function(info: any) {
+                            var info = JSON.parse(info);
+                            // webimutil.ImageHelper.getThumbnail(file.getNative(), 60000, function(obj: any, data: any) {
+                            //     var im = RongIMLib.ImageMessage.obtain(data, IMGDOMAIN + info.key);
+                            //
+                            //     var content = packmysend(im, webimmodel.MessageType.ImageMessage);
+                            //     RongIMSDKServer.sendMessage($scope.currentConversation.targetType, $scope.currentConversation.targetId, im).then(function() {
+                            //
+                            //     }, function() {
+                            //
+                            //     })
+                            //     conversationServer.addHistoryMessages($scope.currentConversation.targetId, $scope.currentConversation.targetType,
+                            //         webimmodel.Message.convertMsg(content));
+                            //     setTimeout(function() {
+                            //         $scope.$emit("msglistchange");
+                            //         $scope.$emit("conversationChange");
+                            //     }, 200);
+                            // })
+                        } (info)
+
+                    },
+                    'Error': function(up: any, err: any, errTip: any) {
+                    }
+                    // ,
+                    // 'Key': function(up: any, file: any) {
+                    //     var key = "";
+                    //     // do something with key
+                    //     return key
+                    // }
+                }
+            });
+        }
 
     }]);

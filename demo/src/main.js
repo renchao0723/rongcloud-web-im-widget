@@ -147,9 +147,10 @@ conversationController.controller("conversationController", ["$scope", "conversa
             if ($scope.currentConversation.messageContent == "") {
                 return;
             }
-            var con = $scope.currentConversation.messageContent.replace(/\[.+?\]/g, function (x) {
-                return RongIMLib.Expression.getEmojiObjByEnglishNameOrChineseName(x.slice(1, x.length - 1)).tag || x;
-            });
+            // var con = $scope.currentConversation.messageContent.replace(/\[.+?\]/g, function(x: any) {
+            //     return RongIMLib.Expression.getEmojiObjByEnglishNameOrChineseName(x.slice(1, x.length - 1)).tag || x;
+            // });
+            var con = RongIMLib.RongIMEmoji.getExpressions($scope.currentConversation.messageContent);
             var msg = RongIMLib.TextMessage.obtain(con);
             var userinfo = new RongIMLib.UserInfo(conversationServer.loginUser.id, conversationServer.loginUser.name, conversationServer.loginUser.portraitUri);
             // userinfo.userId = conversationServer.loginUser.id;
@@ -173,6 +174,68 @@ conversationController.controller("conversationController", ["$scope", "conversa
             var obj = document.getElementById("inputMsg");
             WidgetModule.Helper.getFocus(obj);
         };
+        uploadFileInit();
+        function uploadFileInit() {
+            var qiniuuploader = Qiniu.uploader({
+                // runtimes: 'html5,flash,html4',
+                runtimes: 'html5,html4',
+                browse_button: 'upload-file',
+                container: 'MessageForm',
+                drop_element: 'Message',
+                max_file_size: '100mb',
+                // flash_swf_url: 'js/plupload/Moxie.swf',
+                dragdrop: true,
+                chunk_size: '4mb',
+                // uptoken_url: "http://webim.demo.rong.io/getUploadToken",
+                uptoken: "",
+                domain: "",
+                get_new_uptoken: false,
+                unique_names: true,
+                filters: {
+                    mime_types: [{ title: "Image files", extensions: "jpg,gif,png" }],
+                    prevent_duplicates: false
+                },
+                multi_selection: false,
+                auto_start: true,
+                init: {
+                    'FilesAdded': function (up, files) {
+                        console.log(up, files);
+                    },
+                    'BeforeUpload': function (up, file) {
+                        console.log(up, file);
+                    },
+                    'UploadProgress': function (up, file) {
+                        console.log(up, file);
+                    },
+                    'UploadComplete': function () {
+                        console.log("wan cheng");
+                    },
+                    'FileUploaded': function (up, file, info) {
+                        !function (info) {
+                            var info = JSON.parse(info);
+                            // webimutil.ImageHelper.getThumbnail(file.getNative(), 60000, function(obj: any, data: any) {
+                            //     var im = RongIMLib.ImageMessage.obtain(data, IMGDOMAIN + info.key);
+                            //
+                            //     var content = packmysend(im, webimmodel.MessageType.ImageMessage);
+                            //     RongIMSDKServer.sendMessage($scope.currentConversation.targetType, $scope.currentConversation.targetId, im).then(function() {
+                            //
+                            //     }, function() {
+                            //
+                            //     })
+                            //     conversationServer.addHistoryMessages($scope.currentConversation.targetId, $scope.currentConversation.targetType,
+                            //         webimmodel.Message.convertMsg(content));
+                            //     setTimeout(function() {
+                            //         $scope.$emit("msglistchange");
+                            //         $scope.$emit("conversationChange");
+                            //     }, 200);
+                            // })
+                        }(info);
+                    },
+                    'Error': function (up, err, errTip) {
+                    }
+                }
+            });
+        }
     }]);
 /// <reference path="../../../typings/tsd.d.ts"/>
 var conversationDirective = angular.module("RongWebIMWidget.conversationDirective", ["RongWebIMWidget.conversationController"]);
@@ -195,8 +258,8 @@ conversationDirective.directive("emoji", [function () {
                 ele.append(scope.item);
                 ele.on("click", function () {
                     scope.$parent.currentConversation.messageContent = scope.$parent.currentConversation.messageContent || "";
-                    scope.$parent.currentConversation.messageContent = scope.$parent.currentConversation.draftMsg.replace(/\n$/, "");
-                    scope.$parent.currentConversation.messageContent = scope.$parent.currentConversation.draftMsg + scope.item.children[0].getAttribute("name");
+                    scope.$parent.currentConversation.messageContent = scope.$parent.currentConversation.messageContent.replace(/\n$/, "");
+                    scope.$parent.currentConversation.messageContent = scope.$parent.currentConversation.messageContent + scope.item.children[0].getAttribute("name");
                     scope.$parent.$apply();
                     var obj = document.getElementById("inputMsg");
                     WidgetModule.Helper.getFocus(obj);
@@ -470,7 +533,7 @@ var conversationListDir = angular.module("RongWebIMWidget.conversationListDirect
 conversationListDir.directive("rongConversationList", [function () {
         return {
             restrict: "E",
-            templateUrl: "./src/ts/conversationList/conversationList.tpl.html",
+            templateUrl: "./src/ts/conversationlist/conversationList.tpl.html",
             controller: "conversationListController"
         };
     }]);
@@ -584,19 +647,45 @@ conversationListSer.factory("conversationListServer", ["$q", "providerdata",
 var widget = angular.module("RongWebIMWidget", ["RongWebIMWidget.conversationServer", "RongWebIMWidget.conversationListServer"]);
 widget.config(function () {
 });
-widget.run(function () {
-    console.log("config widget");
-    var e = document.getElementsByTagName("script");
-    var sdk = document.createElement("script");
-    // sdk.src = "http://cdn.ronghub.com/RongIMLib-2.0.3.beta.min.js";
-    sdk.src = "./RongIMLib.js";
-    var emoji = document.createElement("script");
-    emoji.src = "./emoji-2.0.0.js";
-    document.head.appendChild(sdk);
-    angular.element(document).ready(function () {
-        document.head.appendChild(emoji);
-    });
-});
+widget.run(["$http", function ($http) {
+        console.log("config widget");
+        // var e = document.getElementsByTagName("script");
+        // var sdk = document.createElement("script");
+        // // sdk.src = "http://cdn.ronghub.com/RongIMLib-2.0.3.beta.min.js";
+        // sdk.src = "./RongIMLib.js"
+        //
+        // var emoji = document.createElement("script");
+        // emoji.src = "./emoji-2.0.0.js";
+        //
+        // document.head.appendChild(sdk);
+        //
+        //
+        // angular.element(document).ready(function() {
+        //     document.head.appendChild(emoji);
+        // });
+        function loadScript1(url, callback) {
+            var eHead = document.getElementsByTagName("head")[0];
+            var eScript = document.createElement("script");
+            eScript.src = url;
+            eHead.appendChild(eScript);
+        }
+        function loadScript(url, callback) {
+            var eHead = document.getElementsByTagName("head")[0];
+            $http.get(url, {}).success(function (data) {
+                var eScript = document.createElement("script");
+                eScript.innerHTML = data;
+                eHead.appendChild(eScript);
+                if (callback && typeof callback == "function") {
+                    callback();
+                }
+            });
+        }
+        loadScript1("http://jssdk.demo.qiniu.io/js/plupload/plupload.full.min.js", function () {
+        });
+        loadScript1("http://jssdk.demo.qiniu.io/js/qiniu.js");
+        loadScript("./RongIMLib.js");
+        loadScript("./emoji-2.0.0.js");
+    }]);
 widget.factory("providerdata", [function () {
         return {};
     }]);
@@ -678,6 +767,11 @@ widget.factory("WebIMWidget", ["$q", "conversationServer", "conversationListServ
                     //         console.log("getUserInfo error:" + error);
                     //     }
                     // });
+                    providerdata.getUserInfo(userId, { onSuccess: function (data) {
+                            conversationServer.loginUser.id = data.userId;
+                            conversationServer.loginUser.name = data.name;
+                            conversationServer.loginUser.portraitUri = data.portraitUri;
+                        } });
                     conversationListServer.updateConversations();
                 },
                 onTokenIncorrect: function () {
@@ -1165,7 +1259,7 @@ angular.module('RongWebIMWidget').run(['$templateCache', function($templateCache
   );
 
 
-  $templateCache.put('./src/ts/conversationList/conversationList.tpl.html',
+  $templateCache.put('./src/ts/conversationlist/conversationList.tpl.html',
     "<div id=rong-conversation-list class=\"kefuListBox both\"><div class=kefuList><div class=\"header blueBg\"><div class=\"toolBar headBtn\"><div class=\"sprite people\"></div><span class=recent>最近联系人</span></div></div><div class=content><div class=\"netStatus hide\"><div class=sprite></div><span>网络连接成功</span></div><div><conversation-item ng-repeat=\"item in conversationListServer.conversationList\" item=item></conversation-item></div></div></div></div>"
   );
 

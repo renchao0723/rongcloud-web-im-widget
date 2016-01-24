@@ -24,9 +24,7 @@ demo.controller("main", ["$scope", "WebIMWidget", function($scope,
       appkey: "3argexb6r934e",
       token: "BRrW9ZoxW5pkra92UQK+e5UnU/cREmEFuMhOJuGv5bP+dl6CkOlF+VrK3U6TbotAVT4eqyf00Itg2Mh5WIasRw==",
       style:{
-        right:"0px",
-        bottom:"0px",
-        left:"0px",
+        center:true,
         width:"600px",
       },
       displayConversationList:true,
@@ -52,6 +50,8 @@ demo.controller("main", ["$scope", "WebIMWidget", function($scope,
     WebIMWidget.onClose=function(){
       console.log("已关闭");
     }
+
+    WebIMWidget.show();
 
 
     //设置会话

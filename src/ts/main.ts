@@ -6,22 +6,48 @@ widget.config(function() {
 
 });
 
-widget.run(function() {
+widget.run(["$http",function($http:angular.IHttpService) {
+
     console.log("config widget");
-    var e = document.getElementsByTagName("script");
-    var sdk = document.createElement("script");
-    // sdk.src = "http://cdn.ronghub.com/RongIMLib-2.0.3.beta.min.js";
-    sdk.src = "./RongIMLib.js"
+    // var e = document.getElementsByTagName("script");
+    // var sdk = document.createElement("script");
+    // // sdk.src = "http://cdn.ronghub.com/RongIMLib-2.0.3.beta.min.js";
+    // sdk.src = "./RongIMLib.js"
+    //
+    // var emoji = document.createElement("script");
+    // emoji.src = "./emoji-2.0.0.js";
+    //
+    // document.head.appendChild(sdk);
+    //
+    //
+    // angular.element(document).ready(function() {
+    //     document.head.appendChild(emoji);
+    // });
+    function loadScript1(url,callback?){
+        var eHead=document.getElementsByTagName("head")[0];
+        var eScript = document.createElement("script");
+        eScript.src=url;
+        eHead.appendChild(eScript);
+    }
 
-    var emoji = document.createElement("script");
-    emoji.src = "./emoji-2.0.0.js";
+    function loadScript(url,callback?){
+        var eHead=document.getElementsByTagName("head")[0];
+        $http.get(url,{}).success(function(data:string){
+            var eScript=document.createElement("script");
+            eScript.innerHTML=data;
+            eHead.appendChild(eScript);
+            if (callback && typeof callback=="function") {
+                callback();
+            }
+        })
+    }
+    loadScript1("http://jssdk.demo.qiniu.io/js/plupload/plupload.full.min.js",function(){
+    })
+    loadScript1("http://jssdk.demo.qiniu.io/js/qiniu.js");
+    loadScript("./RongIMLib.js");
+    loadScript("./emoji-2.0.0.js");
 
-    document.head.appendChild(sdk);
-
-    angular.element(document).ready(function() {
-        document.head.appendChild(emoji);
-    });
-});
+}]);
 
 widget.factory("providerdata", [function() {
     return {}
@@ -124,9 +150,11 @@ widget.factory("WebIMWidget", ["$q", "conversationServer", "conversationListServ
                     //         console.log("getUserInfo error:" + error);
                     //     }
                     // });
-                    providerdata.getUserInfo(userId, function(data) {
-
-                    });
+                    providerdata.getUserInfo(userId, {onSuccess:function(data){
+                        conversationServer.loginUser.id=data.userId;
+                        conversationServer.loginUser.name = data.name;
+                        conversationServer.loginUser.portraitUri = data.portraitUri;
+                    }});
 
                     conversationListServer.updateConversations();
 

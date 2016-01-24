@@ -14,3 +14,10 @@ declare module RongIMLib {
         static retrievalName(str: string): string
     }
 }
+
+
+declare var Qiniu: Qiniu;
+
+interface Qiniu {
+    uploader(config: any): Qiniu
+}

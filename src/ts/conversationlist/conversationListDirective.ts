@@ -6,7 +6,7 @@ conversationListDir.directive("rongConversationList", [function() {
 
     return {
         restrict: "E",
-        templateUrl: "./src/ts/conversationList/conversationList.tpl.html",
+        templateUrl: "./src/ts/conversationlist/conversationList.tpl.html",
         controller: "conversationListController"
     }
 }]);
@@ -39,7 +39,7 @@ conversationListDir.directive("conversationItem", ["conversationServer", "conver
                 conversationServer.onConversationChangged(new WidgetModule.Conversation(scope.item.targetType, scope.item.targetId, scope.item.title))
                 RongIMLib.RongIMClient.getInstance().clearUnreadCount(scope.item.targetType, scope.item.targetId, {
                     onSuccess: function() {
-                      
+
                     },
                     onError: function() {
 

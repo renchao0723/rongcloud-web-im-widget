@@ -24,8 +24,8 @@ conversationDirective.directive("emoji", [function() {
             ele.append(scope.item);
             ele.on("click", function() {
                 scope.$parent.currentConversation.messageContent = scope.$parent.currentConversation.messageContent || "";
-                scope.$parent.currentConversation.messageContent = scope.$parent.currentConversation.draftMsg.replace(/\n$/, "");
-                scope.$parent.currentConversation.messageContent = scope.$parent.currentConversation.draftMsg + scope.item.children[0].getAttribute("name");
+                scope.$parent.currentConversation.messageContent = scope.$parent.currentConversation.messageContent.replace(/\n$/, "");
+                scope.$parent.currentConversation.messageContent = scope.$parent.currentConversation.messageContent + scope.item.children[0].getAttribute("name");
                 scope.$parent.$apply();
                 var obj = document.getElementById("inputMsg");
                 WidgetModule.Helper.getFocus(obj);
