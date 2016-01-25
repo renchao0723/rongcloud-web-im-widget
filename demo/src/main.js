@@ -174,21 +174,39 @@ conversationController.controller("conversationController", ["$scope", "conversa
             var obj = document.getElementById("inputMsg");
             WidgetModule.Helper.getFocus(obj);
         };
-        // uploadFileInit()
+        $script.ready("qiniu", function () {
+            if (conversationServer._uploadToken) {
+                uploadFileInit();
+            }
+            else {
+                var upload = document.getElementById("upload-file");
+                var getToken = function () {
+                    RongIMLib.RongIMClient.getInstance().getQnTkn(RongIMLib.FileType.IMAGE, {
+                        onSuccess: function (data) {
+                            conversationServer._uploadToken = data.token;
+                            uploadFileInit();
+                            angular.element(upload).off("click", getToken);
+                        }
+                    });
+                };
+                angular.element(upload).on("click", getToken);
+            }
+        });
         function uploadFileInit() {
             var qiniuuploader = Qiniu.uploader({
                 // runtimes: 'html5,flash,html4',
                 runtimes: 'html5,html4',
                 browse_button: 'upload-file',
-                container: 'MessageForm',
-                drop_element: 'Message',
+                // browse_button: 'upload',
+                container: 'funcPanel',
+                drop_element: 'Messages',
                 max_file_size: '100mb',
                 // flash_swf_url: 'js/plupload/Moxie.swf',
                 dragdrop: true,
                 chunk_size: '4mb',
                 // uptoken_url: "http://webim.demo.rong.io/getUploadToken",
-                uptoken: "",
-                domain: "",
+                uptoken: conversationServer._uploadToken,
+                domain: "http://localhost:8000/",
                 get_new_uptoken: false,
                 unique_names: true,
                 filters: {
@@ -533,7 +551,7 @@ var conversationListDir = angular.module("RongWebIMWidget.conversationListDirect
 conversationListDir.directive("rongConversationList", [function () {
         return {
             restrict: "E",
-            templateUrl: "./src/ts/conversationlist/conversationList.tpl.html",
+            templateUrl: "./src/ts/conversationList/conversationList.tpl.html",
             controller: "conversationListController"
         };
     }]);
@@ -644,11 +662,15 @@ conversationListSer.factory("conversationListServer", ["$q", "providerdata",
         return server;
     }]);
 /// <reference path="../../typings/tsd.d.ts"/>
+/// <reference path="../../vendor/loadscript/script.d.ts"/>
 var widget = angular.module("RongWebIMWidget", ["RongWebIMWidget.conversationServer", "RongWebIMWidget.conversationListServer"]);
 widget.config(function () {
 });
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("DOMContentLoaded");
+}, false);
 widget.run(["$http", function ($http) {
-        console.log("config widget");
+        console.log("run widget");
         // var e = document.getElementsByTagName("script");
         // var sdk = document.createElement("script");
         // // sdk.src = "http://cdn.ronghub.com/RongIMLib-2.0.3.beta.min.js";
@@ -663,29 +685,45 @@ widget.run(["$http", function ($http) {
         // angular.element(document).ready(function() {
         //     document.head.appendChild(emoji);
         // });
-        function loadScript1(url, callback) {
+        function loadScript(url, callback) {
             var eHead = document.getElementsByTagName("head")[0];
             var eScript = document.createElement("script");
             eScript.src = url;
             eHead.appendChild(eScript);
         }
-        function loadScript(url, callback) {
-            var eHead = document.getElementsByTagName("head")[0];
-            $http.get(url, {}).success(function (data) {
-                var eScript = document.createElement("script");
-                eScript.innerHTML = data;
-                eHead.appendChild(eScript);
-                if (callback && typeof callback == "function") {
-                    callback();
-                }
-            });
-        }
-        loadScript1("http://jssdk.demo.qiniu.io/js/plupload/plupload.full.min.js", function () {
+        var scripts = {}, urlArgs = "", head = document.getElementsByTagName("head")[0];
+        // function create(path, fn) {
+        //     var el = document.createElement('script'), loaded
+        //     el.onload = el.onerror = el["onreadystatechange"] = function() {
+        //         if ((el["readyState"] && !(/^c|loade/.test(el["readyState"]))) || loaded) return;
+        //         el.onload = el["onreadystatechange"] = null
+        //         loaded = 1
+        //         fn()
+        //     }
+        //     el.async = !!1;
+        //     el.src = urlArgs ? path + (path.indexOf('?') === -1 ? '?' : '&') + urlArgs : path;
+        //     head.insertBefore(el, head.lastChild)
+        // }
+        // function loadScript(url, callback?) {
+        //     var eHead = document.getElementsByTagName("head")[0];
+        //     $http.get(url, {}).success(function(data: string) {
+        //         var eScript = document.createElement("script");
+        //         eScript.innerHTML = data;
+        //         eHead.appendChild(eScript);
+        //         if (callback && typeof callback == "function") {
+        //             callback();
+        //         }
+        //     })
+        // }
+        // loadScript("http://jssdk.demo.qiniu.io/js/plupload/plupload.full.min.js", function() {
+        // });
+        $script.get("./RongIMLib.js", function () {
+            $script("./emoji-2.0.0.js");
         });
-        loadScript1("http://jssdk.demo.qiniu.io/js/qiniu.js");
-        // loadScript1("./RongIMLib.js");
-        loadScript1("http://cdn.ronghub.com/RongIMLib-2.0.5.beta.min.js");
-        loadScript1("./emoji-2.0.0.js");
+        $script(["http://jssdk.demo.qiniu.io/js/plupload/plupload.full.min.js", "http://jssdk.demo.qiniu.io/js/qiniu.js"], "qiniu");
+        // loadScript("./RongIMLib.js")
+        // // loadScript("http://cdn.ronghub.com/RongIMLib-2.0.5.beta.min.js");
+        // loadScript("./emoji-2.0.0.js");
     }]);
 widget.factory("providerdata", [function () {
         return {};
@@ -768,11 +806,13 @@ widget.factory("WebIMWidget", ["$q", "conversationServer", "conversationListServ
                     //         console.log("getUserInfo error:" + error);
                     //     }
                     // });
-                    providerdata.getUserInfo(userId, { onSuccess: function (data) {
+                    providerdata.getUserInfo(userId, {
+                        onSuccess: function (data) {
                             conversationServer.loginUser.id = data.userId;
                             conversationServer.loginUser.name = data.name;
                             conversationServer.loginUser.portraitUri = data.portraitUri;
-                        } });
+                        }
+                    });
                     conversationListServer.updateConversations();
                 },
                 onTokenIncorrect: function () {
@@ -1080,8 +1120,8 @@ var WidgetModule;
                 case WidgetModule.MessageType.TextMessage:
                     var texmsg = new TextMessage();
                     var content = SDKmsg.content.content;
-                    if (RongIMLib.Expression && RongIMLib.Expression.retrievalEmoji) {
-                        var a = document.createElement("span");
+                    if (RongIMLib.RongIMEmoji && RongIMLib.RongIMEmoji.retrievalEmoji) {
+                        //var a = document.createElement("span");
                         // content = RongIMLib.Expression.retrievalEmoji(content, function(img: any) {
                         //     a.appendChild(img.img);
                         //     var str = '<span class="RongIMexpression_' + img.englishName + '" title="' + img.chineseName + '">' + a.innerHTML + '</span>';
@@ -1125,8 +1165,24 @@ var WidgetModule;
                     msg.content = location;
                     break;
                 case WidgetModule.MessageType.InformationNotificationMessage:
+                    var info = new InformationNotificationMessage();
+                    info.content = SDKmsg.content.content;
+                    msg.content = info;
+                    break;
+                case WidgetModule.MessageType.DiscussionNotificationMessage:
+                    var discussion = new DiscussionNotificationMessage();
+                    discussion.extension = SDKmsg.content.extension;
+                    discussion.operation = SDKmsg.content.operation;
+                    discussion.type = SDKmsg.content.type;
+                    discussion.isHasReceived = SDKmsg.content.isHasReceived;
+                    msg.content = discussion;
+                default:
+                    console.log("未处理消息类型:" + SDKmsg.messageType);
+                    break;
             }
-            msg.content.userInfo = SDKmsg.content.userInfo;
+            if (msg.content) {
+                msg.content.userInfo = SDKmsg.content.userInfo;
+            }
             return msg;
         };
         return Message;
@@ -1159,12 +1215,12 @@ var WidgetModule;
         return TextMessage;
     })();
     WidgetModule.TextMessage = TextMessage;
-    var InformationPanel = (function () {
-        function InformationPanel() {
+    var InformationNotificationMessage = (function () {
+        function InformationNotificationMessage() {
         }
-        return InformationPanel;
+        return InformationNotificationMessage;
     })();
-    WidgetModule.InformationPanel = InformationPanel;
+    WidgetModule.InformationNotificationMessage = InformationNotificationMessage;
     var ImageMessage = (function () {
         function ImageMessage() {
         }
@@ -1189,6 +1245,12 @@ var WidgetModule;
         return RichContentMessage;
     })();
     WidgetModule.RichContentMessage = RichContentMessage;
+    var DiscussionNotificationMessage = (function () {
+        function DiscussionNotificationMessage() {
+        }
+        return DiscussionNotificationMessage;
+    })();
+    WidgetModule.DiscussionNotificationMessage = DiscussionNotificationMessage;
     var Conversation = (function () {
         function Conversation(targetType, targetId, title) {
             this.targetType = targetType;
@@ -1261,7 +1323,7 @@ angular.module('RongWebIMWidget').run(['$templateCache', function($templateCache
   );
 
 
-  $templateCache.put('./src/ts/conversationlist/conversationList.tpl.html',
+  $templateCache.put('./src/ts/conversationList/conversationList.tpl.html',
     "<div id=rong-conversation-list class=\"kefuListBox both\"><div class=kefuList><div class=\"header blueBg\"><div class=\"toolBar headBtn\"><div class=\"sprite people\"></div><span class=recent>最近联系人</span></div></div><div class=content><div class=\"netStatus hide\"><div class=sprite></div><span>网络连接成功</span></div><div><conversation-item ng-repeat=\"item in conversationListServer.conversationList\" item=item></conversation-item></div></div></div></div>"
   );
 
@@ -1271,3 +1333,10 @@ angular.module('RongWebIMWidget').run(['$templateCache', function($templateCache
   );
 
 }]);
+
+/*!
+  * $script.js JS loader & dependency manager
+  * https://github.com/ded/script.js
+  * (c) Dustin Diaz 2014 | License MIT
+  */
+(function(e,t){typeof module!="undefined"&&module.exports?module.exports=t():typeof define=="function"&&define.amd?define(t):this[e]=t()})("$script",function(){function p(e,t){for(var n=0,i=e.length;n<i;++n)if(!t(e[n]))return r;return 1}function d(e,t){p(e,function(e){return!t(e)})}function v(e,t,n){function g(e){return e.call?e():u[e]}function y(){if(!--h){u[o]=1,s&&s();for(var e in f)p(e.split("|"),g)&&!d(f[e],g)&&(f[e]=[])}}e=e[i]?e:[e];var r=t&&t.call,s=r?t:n,o=r?e.join(""):t,h=e.length;return setTimeout(function(){d(e,function t(e,n){if(e===null)return y();!n&&!/^https?:\/\//.test(e)&&c&&(e=e.indexOf(".js")===-1?c+e+".js":c+e);if(l[e])return o&&(a[o]=1),l[e]==2?y():setTimeout(function(){t(e,!0)},0);l[e]=1,o&&(a[o]=1),m(e,y)})},0),v}function m(n,r){var i=e.createElement("script"),u;i.onload=i.onerror=i[o]=function(){if(i[s]&&!/^c|loade/.test(i[s])||u)return;i.onload=i[o]=null,u=1,l[n]=2,r()},i.async=1,i.src=h?n+(n.indexOf("?")===-1?"?":"&")+h:n,t.insertBefore(i,t.lastChild)}var e=document,t=e.getElementsByTagName("head")[0],n="string",r=!1,i="push",s="readyState",o="onreadystatechange",u={},a={},f={},l={},c,h;return v.get=m,v.order=function(e,t,n){(function r(i){i=e.shift(),e.length?v(i,r):v(i,t,n)})()},v.path=function(e){c=e},v.urlArgs=function(e){h=e},v.ready=function(e,t,n){e=e[i]?e:[e];var r=[];return!d(e,function(e){u[e]||r[i](e)})&&p(e,function(e){return u[e]})?t():!function(e){f[e]=f[e]||[],f[e][i](t),n&&n(r)}(e.join("|")),v},v.done=function(e){v([null],e)},v})

@@ -26,14 +26,15 @@
     "src/ts/conversation/conversationController.ts",
     "src/ts/conversation/conversationDirective.ts",
     "src/ts/conversation/conversationServer.ts",
-    "src/ts/conversationlist/conversationListController.ts",
-    "src/ts/conversationlist/conversationListDirective.ts",
-    "src/ts/conversationlist/conversationListServer.ts",
+    "src/ts/conversationList/conversationListController.ts",
+    "src/ts/conversationList/conversationListDirective.ts",
+    "src/ts/conversationList/conversationListServer.ts",
     "src/ts/main.ts",
     "src/ts/module.ts",
     "typings/angularjs/angular.d.ts",
     "typings/jquery/jquery.d.ts",
-    "typings/tsd.d.ts"
+    "typings/tsd.d.ts",
+    "vendor/loadscript/script.d.ts"
   ],
   "atom": {
     "rewriteTsconfig": true

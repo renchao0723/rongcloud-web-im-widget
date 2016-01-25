@@ -43,7 +43,7 @@ conversationServer.factory("conversationServer", ["$q", function($q: angular.IQS
         return defer.promise;
     }
 
-    function adduserinfo(){
+    function adduserinfo() {
 
     }
 
@@ -87,6 +87,7 @@ interface ConversationServer {
     loginUser: any
     onConversationChangged(conversation: WidgetModule.Conversation): void
     onReceivedMessage(message: WidgetModule.Message): void
+    _uploadToken: string
     _cacheHistory: any
     _getHistoryMessages(targetType: number, targetId: string, number: number): angular.IPromise<any>
     _addHistoryMessages(msg: WidgetModule.Message): void

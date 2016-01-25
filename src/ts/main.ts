@@ -1,4 +1,5 @@
 /// <reference path="../../typings/tsd.d.ts"/>
+/// <reference path="../../vendor/loadscript/script.d.ts"/>
 
 var widget = angular.module("RongWebIMWidget", ["RongWebIMWidget.conversationServer", "RongWebIMWidget.conversationListServer"]);
 
@@ -6,9 +7,13 @@ widget.config(function() {
 
 });
 
-widget.run(["$http",function($http:angular.IHttpService) {
+document.addEventListener("DOMContentLoaded", function() {
+    console.log("DOMContentLoaded");
+}, false)
 
-    console.log("config widget");
+widget.run(["$http", function($http: angular.IHttpService) {
+
+    console.log("run widget");
     // var e = document.getElementsByTagName("script");
     // var sdk = document.createElement("script");
     // // sdk.src = "http://cdn.ronghub.com/RongIMLib-2.0.3.beta.min.js";
@@ -23,30 +28,47 @@ widget.run(["$http",function($http:angular.IHttpService) {
     // angular.element(document).ready(function() {
     //     document.head.appendChild(emoji);
     // });
-    function loadScript1(url,callback?){
-        var eHead=document.getElementsByTagName("head")[0];
+    function loadScript(url, callback?) {
+        var eHead = document.getElementsByTagName("head")[0];
         var eScript = document.createElement("script");
-        eScript.src=url;
+        eScript.src = url;
         eHead.appendChild(eScript);
     }
+    var scripts = <any>{}, urlArgs = "", head = document.getElementsByTagName("head")[0];
+    // function create(path, fn) {
+    //     var el = document.createElement('script'), loaded
+    //     el.onload = el.onerror = el["onreadystatechange"] = function() {
+    //         if ((el["readyState"] && !(/^c|loade/.test(el["readyState"]))) || loaded) return;
+    //         el.onload = el["onreadystatechange"] = null
+    //         loaded = 1
+    //         fn()
+    //     }
+    //     el.async = !!1;
+    //     el.src = urlArgs ? path + (path.indexOf('?') === -1 ? '?' : '&') + urlArgs : path;
+    //     head.insertBefore(el, head.lastChild)
+    // }
 
-    function loadScript(url,callback?){
-        var eHead=document.getElementsByTagName("head")[0];
-        $http.get(url,{}).success(function(data:string){
-            var eScript=document.createElement("script");
-            eScript.innerHTML=data;
-            eHead.appendChild(eScript);
-            if (callback && typeof callback=="function") {
-                callback();
-            }
-        })
-    }
-    loadScript1("http://jssdk.demo.qiniu.io/js/plupload/plupload.full.min.js",function(){
-    })
-    loadScript1("http://jssdk.demo.qiniu.io/js/qiniu.js");
-    // loadScript1("./RongIMLib.js");
-    loadScript1("http://cdn.ronghub.com/RongIMLib-2.0.5.beta.min.js");
-    loadScript1("./emoji-2.0.0.js");
+    // function loadScript(url, callback?) {
+    //     var eHead = document.getElementsByTagName("head")[0];
+    //     $http.get(url, {}).success(function(data: string) {
+    //         var eScript = document.createElement("script");
+    //         eScript.innerHTML = data;
+    //         eHead.appendChild(eScript);
+    //         if (callback && typeof callback == "function") {
+    //             callback();
+    //         }
+    //     })
+    // }
+    // loadScript("http://jssdk.demo.qiniu.io/js/plupload/plupload.full.min.js", function() {
+    // });
+    $script.get("./RongIMLib.js", function() {
+        $script("./emoji-2.0.0.js");
+    });
+    $script(["http://jssdk.demo.qiniu.io/js/plupload/plupload.full.min.js", "http://jssdk.demo.qiniu.io/js/qiniu.js"], "qiniu")
+
+    // loadScript("./RongIMLib.js")
+    // // loadScript("http://cdn.ronghub.com/RongIMLib-2.0.5.beta.min.js");
+    // loadScript("./emoji-2.0.0.js");
 
 }]);
 
@@ -151,11 +173,13 @@ widget.factory("WebIMWidget", ["$q", "conversationServer", "conversationListServ
                     //         console.log("getUserInfo error:" + error);
                     //     }
                     // });
-                    providerdata.getUserInfo(userId, {onSuccess:function(data){
-                        conversationServer.loginUser.id=data.userId;
-                        conversationServer.loginUser.name = data.name;
-                        conversationServer.loginUser.portraitUri = data.portraitUri;
-                    }});
+                    providerdata.getUserInfo(userId, {
+                        onSuccess: function(data) {
+                            conversationServer.loginUser.id = data.userId;
+                            conversationServer.loginUser.name = data.name;
+                            conversationServer.loginUser.portraitUri = data.portraitUri;
+                        }
+                    });
 
                     conversationListServer.updateConversations();
 

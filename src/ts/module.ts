@@ -148,8 +148,8 @@ module WidgetModule {
                 case MessageType.TextMessage:
                     var texmsg = new TextMessage();
                     var content = SDKmsg.content.content;
-                    if (RongIMLib.Expression && RongIMLib.Expression.retrievalEmoji) {
-                        var a = document.createElement("span");
+                    if (RongIMLib.RongIMEmoji && RongIMLib.RongIMEmoji.retrievalEmoji) {
+                        //var a = document.createElement("span");
                         // content = RongIMLib.Expression.retrievalEmoji(content, function(img: any) {
                         //     a.appendChild(img.img);
                         //     var str = '<span class="RongIMexpression_' + img.englishName + '" title="' + img.chineseName + '">' + a.innerHTML + '</span>';
@@ -157,7 +157,7 @@ module WidgetModule {
                         //     return str;
                         // });
 
-                        content=RongIMLib.RongIMEmoji.retrievalEmoji(content);
+                        content = RongIMLib.RongIMEmoji.retrievalEmoji(content);
                     }
                     texmsg.content = content;
 
@@ -201,14 +201,26 @@ module WidgetModule {
                     msg.content = location;
                     break;
                 case MessageType.InformationNotificationMessage:
-                // var info = new InformationPanel();
-                // info.content = SDKmsg.content.content;
-                // msg.content = info;
-                // break;
+                    var info = new InformationNotificationMessage();
+                    info.content = SDKmsg.content.content;
 
+                    msg.content = info;
+                    break;
+                case MessageType.DiscussionNotificationMessage:
+                    var discussion = new DiscussionNotificationMessage();
+                    discussion.extension = SDKmsg.content.extension;
+                    discussion.operation = SDKmsg.content.operation;
+                    discussion.type = SDKmsg.content.type;
+                    discussion.isHasReceived = SDKmsg.content.isHasReceived;
+
+                    msg.content = discussion;
+                default:
+                    console.log("未处理消息类型:" + SDKmsg.messageType);
+                    break;
             }
-
-            msg.content.userInfo = SDKmsg.content.userInfo;
+            if (msg.content) {
+                msg.content.userInfo = SDKmsg.content.userInfo;
+            }
 
             return msg;
         }
@@ -246,8 +258,11 @@ module WidgetModule {
             this.userInfo = msg.userInfo;
         }
     }
-    export class InformationPanel {
-
+    export class InformationNotificationMessage {
+        userInfo: UserInfo;
+        content: string;
+        extra: string;
+        messageName: string;
     }
 
     export class ImageMessage {
@@ -275,6 +290,16 @@ module WidgetModule {
         content: string;
         title: string;
         imageUri: string;
+    }
+
+    export class DiscussionNotificationMessage {
+        userInfo: UserInfo;
+        extension: string;
+        type: number;
+        isHasReceived: boolean;
+        operation: string;
+        extra: string;
+        messageName: string;
     }
 
     export class Conversation {

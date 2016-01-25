@@ -185,7 +185,7 @@ conversationController.controller("conversationController", ["$scope", "conversa
             //     return RongIMLib.Expression.getEmojiObjByEnglishNameOrChineseName(x.slice(1, x.length - 1)).tag || x;
             // });
 
-            var con=RongIMLib.RongIMEmoji.getExpressions($scope.currentConversation.messageContent);
+            var con = RongIMLib.RongIMEmoji.getExpressions($scope.currentConversation.messageContent);
 
             var msg = RongIMLib.TextMessage.obtain(con);
             var userinfo = new RongIMLib.UserInfo(conversationServer.loginUser.id, conversationServer.loginUser.name, conversationServer.loginUser.portraitUri);
@@ -215,23 +215,39 @@ conversationController.controller("conversationController", ["$scope", "conversa
             WidgetModule.Helper.getFocus(obj);
         }
 
-        // uploadFileInit()
-
+        $script.ready("qiniu", function() {
+            if (conversationServer._uploadToken) {
+                uploadFileInit();
+            } else {
+                var upload = document.getElementById("upload-file");
+                var getToken = function() {
+                    RongIMLib.RongIMClient.getInstance().getQnTkn(RongIMLib.FileType.IMAGE, {
+                        onSuccess: function(data) {
+                            conversationServer._uploadToken = data.token;
+                            uploadFileInit();
+                            angular.element(upload).off("click", getToken)
+                        }
+                    })
+                }
+                angular.element(upload).on("click", getToken)
+            }
+        })
 
         function uploadFileInit() {
             var qiniuuploader = Qiniu.uploader({
                 // runtimes: 'html5,flash,html4',
                 runtimes: 'html5,html4',
                 browse_button: 'upload-file',
-                container: 'MessageForm',
-                drop_element: 'Message',
+                // browse_button: 'upload',
+                container: 'funcPanel',
+                drop_element: 'Messages',
                 max_file_size: '100mb',
                 // flash_swf_url: 'js/plupload/Moxie.swf',
                 dragdrop: true,
                 chunk_size: '4mb',
                 // uptoken_url: "http://webim.demo.rong.io/getUploadToken",
-                uptoken: "",
-                domain: "",
+                uptoken: conversationServer._uploadToken,
+                domain: "http://localhost:8000/",
                 get_new_uptoken: false,
                 unique_names: true,
                 filters: {

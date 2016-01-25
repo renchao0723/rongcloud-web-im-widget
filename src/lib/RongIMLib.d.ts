@@ -621,6 +621,7 @@ declare module RongIMLib {
          * 获取当前连接的状态。
          */
         getCurrentConnectionStatus(): ConnectionStatus;
+        getQnTkn(type: number, callback: any): void
         /**
          * 获取当前使用的连接通道。
          */
@@ -991,6 +992,9 @@ declare module RongIMLib {
         AT_LEAST_ONCE = 1,
         EXACTLY_ONCE = 2,
         DEFAULT = 3,
+    }
+    enum FileType {
+        IMAGE = 1
     }
     enum Type {
         CONNECT = 1,

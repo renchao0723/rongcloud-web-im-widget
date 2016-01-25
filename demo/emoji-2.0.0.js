@@ -171,7 +171,7 @@ var RongIMLib;
             u1F3E1: { en: "house_with_garden", zh: "\u623f\u5b50", tag: "\ud83c\udfe1", "bp": "-621px 0" },
             u1F004: { en: "mahjong", zh: "\u9ebb\u5c06", tag: "\ud83c\udc04", "bp": "0 0" },
             u1F4A1: { en: "bulb", zh: "\u706f\u6ce1", tag: "\ud83d\udca1", "bp": "-1188px 0" },
-            u1F4A2: { en: "anger", zh: "\u751f\u6c14", tag: "\ud83d\udca2", "bp": "-1215px 0" },
+            u1F4A2: { en: "anger", zh: "\u7206\u7B4B", tag: "\ud83d\udca2", "bp": "-1215px 0" },
             u1F4A3: { en: "bomb", zh: "\u70b8\u5f39", tag: "\ud83d\udca3", "bp": "-1242px 0" },
             u1F4A4: { en: "zzz", zh: "ZZZ", tag: "\ud83d\udca4", "bp": "-1269px 0" },
             u1F4A9: { en: "shit", zh: "\u72d7\u5c41", tag: "\ud83d\udca9", "bp": "-1296px 0" },

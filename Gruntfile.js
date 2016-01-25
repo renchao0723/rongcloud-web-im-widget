@@ -90,7 +90,7 @@ module.exports = function(grunt) {
       build: {
         files:[
           {
-            src:['./temp/main.js','./temp/myAppHTMLCache.js'],
+            src:['./temp/main.js','./temp/myAppHTMLCache.js','./vendor/loadscript/script.min.js'],
             dest:'./build/main.js'
           }
         ]
