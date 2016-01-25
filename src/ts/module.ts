@@ -372,6 +372,11 @@ module WidgetModule {
                 sel.addRange(tempRange);
             }
         }
+
+        static checkType(obj){
+          var type=Object.prototype.toString.call(obj);
+          return type.substring(8,type.length-1).toLowerCase();
+        }
     }
 
 }

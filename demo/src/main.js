@@ -180,16 +180,12 @@ conversationController.controller("conversationController", ["$scope", "conversa
             }
             else {
                 var upload = document.getElementById("upload-file");
-                var getToken = function () {
-                    RongIMLib.RongIMClient.getInstance().getQnTkn(RongIMLib.FileType.IMAGE, {
-                        onSuccess: function (data) {
-                            conversationServer._uploadToken = data.token;
-                            uploadFileInit();
-                            angular.element(upload).off("click", getToken);
-                        }
-                    });
-                };
-                angular.element(upload).on("click", getToken);
+                RongIMLib.RongIMClient.getInstance().getQnTkn(RongIMLib.FileType.IMAGE, {
+                    onSuccess: function (data) {
+                        conversationServer._uploadToken = data.token;
+                        uploadFileInit();
+                    }
+                });
             }
         });
         function uploadFileInit() {
@@ -794,18 +790,6 @@ widget.factory("WebIMWidget", ["$q", "conversationServer", "conversationListServ
                     if (defaultconfig.onSuccess && typeof defaultconfig.onSuccess == "function") {
                         defaultconfig.onSuccess(userId);
                     }
-                    //取登录用户信息；
-                    // RongIMLib.RongIMClient.getInstance().getUserInfo(userId, {
-                    //     onSuccess: function(data) {
-                    //         conversationServer.loginUser.id = data.userId;
-                    //         conversationServer.loginUser.name = data.name;
-                    //         conversationServer.loginUser.portraitUri = data.portraitUri;
-                    //         console.log(data);
-                    //     },
-                    //     onError: function(error) {
-                    //         console.log("getUserInfo error:" + error);
-                    //     }
-                    // });
                     providerdata.getUserInfo(userId, {
                         onSuccess: function (data) {
                             conversationServer.loginUser.id = data.userId;
@@ -1277,6 +1261,10 @@ var WidgetModule;
             var pre = first.toString();
             var cur = second.toString();
             return pre.substring(0, pre.lastIndexOf(":")) == cur.substring(0, cur.lastIndexOf(":"));
+        };
+        Helper.checkType = function (obj) {
+            var type = Object.prototype.toString.call(obj);
+            return type.substring(8, type.length - 1).toLowerCase();
         };
         Helper.browser = {
             version: (userAgent.match(/.+(?:rv|it|ra|chrome|ie)[\/: ]([\d.]+)/) || [0, '0'])[1],

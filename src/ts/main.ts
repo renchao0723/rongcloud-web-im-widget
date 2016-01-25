@@ -161,18 +161,6 @@ widget.factory("WebIMWidget", ["$q", "conversationServer", "conversationListServ
                         defaultconfig.onSuccess(userId);
                     }
 
-                    //取登录用户信息；
-                    // RongIMLib.RongIMClient.getInstance().getUserInfo(userId, {
-                    //     onSuccess: function(data) {
-                    //         conversationServer.loginUser.id = data.userId;
-                    //         conversationServer.loginUser.name = data.name;
-                    //         conversationServer.loginUser.portraitUri = data.portraitUri;
-                    //         console.log(data);
-                    //     },
-                    //     onError: function(error) {
-                    //         console.log("getUserInfo error:" + error);
-                    //     }
-                    // });
                     providerdata.getUserInfo(userId, {
                         onSuccess: function(data) {
                             conversationServer.loginUser.id = data.userId;

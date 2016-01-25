@@ -220,16 +220,13 @@ conversationController.controller("conversationController", ["$scope", "conversa
                 uploadFileInit();
             } else {
                 var upload = document.getElementById("upload-file");
-                var getToken = function() {
-                    RongIMLib.RongIMClient.getInstance().getQnTkn(RongIMLib.FileType.IMAGE, {
-                        onSuccess: function(data) {
-                            conversationServer._uploadToken = data.token;
-                            uploadFileInit();
-                            angular.element(upload).off("click", getToken)
-                        }
-                    })
-                }
-                angular.element(upload).on("click", getToken)
+                RongIMLib.RongIMClient.getInstance().getQnTkn(RongIMLib.FileType.IMAGE, {
+                    onSuccess: function(data) {
+                        conversationServer._uploadToken = data.token;
+                        uploadFileInit();
+                    }
+                })
+
             }
         })
 
