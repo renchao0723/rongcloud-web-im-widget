@@ -87,7 +87,7 @@ interface ConversationServer {
     loginUser: any
     onConversationChangged(conversation: WidgetModule.Conversation): void
     onReceivedMessage(message: WidgetModule.Message): void
-    onConnectSuccess():void
+    _onConnectSuccess():void
     _uploadToken: string
     _cacheHistory: any
     _getHistoryMessages(targetType: number, targetId: string, number: number): angular.IPromise<any>

@@ -172,8 +172,8 @@ conversationDirective.directive("imagemessage", [function() {
         template: '<div class="">' +
         '<div class="Message-img">' +
         '<span class="Message-entry" style="">' +
-        '<p>发给您一张示意图</p>' +
-        '<img src="./src/images/webBg.png" alt="">' +
+        // '<p>发给您一张示意图</p>' +
+        '<img ng-src="{{msg.content}}" alt="">' +
         '</span>' +
         '</div>' +
         '</div>'
@@ -191,7 +191,10 @@ conversationDirective.directive("voicemessage", [function() {
         '<div style="display: inline-block;"><span class="audioTimer">30”</span><span class="audioState"></span></div>' +
         '</span>' +
         '</div>' +
-        '</div>'
+        '</div>',
+        link: function(scope, ele, attr) {
+
+        }
     }
 }]);
 
@@ -203,8 +206,8 @@ conversationDirective.directive("locationmessage", [function() {
         '<div class="Message-map">' +
         '<span class="Message-entry" style="">' +
         '<div class="mapBox">' +
-        '<img src="./src/images/webBg.png" alt="">' +
-        '<span>朝阳区北苑路北</span>' +
+        '<img ng-src="{{msg.content}}" alt="">' +
+        '<span>{{msg.poi}}</span>' +
         '</div>' +
         '</span>' +
         '</div>' +
@@ -220,11 +223,10 @@ conversationDirective.directive("richcontentmessage", [function() {
         '<div class="Message-image-text">' +
         '<span class="Message-entry" style="">' +
         '<div class="image-textBox">' +
-        '<h4>理性设计</h4>' +
+        '<h4>{{msg.title}}</h4>' +
         '<div class="cont clearfix">' +
-        '<img src="./src/images/webBg.png" alt="">' +
-        '<div>苹果公司设计师年薪高达 17.4 万美元，约合人民币 110 万，而苹果官网也被业界捧为大师之作，受到世界各国产' +
-        '品经理和设计师的追捧。为什么苹果公司设计的网页如此受欢迎，有什么技巧在其中吗？</div>' +
+        '<img ng-src="{{msg.imageUri}}" alt="">' +
+        '<div>{{msg.content}}</div>' +
         '</div>' +
         '</div>' +
         '</span>' +

@@ -148,16 +148,8 @@ module WidgetModule {
                 case MessageType.TextMessage:
                     var texmsg = new TextMessage();
                     var content = SDKmsg.content.content;
-                    if (RongIMLib.RongIMEmoji && RongIMLib.RongIMEmoji.retrievalEmoji) {
-                        //var a = document.createElement("span");
-                        // content = RongIMLib.Expression.retrievalEmoji(content, function(img: any) {
-                        //     a.appendChild(img.img);
-                        //     var str = '<span class="RongIMexpression_' + img.englishName + '" title="' + img.chineseName + '">' + a.innerHTML + '</span>';
-                        //     a.innerHTML = "";
-                        //     return str;
-                        // });
-
-                        content = RongIMLib.RongIMEmoji.retrievalEmoji(content);
+                    if (RongIMLib.RongIMEmoji && RongIMLib.RongIMEmoji.emojiToHTML) {
+                        content = RongIMLib.RongIMEmoji.emojiToHTML(content);
                     }
                     texmsg.content = content;
 
@@ -373,9 +365,56 @@ module WidgetModule {
             }
         }
 
-        static checkType(obj){
-          var type=Object.prototype.toString.call(obj);
-          return type.substring(8,type.length-1).toLowerCase();
+        static checkType(obj) {
+            var type = Object.prototype.toString.call(obj);
+            return type.substring(8, type.length - 1).toLowerCase();
+        }
+
+        static ImageHelper = {
+            getThumbnail(obj: any, area: number, callback: any) {
+                var canvas = document.createElement("canvas"),
+                    context = canvas.getContext('2d');
+
+                var img = new Image();
+
+                img.onload = function() {
+                    var target_w: number;
+                    var target_h: number;
+
+                    var imgarea = img.width * img.height;
+                    if (imgarea > area) {
+                        var scale = Math.sqrt(imgarea / area);
+                        scale = Math.ceil(scale * 100) / 100;
+                        target_w = img.width / scale;
+                        target_h = img.height / scale;
+                    } else {
+                        target_w = img.width;
+                        target_h = img.height;
+                    }
+
+                    canvas.width = target_w;
+                    canvas.height = target_h;
+
+                    context.drawImage(img, 0, 0, target_w, target_h);
+
+                    try {
+                        var _canvas = canvas.toDataURL("image/jpeg", 0.5);
+                        callback(obj, _canvas);
+                    } catch (e) {
+                        callback(obj, null);
+                    }
+
+                }
+                img.src = WidgetModule.Helper.ImageHelper.getFullPath(obj);
+            },
+            getFullPath(file: File) {
+                window.URL = window.URL || window.webkitURL;
+                if (window.URL && window.URL.createObjectURL) {
+                    return window.URL.createObjectURL(file)
+                } else {
+                    return null;
+                }
+            }
         }
     }
 

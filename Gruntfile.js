@@ -9,8 +9,8 @@ module.exports = function(grunt) {
       },
       demo: {
         src: [
-          "./demo/src/**/*",
-          "./demo/src/**"
+          "./demo/widget/**/*",
+          "./demo/widget/**"
         ]
       },
       release:{
@@ -27,26 +27,36 @@ module.exports = function(grunt) {
           expand: true,
           cwd: "./build/",
           src: "./**",
-          dest: "./demo/src/"
+          dest: "./demo/widget/"
         }]
       },
       build: {
         files: [
-        {
-          src: "./bower_components/angular/angular.js",
-          dest: "./build/angular.js"
-        },
-        {
-          expand: true,
-          cwd: "./src/images/",
-          src: "./**",
-          dest: "./build/images/"
-        },
-        {
-          src:"./src/css/conversation.css",
-          dest:"./build/css/conversation.css"
-        }
-      ]
+          {
+            expand: true,
+            cwd: "./src/images/",
+            src: "./**",
+            dest: "./build/images/"
+          },
+          {
+            src:"./src/css/conversation.css",
+            dest:"./build/css/conversation.css"
+          }
+        ]
+      },
+      release:{
+        files:[
+          {
+            expand: true,
+            cwd: "./src/images/",
+            src: "./**",
+            dest: "./dist/images/"
+          },
+          {
+            src:"./src/css/conversation.css",
+            dest:"./dist/css/conversation.css"
+          }
+        ]
       }
     },
 
@@ -73,6 +83,17 @@ module.exports = function(grunt) {
           declaration: false
         },
         dest: "./temp/main.js"
+      },
+      release:{
+        src: ["./src/main.ts", "./src/**/*.ts"],
+        option: {
+          module: 'amd', //or commonjs
+          target: 'es5', //or es3
+          //basePath: 'path/to/typescript/files',
+          sourceMap: true,
+          declaration: false
+        },
+        dest: "./temp/main.js"
       }
     },
 
@@ -90,11 +111,19 @@ module.exports = function(grunt) {
       build: {
         files:[
           {
-            src:['./temp/main.js','./temp/myAppHTMLCache.js','./vendor/loadscript/script.min.js'],
+            src:['./temp/main.js','./temp/myAppHTMLCache.js','./vendor/loadscript/script.min.js','./vendor/qiniu/qiniu.js'],
             dest:'./build/main.js'
           }
         ]
       },
+      release:{
+        files:[
+          {
+            src:['./temp/main.js','./temp/myAppHTMLCache.js','./vendor/loadscript/script.min.js','./vendor/qiniu/qiniu.js'],
+            dest:'./dist/main.js'
+          }
+        ]
+      }
     },
 
 
@@ -136,6 +165,10 @@ module.exports = function(grunt) {
 
   grunt.registerTask("build", ["clean:build", "typescript:build",
     "ngtemplates:app","concat:build", "copy:build","clean:temp"
+  ]);
+
+  grunt.registerTask("release", ["clean:release", "typescript:release",
+    "ngtemplates:app","concat:release", "copy:release","clean:temp"
   ]);
 
 

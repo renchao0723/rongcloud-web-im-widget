@@ -6,6 +6,8 @@ conversationController.controller("conversationController", ["$scope", "conversa
     function($scope: any, conversationServer: ConversationServer, WebIMWidget: WebIMWidget, conversationListServer: conversationListServer) {
         console.log("conversation controller");
 
+        var ImageDomain = "http://7xogjk.com1.z0.glb.clouddn.com/";
+
         function adjustScrollbars() {
             setTimeout(function() {
                 var ele = document.getElementById("Messages");
@@ -39,14 +41,14 @@ conversationController.controller("conversationController", ["$scope", "conversa
             }
         });
 
+        // $scope.emojiList = RongIMLib.RongIMEmoji.emojis.slice(0, 84);
+
         $scope.$watch("showemoji", function(newVal, oldVal) {
             if (newVal === oldVal)
                 return;
             if (!$scope.emojiList || $scope.emojiList.length == 0) {
-                // $scope.emojiList = RongIMLib.Expression.getAllExpression(81, 0);
-                RongIMLib.RongIMEmoji.initExpression(81, function(data) {
-                    $scope.emojiList = data;
-                })
+                //RongIMLib.RongIMEmoji.init();
+                $scope.emojiList = RongIMLib.RongIMEmoji.emojis.slice(0, 84);
             }
         });
 
@@ -105,13 +107,21 @@ conversationController.controller("conversationController", ["$scope", "conversa
             // $scope.messageList.splice(0, $scope.messageList.length);
             if (msg.targetId == $scope.currentConversation.targetId && msg.conversationType == $scope.currentConversation.targetType) {
                 $scope.$apply();
-                adjustScrollbars();
+                if (msg.messageType == WidgetModule.MessageType.ImageMessage) {
+                    setTimeout(function() {
+                        adjustScrollbars();
+                    }, 200);
+                } else {
+                    adjustScrollbars();
+                }
                 console.log("刷新页面");
             }
         }
 
 
         $scope.getHistory = function() {
+            var arr = conversationServer._cacheHistory[$scope.currentConversation.targetType + "_" + $scope.currentConversation.targetId];
+            arr.splice(0, arr.length);
             conversationServer._getHistoryMessages(+$scope.currentConversation.targetType, $scope.currentConversation.targetId, 20).then(function() {
                 $scope.messageList = conversationServer._cacheHistory[$scope.currentConversation.targetType + "_" + $scope.currentConversation.targetId];
                 // $scope.$apply();
@@ -131,15 +141,17 @@ conversationController.controller("conversationController", ["$scope", "conversa
         }
 
 
-        function packDisplaySendMessage(msg: RongIMLib.MessageContent, messageType: string) {
+        function packDisplaySendMessage(msg: any, messageType: string) {
             var ret = new RongIMLib.Message();
+            var userinfo = new RongIMLib.UserInfo(conversationServer.loginUser.id, conversationServer.loginUser.name, conversationServer.loginUser.portraitUri);
+            msg.userInfo = userinfo;
             ret.content = msg;
             ret.conversationType = $scope.currentConversation.targetType;
             ret.targetId = $scope.currentConversation.targetId;
             ret.senderUserId = conversationServer.loginUser.id;
 
             ret.messageDirection = RongIMLib.MessageDirection.SEND;
-            ret.sentTime = (new Date()).getTime();
+            ret.sentTime = (new Date()).getTime() - RongIMLib.RongIMClient.getInstance().getDeltaTime();
             ret.messageType = messageType;
 
             return ret;
@@ -185,7 +197,7 @@ conversationController.controller("conversationController", ["$scope", "conversa
             //     return RongIMLib.Expression.getEmojiObjByEnglishNameOrChineseName(x.slice(1, x.length - 1)).tag || x;
             // });
 
-            var con = RongIMLib.RongIMEmoji.getExpressions($scope.currentConversation.messageContent);
+            var con = RongIMLib.RongIMEmoji.symbolToEmoji($scope.currentConversation.messageContent);
 
             var msg = RongIMLib.TextMessage.obtain(con);
             var userinfo = new RongIMLib.UserInfo(conversationServer.loginUser.id, conversationServer.loginUser.name, conversationServer.loginUser.portraitUri);
@@ -215,20 +227,29 @@ conversationController.controller("conversationController", ["$scope", "conversa
             WidgetModule.Helper.getFocus(obj);
         }
 
-        $script.ready("qiniu", function() {
-            if (conversationServer._uploadToken) {
-                uploadFileInit();
-            } else {
-                var upload = document.getElementById("upload-file");
-                RongIMLib.RongIMClient.getInstance().getQnTkn(RongIMLib.FileType.IMAGE, {
-                    onSuccess: function(data) {
-                        conversationServer._uploadToken = data.token;
-                        uploadFileInit();
-                    }
-                })
+        // $script.ready("qiniu", function() {
+        //     if (conversationServer._uploadToken) {
+        //         uploadFileInit();
+        //     } else {
+        //         var upload = document.getElementById("upload-file");
+        //         RongIMLib.RongIMClient.getInstance().getQnTkn(RongIMLib.FileType.IMAGE, {
+        //             onSuccess: function(data) {
+        //                 conversationServer._uploadToken = data.token;
+        //                 uploadFileInit();
+        //             }
+        //         })
+        //
+        //     }
+        // })
 
-            }
-        })
+        conversationServer._onConnectSuccess = function() {
+            RongIMLib.RongIMClient.getInstance().getFileToken(RongIMLib.FileType.IMAGE, {
+                onSuccess: function(data) {
+                    conversationServer._uploadToken = data.token;
+                    uploadFileInit();
+                }
+            })
+        }
 
         function uploadFileInit() {
             var qiniuuploader = Qiniu.uploader({
@@ -244,9 +265,9 @@ conversationController.controller("conversationController", ["$scope", "conversa
                 chunk_size: '4mb',
                 // uptoken_url: "http://webim.demo.rong.io/getUploadToken",
                 uptoken: conversationServer._uploadToken,
-                domain: "http://localhost:8000/",
+                domain: ImageDomain,
                 get_new_uptoken: false,
-                unique_names: true,
+                // unique_names: true,
                 filters: {
                     mime_types: [{ title: "Image files", extensions: "jpg,gif,png" }],
                     prevent_duplicates: false
@@ -255,38 +276,43 @@ conversationController.controller("conversationController", ["$scope", "conversa
                 auto_start: true,
                 init: {
                     'FilesAdded': function(up: any, files: any) {
-                        console.log(up, files);
                     },
                     'BeforeUpload': function(up: any, file: any) {
-                        console.log(up, file);
                     },
                     'UploadProgress': function(up: any, file: any) {
-                        console.log(up, file);
                     },
                     'UploadComplete': function() {
-                        console.log("wan cheng");
                     },
                     'FileUploaded': function(up: any, file: any, info: any) {
-                        !function(info: any) {
-                            var info = JSON.parse(info);
-                            // webimutil.ImageHelper.getThumbnail(file.getNative(), 60000, function(obj: any, data: any) {
-                            //     var im = RongIMLib.ImageMessage.obtain(data, IMGDOMAIN + info.key);
-                            //
-                            //     var content = packmysend(im, webimmodel.MessageType.ImageMessage);
-                            //     RongIMSDKServer.sendMessage($scope.currentConversation.targetType, $scope.currentConversation.targetId, im).then(function() {
-                            //
-                            //     }, function() {
-                            //
-                            //     })
-                            //     conversationServer.addHistoryMessages($scope.currentConversation.targetId, $scope.currentConversation.targetType,
-                            //         webimmodel.Message.convertMsg(content));
-                            //     setTimeout(function() {
-                            //         $scope.$emit("msglistchange");
-                            //         $scope.$emit("conversationChange");
-                            //     }, 200);
-                            // })
-                        } (info)
+                        console.log(info);
+                        if (!$scope.currentConversation.targetId || !$scope.currentConversation.targetType) {
+                            console.log("请设置会话");
+                            alert("请先选择一个会话目标。")
+                            return;
+                        }
+                        info = JSON.parse(info);
+                        RongIMLib.RongIMClient.getInstance().getFileUrl(RongIMLib.FileType.IMAGE, info.name, {
+                            onSuccess: function(url) {
 
+                                WidgetModule.Helper.ImageHelper.getThumbnail(file.getNative(), 60000, function(obj: any, data: any) {
+                                    var im = RongIMLib.ImageMessage.obtain(data, url);
+
+                                    var content = packDisplaySendMessage(im, WidgetModule.MessageType.ImageMessage);
+                                    RongIMLib.RongIMClient.getInstance().sendMessage($scope.currentConversation.targetType, $scope.currentConversation.targetId, im, {
+                                        onSuccess: function() {
+
+                                        },
+                                        onError: function() {
+
+                                        }
+                                    })
+                                    conversationServer._addHistoryMessages(WidgetModule.Message.convert(content));
+                                    $scope.$apply();
+                                    adjustScrollbars();
+                                })
+
+                            }
+                        });
                     },
                     'Error': function(up: any, err: any, errTip: any) {
                     }

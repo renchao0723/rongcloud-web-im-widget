@@ -8,13 +8,19 @@ declare module RongIMLib {
         static play(content: string, time: any): void
     }
     class RongIMEmoji {
-        static initExpression(num: number, fun: any): void
-        static getExpressions(str: string): string
-        static retrievalEmoji(str: string): string
-        static retrievalName(str: string): string
+        static emojis: any[]
+        static init(): void
+        
+        static emojiToSymbol(str: string): string
+        static symbolToEmoji(str: string): string
+        static symbolToHTML(str: string): string
+        static emojiToHTML(str: string): string
     }
 }
 
+interface Window {
+    webkitURL: any
+}
 
 declare var Qiniu: Qiniu;
 

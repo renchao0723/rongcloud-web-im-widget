@@ -3,9 +3,6 @@
 
 var widget = angular.module("RongWebIMWidget", ["RongWebIMWidget.conversationServer", "RongWebIMWidget.conversationListServer"]);
 
-widget.config(function() {
-
-});
 
 document.addEventListener("DOMContentLoaded", function() {
     console.log("DOMContentLoaded");
@@ -13,59 +10,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
 widget.run(["$http", function($http: angular.IHttpService) {
 
-    console.log("run widget");
-    // var e = document.getElementsByTagName("script");
-    // var sdk = document.createElement("script");
-    // // sdk.src = "http://cdn.ronghub.com/RongIMLib-2.0.3.beta.min.js";
-    // sdk.src = "./RongIMLib.js"
-    //
-    // var emoji = document.createElement("script");
-    // emoji.src = "./emoji-2.0.0.js";
-    //
-    // document.head.appendChild(sdk);
-    //
-    //
-    // angular.element(document).ready(function() {
-    //     document.head.appendChild(emoji);
-    // });
-    function loadScript(url, callback?) {
-        var eHead = document.getElementsByTagName("head")[0];
-        var eScript = document.createElement("script");
-        eScript.src = url;
-        eHead.appendChild(eScript);
-    }
-    var scripts = <any>{}, urlArgs = "", head = document.getElementsByTagName("head")[0];
-    // function create(path, fn) {
-    //     var el = document.createElement('script'), loaded
-    //     el.onload = el.onerror = el["onreadystatechange"] = function() {
-    //         if ((el["readyState"] && !(/^c|loade/.test(el["readyState"]))) || loaded) return;
-    //         el.onload = el["onreadystatechange"] = null
-    //         loaded = 1
-    //         fn()
-    //     }
-    //     el.async = !!1;
-    //     el.src = urlArgs ? path + (path.indexOf('?') === -1 ? '?' : '&') + urlArgs : path;
-    //     head.insertBefore(el, head.lastChild)
-    // }
-
-    // function loadScript(url, callback?) {
-    //     var eHead = document.getElementsByTagName("head")[0];
-    //     $http.get(url, {}).success(function(data: string) {
-    //         var eScript = document.createElement("script");
-    //         eScript.innerHTML = data;
-    //         eHead.appendChild(eScript);
-    //         if (callback && typeof callback == "function") {
-    //             callback();
-    //         }
-    //     })
-    // }
-    // loadScript("http://jssdk.demo.qiniu.io/js/plupload/plupload.full.min.js", function() {
-    // });
-    $script.get("./RongIMLib.js", function() {
-        $script("./emoji-2.0.0.js");
+    $script.get("http://cdn.ronghub.com/RongIMLib-2.0.6.beta.min.js", function() {
+        // $script("http://cdn.ronghub.com/RongEmoji-2.0.0.beta.min.js");
+        $script.get("../lib/emoji-2.0.0.js", function() {
+            RongIMLib.RongIMEmoji.init();
+        });
     });
-    $script(["http://jssdk.demo.qiniu.io/js/plupload/plupload.full.min.js", "http://jssdk.demo.qiniu.io/js/qiniu.js"], "qiniu")
-
+    $script.get("//cdn.bootcss.com/plupload/2.1.8/plupload.full.min.js", function() { });
+    // $script(["http://jssdk.demo.qiniu.io/js/plupload/plupload.full.min.js", "http://jssdk.demo.qiniu.io/js/qiniu.js"], "qiniu")
+    // $script(["./qiniu/plupload.min.js", "./qiniu/qiniu.js"], "qiniu");
     // loadScript("./RongIMLib.js")
     // // loadScript("http://cdn.ronghub.com/RongIMLib-2.0.5.beta.min.js");
     // loadScript("./emoji-2.0.0.js");
@@ -157,7 +110,7 @@ widget.factory("WebIMWidget", ["$q", "conversationServer", "conversationListServ
             RongIMLib.RongIMClient.connect(defaultconfig.token, {
                 onSuccess: function(userId: string) {
                     console.log("connect success:" + userId);
-                    if (defaultconfig.onSuccess && typeof defaultconfig.onSuccess == "function") {
+                    if (WidgetModule.Helper.checkType(defaultconfig.onSuccess) == "function") {
                         defaultconfig.onSuccess(userId);
                     }
 
@@ -170,6 +123,8 @@ widget.factory("WebIMWidget", ["$q", "conversationServer", "conversationListServ
                     });
 
                     conversationListServer.updateConversations();
+
+                    conversationServer._onConnectSuccess();
 
                 },
                 onTokenIncorrect: function() {

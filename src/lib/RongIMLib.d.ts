@@ -621,7 +621,9 @@ declare module RongIMLib {
          * 获取当前连接的状态。
          */
         getCurrentConnectionStatus(): ConnectionStatus;
-        getQnTkn(type: number, callback: any): void
+        getFileToken(type: number, callback: any): void
+        getFileUrl(type: number, name: string, callback: any): void
+        getDeltaTime(): number
         /**
          * 获取当前使用的连接通道。
          */

@@ -18,9 +18,9 @@ conversationListSer.factory("conversationListServer", ["$q", "providerdata",
                     for (var i = 0, len = data.length; i < len; i++) {
                         var con = WidgetModule.Conversation.onvert(data[i]);
 
-                        if ( providerdata.getUserInfo) {
-                            switch (con.targetType) {
-                                case RongIMLib.ConversationType.PRIVATE:
+                        switch (con.targetType) {
+                            case RongIMLib.ConversationType.PRIVATE:
+                                if (WidgetModule.Helper.checkType(providerdata.getUserInfo) == "function") {
                                     (function(a, b) {
                                         providerdata.getUserInfo(a.targetId, {
                                             onSuccess: function(data) {
@@ -31,9 +31,26 @@ conversationListSer.factory("conversationListServer", ["$q", "providerdata",
                                             }
                                         })
                                     } (con, data[i]));
-                                    break;
-                            }
+                                }
+                                break;
+                            case RongIMLib.ConversationType.GROUP:
+                                if (WidgetModule.Helper.checkType(providerdata.getGroupInfo) == "function") {
+                                    (function(a, b) {
+                                        providerdata.getGroupInfo(a.targetId, {
+                                            onSuccess: function(data) {
+                                                a.title = data.name;
+                                                a.portraitUri = data.portraitUri;
+                                                b.conversationTitle = data.name;
+                                                b.portraitUri = data.portraitUri;
+                                            }
+                                        })
+                                    } (con, data[i]))
+                                }
+                                break;
+                            case RongIMLib.ConversationType.CHATROOM:
+                                break;
                         }
+
                         server.conversationList.push(con);
                     }
                     defer.resolve();

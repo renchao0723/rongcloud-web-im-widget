@@ -176,7 +176,7 @@ textarea {
 .kefuListBox .kefuList{
     border: 1px solid #cdd7db;
     /*border-bottom: none;*/
-    border-radius: 5px 5px 0px 0px;
+    /*border-radius: 5px 5px 0px 0px;*/
     overflow: hidden;
     position: relative;
     /*height: 100%;*/
@@ -187,7 +187,7 @@ textarea {
     width: 194px;
 }
 .kefuListBox.both .kefuList{
-     border-radius: 0px 5px 0px 0px;
+     /*border-radius: 0px 5px 0px 0px;*/
 }
 .kefuListBox .kefuList .header{
     height: 36px;
@@ -985,6 +985,7 @@ textarea {
     color: black;
     resize: none;
     font-size: 9pt;
+    overflow: auto;
 }
 .text:focus {
     outline: 0;

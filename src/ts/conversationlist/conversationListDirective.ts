@@ -25,7 +25,7 @@ conversationListDir.directive("conversationItem", ["conversationServer", "conver
         '</div>' +
         '<div class="photo">' +
         '<img class="img" src="images/webBg.png" alt="">' +
-        '<i class="Presence Presence--stacked Presence--mainBox"></i>' +
+        // '<i class="Presence Presence--stacked Presence--mainBox"></i>' +
         '</div>' +
         '<div class="info">' +
         '<h3 class="nickname">' +

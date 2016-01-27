@@ -21,6 +21,7 @@
     "!node_modules/**"
   ],
   "files": [
+    "demo - 副本/qiniu/qiniu.d.ts",
     "src/lib/RongIMLib.d.ts",
     "src/lib/window.d.ts",
     "src/ts/conversation/conversationController.ts",
@@ -34,7 +35,8 @@
     "typings/angularjs/angular.d.ts",
     "typings/jquery/jquery.d.ts",
     "typings/tsd.d.ts",
-    "vendor/loadscript/script.d.ts"
+    "vendor/loadscript/script.d.ts",
+    "vendor/qiniu/qiniu.d.ts"
   ],
   "atom": {
     "rewriteTsconfig": true
