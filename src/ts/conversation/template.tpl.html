@@ -1,11 +1,11 @@
 
-    <div id="rong-conversation" class="kefuChatBox both am-fade-and-slide-top" ng-class="{'fullScreen':resoures.fullScreen}" ><!-- fullScreen 全屏class -->
+    <div id="rong-conversation" class="kefuChatBox both am-fade-and-slide-top" ng-show="showPanel" ng-class="{'fullScreen':resoures.fullScreen}" ><!-- fullScreen 全屏class -->
 
         <div class="kefuChat">
             <div id="header" class="header blueBg online">
                 <div class="infoBar pull-left">
                     <div class="infoBarTit">
-                        <span class="Presence Presence--stacked"></span>
+                        <!-- <span class="Presence Presence--stacked"></span> -->
                         <span class="kefuName" ng-bind="currentConversation.title"></span>
                     </div>
                 </div>
@@ -30,7 +30,7 @@
 
                         <div ng-repeat="item in messageList" ng-switch="item.panelType">
                             <div class="Messages-date" ng-switch-when="104"><b class="">{{item.sentTime|historyTime}}</b></div>
-                            <div class="Messages-date" ng-switch-when="105"><b class="" ng-click="getHistory()">获取历史消息</b></b></div>
+                            <div class="Messages-date" ng-switch-when="105"><b class="" ng-click="getHistory()">查看历史消息</b></b></div>
                             <div class="Messages-date" ng-switch-when="106"><b class="" ng-click="getMoreMessage()">获取更多消息</b></div>
                             <div class="sys-tips" ng-switch-when="2"><span>会话已结束</span></div>
                             <div class="Message" ng-switch-when="1">

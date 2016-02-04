@@ -10,7 +10,7 @@ declare module RongIMLib {
     class RongIMEmoji {
         static emojis: any[]
         static init(): void
-        
+
         static emojiToSymbol(str: string): string
         static symbolToEmoji(str: string): string
         static symbolToHTML(str: string): string
@@ -20,6 +20,7 @@ declare module RongIMLib {
 
 interface Window {
     webkitURL: any
+    RongIMLib: any
 }
 
 declare var Qiniu: Qiniu;

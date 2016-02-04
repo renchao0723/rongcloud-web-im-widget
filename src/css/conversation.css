@@ -109,7 +109,7 @@ textarea {
     background: url(../images/webBg.png) 0 0/10px auto repeat;
 }
 .kefuBtnBox{
-    position: fixed;
+    /*position: fixed;*/
     z-index: 999;
     box-sizing: border-box;
     height: 50px;
@@ -117,8 +117,11 @@ textarea {
     bottom: 0px;
     text-align: center;
     border-radius: 4px 4px 0px 0px;
-    right: 100px;
+    /*right: 100px;*/
     transition: all 0.3s ease-in-out 0.1s;
+    /*right: 0px;*/
+    position: absolute;
+    display: none;
 }
 .kefuBtn{
     text-decoration: none;

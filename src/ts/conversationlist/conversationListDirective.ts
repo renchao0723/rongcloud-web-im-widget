@@ -6,7 +6,7 @@ conversationListDir.directive("rongConversationList", [function() {
 
     return {
         restrict: "E",
-        templateUrl: "./src/ts/conversationList/conversationList.tpl.html",
+        templateUrl: "./src/ts/conversationlist/conversationList.tpl.html",
         controller: "conversationListController"
     }
 }]);

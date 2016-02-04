@@ -1,41 +1,46 @@
 /// <reference path="../../typings/tsd.d.ts"/>
 /// <reference path="../../vendor/loadscript/script.d.ts"/>
 
-var widget = angular.module("RongWebIMWidget", ["RongWebIMWidget.conversationServer", "RongWebIMWidget.conversationListServer"]);
+var widget = angular.module("RongWebIMWidget", ["RongWebIMWidget.conversationServer", "RongWebIMWidget.conversationListServer", "RongIMSDKModule"]);
 
-
-document.addEventListener("DOMContentLoaded", function() {
-    console.log("DOMContentLoaded");
-}, false)
-
-widget.run(["$http", function($http: angular.IHttpService) {
+widget.run(["$http", "WebIMWidget", "widgetConfig", function($http: angular.IHttpService,
+    WebIMWidget: WebIMWidget, widgetConfig: widgetConfig) {
 
     $script.get("http://cdn.ronghub.com/RongIMLib-2.0.6.beta.min.js", function() {
-        // $script("http://cdn.ronghub.com/RongEmoji-2.0.0.beta.min.js");
-        $script.get("../lib/emoji-2.0.0.js", function() {
+        $script.get("http://cdn.ronghub.com/RongEmoji-2.0.0.beta.min.js", function() {
             RongIMLib.RongIMEmoji.init();
         });
+        if (widgetConfig.config) {
+            WebIMWidget.init(widgetConfig.config);
+        }
     });
-    $script.get("//cdn.bootcss.com/plupload/2.1.8/plupload.full.min.js", function() { });
-    // $script(["http://jssdk.demo.qiniu.io/js/plupload/plupload.full.min.js", "http://jssdk.demo.qiniu.io/js/qiniu.js"], "qiniu")
-    // $script(["./qiniu/plupload.min.js", "./qiniu/qiniu.js"], "qiniu");
-    // loadScript("./RongIMLib.js")
-    // // loadScript("http://cdn.ronghub.com/RongIMLib-2.0.5.beta.min.js");
-    // loadScript("./emoji-2.0.0.js");
 
+    $script.get("//cdn.bootcss.com/plupload/2.1.8/plupload.full.min.js", function() { });
 }]);
 
 widget.factory("providerdata", [function() {
     return {}
 }]);
 
+widget.factory("widgetConfig", [function() {
+    return {}
+}]);
+interface widgetConfig {
+    displayConversationList: boolean
+    config: any
+}
+
 interface providerdata {
     getUserInfo: UserInfoProvider
     getGroupInfo: GroupInfoProvider
 }
+// var RongIMLib: any;
 
-widget.factory("WebIMWidget", ["$q", "conversationServer", "conversationListServer", "providerdata",
-    function($q: angular.IQService, conversationServer: ConversationServer, conversationListServer: conversationListServer, providerdata: providerdata) {
+widget.factory("WebIMWidget", ["$q", "conversationServer",
+    "conversationListServer", "providerdata", "widgetConfig", "RongIMSDKServer",
+    function($q: angular.IQService, conversationServer: ConversationServer,
+        conversationListServer: conversationListServer, providerdata: providerdata,
+        widgetConfig: widgetConfig, RongIMSDKServer: RongIMSDKServer) {
 
 
         var WebIMWidget = <WebIMWidget>{};
@@ -56,7 +61,14 @@ widget.factory("WebIMWidget", ["$q", "conversationServer", "conversationListServ
             }
         }
 
+        WebIMWidget.display = false;
+
         WebIMWidget.init = function(config: Config) {
+
+            if (!window.RongIMLib || !window.RongIMLib.RongIMClient) {
+                widgetConfig.config = config;
+                return;
+            }
 
             var defaultStyle = defaultconfig.style;
             angular.extend(defaultconfig, config);
@@ -65,26 +77,31 @@ widget.factory("WebIMWidget", ["$q", "conversationServer", "conversationListServ
             // if (config)
             //
 
-            if (!RongIMLib || !RongIMLib.RongIMClient) {
-                throw new Error("please refer to RongIMLib");
-            }
             var elebox = document.getElementById("rong-widget-box");
             var eleconversation = document.getElementById("rong-conversation");
             var eleconversationlist = document.getElementById("rong-conversation-list");
 
+            var eleminbtn = document.getElementById("minbtn");
+
 
             if (defaultconfig.displayConversationList) {
+                eleminbtn.style["display"] = "inline-block";
                 if (defaultconfig.conversationListPosition == WidgetModule.EnumConversationListPosition.left) {
                     eleconversation.style["left"] = "197px";
                     eleconversation.style["right"] = "0px";
                     eleconversationlist.style["left"] = "0px";
-                } else {
+                    eleminbtn.style["left"] = "0px";
+                } else if (defaultconfig.conversationListPosition == WidgetModule.EnumConversationListPosition.right) {
                     eleconversation.style["left"] = "0px";
                     eleconversation.style["right"] = "197px";
                     eleconversationlist.style["right"] = "0px";
+                    eleminbtn.style["right"] = "0px";
+                } else {
+                    throw new Error("config conversationListPosition value is invalid");
                 }
             } else {
                 eleconversationlist.style["display"] = "none";
+                eleminbtn.style["display"] = "none";
                 eleconversation.style["left"] = "0px";
                 eleconversation.style["right"] = "0px";
             }
@@ -105,15 +122,18 @@ widget.factory("WebIMWidget", ["$q", "conversationServer", "conversationListServ
                 }
             }
 
-            RongIMLib.RongIMClient.init(defaultconfig.appkey);
 
-            RongIMLib.RongIMClient.connect(defaultconfig.token, {
-                onSuccess: function(userId: string) {
-                    console.log("connect success:" + userId);
-                    if (WidgetModule.Helper.checkType(defaultconfig.onSuccess) == "function") {
-                        defaultconfig.onSuccess(userId);
-                    }
+            widgetConfig.displayConversationList = defaultconfig.displayConversationList;
 
+            // RongIMLib.RongIMClient.init(defaultconfig.appkey);
+            RongIMSDKServer.init(defaultconfig.appkey);
+
+            RongIMSDKServer.connect(defaultconfig.token).then(function(userId) {
+                console.log("connect success:" + userId);
+                if (WidgetModule.Helper.checkType(defaultconfig.onSuccess) == "function") {
+                    defaultconfig.onSuccess(userId);
+                }
+                if (WidgetModule.Helper.checkType(providerdata.getUserInfo) == "function") {
                     providerdata.getUserInfo(userId, {
                         onSuccess: function(data) {
                             conversationServer.loginUser.id = data.userId;
@@ -121,27 +141,26 @@ widget.factory("WebIMWidget", ["$q", "conversationServer", "conversationListServ
                             conversationServer.loginUser.portraitUri = data.portraitUri;
                         }
                     });
-
-                    conversationListServer.updateConversations();
-
-                    conversationServer._onConnectSuccess();
-
-                },
-                onTokenIncorrect: function() {
-                    if (defaultconfig.onError && typeof defaultconfig.onError == "function") {
-                        defaultconfig.onError(0);
-                    }
-                    console.log("token 无效");
-                },
-                onError: function(error) {
-                    if (defaultconfig.onError && typeof defaultconfig.onError == "function") {
-                        defaultconfig.onError(error);
-                    }
-                    console.log("connect error:" + error);
                 }
-            });
 
-            RongIMLib.RongIMClient.setConnectionStatusListener({
+                conversationListServer.updateConversations();
+
+                conversationServer._onConnectSuccess();
+            }, function(err) {
+                if (err.tokenError) {
+                    if (defaultconfig.onError && typeof defaultconfig.onError == "function") {
+                        defaultconfig.onError({ code: 0, info: "token 无效" });
+                    }
+                    // console.log("token 无效");
+                } else {
+                    if (defaultconfig.onError && typeof defaultconfig.onError == "function") {
+                        defaultconfig.onError({ code: err.errorCode });
+                    }
+                    // console.log("connect error:" + err.errorCode);
+                }
+            })
+
+            RongIMSDKServer.setConnectionStatusListener({
                 onChanged: function(status) {
                     switch (status) {
                         //链接成功
@@ -167,7 +186,7 @@ widget.factory("WebIMWidget", ["$q", "conversationServer", "conversationListServ
                 }
             });
 
-            RongIMLib.RongIMClient.setOnReceiveMessageListener({
+            RongIMSDKServer.setOnReceiveMessageListener({
                 onReceived: function(data) {
                     console.log(data);
                     var msg = WidgetModule.Message.convert(data);
@@ -228,18 +247,6 @@ widget.factory("WebIMWidget", ["$q", "conversationServer", "conversationListServ
             conversationServer.onConversationChangged(new WidgetModule.Conversation(targetType, targetId, title));
         }
 
-        WebIMWidget.display = false;
-
-        WebIMWidget.hidden = function() {
-            //由maincontroller实现
-        }
-
-        WebIMWidget.show = function() {
-            //由maincontroller实现
-        }
-
-
-
         WebIMWidget.setUserInfoProvider = function(fun) {
             providerdata.getUserInfo = fun;
         }
@@ -247,8 +254,6 @@ widget.factory("WebIMWidget", ["$q", "conversationServer", "conversationListServ
         WebIMWidget.setGroupInfoProvider = function(fun) {
             providerdata.getGroupInfo = fun;
         }
-
-
 
         WebIMWidget.EnumConversationListPosition = WidgetModule.EnumConversationListPosition;
 
@@ -281,6 +286,9 @@ widget.controller("rongWidgetController", ["$scope", "WebIMWidget", function($sc
             $scope.$apply();
         });
     }
+    $scope.showbtn = function() {
+        WebIMWidget.display = true;
+    }
 }]);
 
 widget.filter('trustHtml', function($sce: angular.ISCEService) {
@@ -307,9 +315,10 @@ interface Config {
     token: string;
     onSuccess(userId: string): void;
     onError(error: any): void;
-    animation: number;
+    // animation: number;
     displayConversationList: boolean;
     conversationListPosition: any;
+    displayMinButton: boolean;
     style: {
         height: string;
         width: string;

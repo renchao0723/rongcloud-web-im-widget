@@ -15,7 +15,7 @@ demo.controller("main", ["$scope", "WebIMWidget", function($scope,
   $scope.targetType=1;
 
   $scope.setconversation=function(){
-    WebIMWidget.setConversation(Number($scope.targetType), $scope.targetId, "自定义");
+    WebIMWidget.setConversation(Number($scope.targetType), $scope.targetId, "自定义:"+$scope.targetId);
   }
 
   angular.element(document).ready(function() {

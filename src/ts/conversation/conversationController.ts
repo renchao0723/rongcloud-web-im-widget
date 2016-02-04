@@ -2,8 +2,12 @@
 
 var conversationController = angular.module("RongWebIMWidget.conversationController", ["RongWebIMWidget.conversationServer"]);
 
-conversationController.controller("conversationController", ["$scope", "conversationServer", "WebIMWidget", "conversationListServer",
-    function($scope: any, conversationServer: ConversationServer, WebIMWidget: WebIMWidget, conversationListServer: conversationListServer) {
+conversationController.controller("conversationController", ["$scope",
+    "conversationServer", "WebIMWidget", "conversationListServer", "widgetConfig",
+    function($scope: any, conversationServer: ConversationServer,
+        WebIMWidget: WebIMWidget, conversationListServer: conversationListServer,
+        widgetConfig: widgetConfig) {
+
         console.log("conversation controller");
 
         var ImageDomain = "http://7xogjk.com1.z0.glb.clouddn.com/";
@@ -29,7 +33,7 @@ conversationController.controller("conversationController", ["$scope", "conversa
 
         $scope.resoures = WebIMWidget;
 
-        console.log(WebIMWidget);
+        $scope.showPanel = false;
 
         //显示表情
         $scope.showemoji = false;
@@ -54,6 +58,8 @@ conversationController.controller("conversationController", ["$scope", "conversa
 
 
         conversationServer.onConversationChangged = function(conversation: WidgetModule.Conversation) {
+            $scope.showPanel = true;
+
             if (!conversation || !conversation.targetId) {
                 $scope.messageList = [];
                 conversationServer.current = null;
@@ -122,10 +128,12 @@ conversationController.controller("conversationController", ["$scope", "conversa
         $scope.getHistory = function() {
             var arr = conversationServer._cacheHistory[$scope.currentConversation.targetType + "_" + $scope.currentConversation.targetId];
             arr.splice(0, arr.length);
-            conversationServer._getHistoryMessages(+$scope.currentConversation.targetType, $scope.currentConversation.targetId, 20).then(function() {
+            conversationServer._getHistoryMessages(+$scope.currentConversation.targetType, $scope.currentConversation.targetId, 20).then(function(data) {
                 $scope.messageList = conversationServer._cacheHistory[$scope.currentConversation.targetType + "_" + $scope.currentConversation.targetId];
-                // $scope.$apply();
-                adjustScrollbars();
+                if (data.has) {
+                    conversationServer._cacheHistory[$scope.currentConversation.targetType + "_" + $scope.currentConversation.targetId].unshift(new WidgetModule.GetMoreMessagePanel());
+                }
+                // adjustScrollbars();
             });
         }
 
@@ -133,10 +141,11 @@ conversationController.controller("conversationController", ["$scope", "conversa
             conversationServer._cacheHistory[$scope.currentConversation.targetType + "_" + $scope.currentConversation.targetId].shift();
             conversationServer._cacheHistory[$scope.currentConversation.targetType + "_" + $scope.currentConversation.targetId].shift();
 
-            conversationServer._getHistoryMessages(+$scope.currentConversation.targetType, $scope.currentConversation.targetId, 20).then(function() {
+            conversationServer._getHistoryMessages(+$scope.currentConversation.targetType, $scope.currentConversation.targetId, 20).then(function(data) {
                 $scope.messageList = conversationServer._cacheHistory[$scope.currentConversation.targetType + "_" + $scope.currentConversation.targetId];
-                // adjustScrollbars();
-                // $scope.$apply();
+                if (data.has) {
+                    conversationServer._cacheHistory[$scope.currentConversation.targetType + "_" + $scope.currentConversation.targetId].unshift(new WidgetModule.GetMoreMessagePanel());
+                }
             });
         }
 
@@ -157,11 +166,19 @@ conversationController.controller("conversationController", ["$scope", "conversa
             return ret;
         }
 
+        function closeState() {
+            if (widgetConfig.displayConversationList) {
+                $scope.showPanel = false;
+            } else {
+                $scope.resoures.display = false;
+            }
+        }
+
         $scope.close = function() {
             if (WebIMWidget.onCloseBefore && typeof WebIMWidget.onCloseBefore === "function") {
                 var isClose = WebIMWidget.onCloseBefore({
                     close: function() {
-                        $scope.resoures.display = false;
+                        closeState();
                         setTimeout(function() {
                             $scope.$apply();
                         })
@@ -171,7 +188,7 @@ conversationController.controller("conversationController", ["$scope", "conversa
                     }
                 });
             } else {
-                $scope.resoures.display = false;
+                closeState();
                 if (WebIMWidget.onClose && typeof WebIMWidget.onClose === "function") {
                     WebIMWidget.onClose();
                 }
