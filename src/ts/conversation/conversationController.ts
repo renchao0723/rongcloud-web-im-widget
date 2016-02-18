@@ -32,6 +32,7 @@ conversationController.controller("conversationController", ["$scope",
         $scope.messageContent = "";
 
         $scope.resoures = WebIMWidget;
+        $scope.widgetConfig = widgetConfig;
 
         $scope.showPanel = false;
 
@@ -58,7 +59,13 @@ conversationController.controller("conversationController", ["$scope",
 
 
         conversationServer.onConversationChangged = function(conversation: WidgetModule.Conversation) {
-            $scope.showPanel = true;
+
+            if (widgetConfig.displayConversationList) {
+                $scope.showPanel = true;
+            } else {
+                $scope.showPanel = true;
+                $scope.resoures.display = true;
+            }
 
             if (!conversation || !conversation.targetId) {
                 $scope.messageList = [];
@@ -82,11 +89,13 @@ conversationController.controller("conversationController", ["$scope",
 
             var currenthis = conversationServer._cacheHistory[conversation.targetType + "_" + conversation.targetId] || [];
             if (currenthis.length == 0) {
-                conversationServer._getHistoryMessages(+conversation.targetType, conversation.targetId, 3).then(function() {
+                conversationServer._getHistoryMessages(+conversation.targetType, conversation.targetId, 3).then(function(data) {
                     $scope.messageList = conversationServer._cacheHistory[conversation.targetType + "_" + conversation.targetId];
                     if ($scope.messageList.length > 0) {
                         $scope.messageList.unshift(new WidgetModule.TimePanl($scope.messageList[0].sentTime));
-                        $scope.messageList.unshift(new WidgetModule.GetMoreMessagePanel());
+                        if (data.has) {
+                            $scope.messageList.unshift(new WidgetModule.GetMoreMessagePanel());
+                        }
                     }
                     adjustScrollbars();
                 });

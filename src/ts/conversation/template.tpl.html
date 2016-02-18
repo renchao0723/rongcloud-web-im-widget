@@ -11,8 +11,8 @@
                 </div>
 
                 <div class="toolBar headBtn pull-right">
-                    <a href="javascript:;" class="kefuChatBoxMin sprite" ng-show="resoures.fullScreen" ng-click="resoures.fullScreen=false;" title="最小化"></a>
-                    <a href="javascript:;" class="kefuChatBoxMax sprite" ng-show="!resoures.fullScreen" ng-click="resoures.fullScreen=true;" title="最大化"></a>
+                    <a href="javascript:;" class="kefuChatBoxMin sprite" ng-show="resoures.fullScreen&&!widgetConfig.displayConversationList" ng-click="resoures.fullScreen=false;" title="最小化"></a>
+                    <a href="javascript:;" class="kefuChatBoxMax sprite" ng-show="!resoures.fullScreen&&!widgetConfig.displayConversationList" ng-click="resoures.fullScreen=true;" title="最大化"></a>
                     <a href="javascript:;" class="kefuChatBoxClose sprite" ng-click="close()" title="结束对话"></a>
                 </div>
             </div>

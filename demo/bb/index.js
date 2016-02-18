@@ -28,6 +28,7 @@ demo.controller("main", ["$scope", "WebIMWidget", function($scope,
         width:"600px",
       },
       displayConversationList:true,
+      displayMinButton:false,
       conversationListPosition:WebIMWidget.EnumConversationListPosition.left,
       onError:function(error){
         console.log("error:"+error);

@@ -23,10 +23,11 @@ widget.factory("providerdata", [function() {
 }]);
 
 widget.factory("widgetConfig", [function() {
-    return {}
+    return {};
 }]);
 interface widgetConfig {
     displayConversationList: boolean
+    displayMinButton: boolean
     config: any
 }
 
@@ -55,6 +56,7 @@ widget.factory("WebIMWidget", ["$q", "conversationServer",
         }
 
         var defaultconfig = <Config>{
+            displayMinButton: true,
             style: {
                 width: "450px",
                 height: "470px"
@@ -124,6 +126,7 @@ widget.factory("WebIMWidget", ["$q", "conversationServer",
 
 
             widgetConfig.displayConversationList = defaultconfig.displayConversationList;
+            widgetConfig.displayMinButton = defaultconfig.displayMinButton;
 
             // RongIMLib.RongIMClient.init(defaultconfig.appkey);
             RongIMSDKServer.init(defaultconfig.appkey);
@@ -271,8 +274,9 @@ widget.directive("rongWidget", [function() {
     }
 }]);
 
-widget.controller("rongWidgetController", ["$scope", "WebIMWidget", function($scope, WebIMWidget) {
+widget.controller("rongWidgetController", ["$scope", "WebIMWidget", "widgetConfig", function($scope, WebIMWidget, widgetConfig: widgetConfig) {
     $scope.main = WebIMWidget;
+    $scope.widgetConfig = widgetConfig;
     WebIMWidget.show = function() {
         WebIMWidget.display = true;
         WebIMWidget.fullScreen = false;
