@@ -1602,7 +1602,7 @@ angular.module('RongWebIMWidget').run(['$templateCache', function($templateCache
 
 
   $templateCache.put('./src/ts/main.tpl.html',
-    "<div id=rong-widget-box><div ng-show=main.display><rong-conversation></rong-conversation><rong-conversation-list></rong-conversation-list></div><div id=minbtn class=\"kefuBtnBox blueBg\" ng-show=!main.display&&widgetConfig.displayMinButton ng-click=showbtn()><a class=kefuBtn href=\"javascript: void(0);\"><div class=\"sprite people\"></div><span class=recent>最近联系人</span><div class=\"sprite arrow-up\"></div></a></div></div>"
+    "<div id=rong-widget-box ng-show=main.display><div><rong-conversation></rong-conversation><rong-conversation-list></rong-conversation-list></div><div id=minbtn class=\"kefuBtnBox blueBg\" ng-show=!main.display&&widgetConfig.displayMinButton ng-click=showbtn()><a class=kefuBtn href=\"javascript: void(0);\"><div class=\"sprite people\"></div><span class=recent>最近联系人</span><div class=\"sprite arrow-up\"></div></a></div></div>"
   );
 
 }]);
