@@ -30,8 +30,8 @@
 
                         <div ng-repeat="item in messageList" ng-switch="item.panelType">
                             <div class="Messages-date" ng-switch-when="104"><b class="">{{item.sentTime|historyTime}}</b></div>
-                            <div class="Messages-date" ng-switch-when="105"><b class="" ng-click="getHistory()">查看历史消息</b></b></div>
-                            <div class="Messages-date" ng-switch-when="106"><b class="" ng-click="getMoreMessage()">获取更多消息</b></div>
+                            <div class="Messages-history" ng-switch-when="105"><b class="" ng-click="getHistory()">查看历史消息</b></b></div>
+                            <div class="Messages-history" ng-switch-when="106"><b class="" ng-click="getMoreMessage()">获取更多消息</b></div>
                             <div class="sys-tips" ng-switch-when="2"><span>会话已结束</span></div>
                             <div class="Message" ng-switch-when="1">
                                 <div class="Messages-unreadLine"></div>

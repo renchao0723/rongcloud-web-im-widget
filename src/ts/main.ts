@@ -6,16 +6,18 @@ var widget = angular.module("RongWebIMWidget", ["RongWebIMWidget.conversationSer
 widget.run(["$http", "WebIMWidget", "widgetConfig", function($http: angular.IHttpService,
     WebIMWidget: WebIMWidget, widgetConfig: widgetConfig) {
 
-    $script.get("http://cdn.ronghub.com/RongIMLib-2.0.6.beta.min.js", function() {
-        $script.get("http://cdn.ronghub.com/RongEmoji-2.0.0.beta.min.js", function() {
-            RongIMLib.RongIMEmoji.init();
+    $script.get("http://cdn.ronghub.com/RongIMLib-2.1.1.beta.min.js", function() {
+        $script.get("http://cdn.ronghub.com/RongEmoji-2.0.2.beta.min.js", function() {
+            RongIMLib.RongIMEmoji && RongIMLib.RongIMEmoji.init();
+        });
+        $script.get("http://cdn.ronghub.com/RongIMVoice-2.0.0.beta.min.js", function() {
+            RongIMLib.RongIMVoice && RongIMLib.RongIMVoice.init();
         });
         if (widgetConfig.config) {
             WebIMWidget.init(widgetConfig.config);
         }
     });
-
-    $script.get("//cdn.bootcss.com/plupload/2.1.8/plupload.full.min.js", function() { });
+    $script.get("http://cdn.bootcss.com/plupload/2.1.8/plupload.full.min.js", function() { });
 }]);
 
 widget.factory("providerdata", [function() {
@@ -25,17 +27,7 @@ widget.factory("providerdata", [function() {
 widget.factory("widgetConfig", [function() {
     return {};
 }]);
-interface widgetConfig {
-    displayConversationList: boolean
-    displayMinButton: boolean
-    config: any
-}
 
-interface providerdata {
-    getUserInfo: UserInfoProvider
-    getGroupInfo: GroupInfoProvider
-}
-// var RongIMLib: any;
 
 widget.factory("WebIMWidget", ["$q", "conversationServer",
     "conversationListServer", "providerdata", "widgetConfig", "RongIMSDKServer",
@@ -43,23 +35,21 @@ widget.factory("WebIMWidget", ["$q", "conversationServer",
         conversationListServer: conversationListServer, providerdata: providerdata,
         widgetConfig: widgetConfig, RongIMSDKServer: RongIMSDKServer) {
 
-
         var WebIMWidget = <WebIMWidget>{};
 
         var messageList = {};
 
-        //TODO:是否要加限制可用css
-        var availableStyleConfig = {
-            height: true, width: true, top: true, left: true, right: true,
-            bottom: true, margin: true, "margin-top": true,
-            "margin-left": true, "margin-right": true, "margin-bottom": true
-        }
+        var eleConversationListWidth = 195, eleminbtnHeight = 50;
 
         var defaultconfig = <Config>{
             displayMinButton: true,
+            conversationListPosition: WidgetModule.EnumConversationListPosition.left,
             style: {
-                width: "450px",
-                height: "470px"
+                positionFixed: false,
+                width: 450,
+                height: 470,
+                bottom: 0,
+                right: 0
             }
         }
 
@@ -76,59 +66,89 @@ widget.factory("WebIMWidget", ["$q", "conversationServer",
             angular.extend(defaultconfig, config);
             angular.extend(defaultStyle, config.style);
 
-            // if (config)
-            //
-
-            var elebox = document.getElementById("rong-widget-box");
             var eleconversation = document.getElementById("rong-conversation");
             var eleconversationlist = document.getElementById("rong-conversation-list");
 
-            var eleminbtn = document.getElementById("minbtn");
-
-
-            if (defaultconfig.displayConversationList) {
-                eleminbtn.style["display"] = "inline-block";
-                if (defaultconfig.conversationListPosition == WidgetModule.EnumConversationListPosition.left) {
-                    eleconversation.style["left"] = "197px";
-                    eleconversation.style["right"] = "0px";
-                    eleconversationlist.style["left"] = "0px";
-                    eleminbtn.style["left"] = "0px";
-                } else if (defaultconfig.conversationListPosition == WidgetModule.EnumConversationListPosition.right) {
-                    eleconversation.style["left"] = "0px";
-                    eleconversation.style["right"] = "197px";
-                    eleconversationlist.style["right"] = "0px";
-                    eleminbtn.style["right"] = "0px";
-                } else {
-                    throw new Error("config conversationListPosition value is invalid");
-                }
-            } else {
-                eleconversationlist.style["display"] = "none";
-                eleminbtn.style["display"] = "none";
-                eleconversation.style["left"] = "0px";
-                eleconversation.style["right"] = "0px";
-            }
+            var eleminbtn = document.getElementById("rong-widget-minbtn");
 
             if (defaultStyle) {
-                for (var s in defaultStyle) {
-                    if (typeof defaultStyle[s] === "string" && availableStyleConfig[s]) {
-                        elebox.style[s] = defaultStyle[s];
-                    }
+
+                eleconversation.style["height"] = defaultStyle.height + "px";
+                eleconversation.style["width"] = defaultStyle.width + "px";
+                eleconversationlist.style["height"] = defaultStyle.height + "px";
+
+                if (defaultStyle.positionFixed) {
+                    eleconversationlist.style['position'] = "fixed";
+                    eleminbtn.style['position'] = "fixed";
+                    eleconversation.style['position'] = "fixed";
+                } else {
+                    eleconversationlist.style['position'] = "absolute";
+                    eleminbtn.style['position'] = "absolute";
+                    eleconversation.style['position'] = "absolute";
                 }
 
-                if (defaultStyle.center) {
-                    elebox.style["top"] = "50%";
-                    elebox.style["left"] = "50%";
-                    elebox.style["margin-top"] = "-" + parseInt(defaultStyle.height) / 2 + "px";
-                    elebox.style["margin-left"] = "-" + parseInt(defaultStyle.width) / 2 + "px";
-                    elebox.style["position"] = "fixed";
+                if (defaultconfig.displayConversationList) {
+
+                    eleminbtn.style["display"] = "inline-block";
+                    eleconversationlist.style["display"] = "inline-block";
+
+                    if (defaultconfig.conversationListPosition == WidgetModule.EnumConversationListPosition.left) {
+                        if (!isNaN(defaultStyle.left)) {
+                            eleconversationlist.style["left"] = defaultStyle.left + "px";
+                            eleminbtn.style["left"] = defaultStyle.left + "px";
+                            eleconversation.style["left"] = defaultStyle.left + eleConversationListWidth + "px";
+                        }
+
+                        if (!isNaN(defaultStyle.right)) {
+                            eleconversationlist.style["right"] = defaultStyle.right + defaultStyle.width + "px";
+                            eleminbtn.style["right"] = defaultStyle.right + defaultStyle.width + "px";
+                            eleconversation.style["right"] = defaultStyle.right + "px";
+                        }
+
+
+                    } else if (defaultconfig.conversationListPosition == WidgetModule.EnumConversationListPosition.right) {
+                        if (!isNaN(defaultStyle.left)) {
+                            eleconversationlist.style["left"] = defaultStyle.left + defaultStyle.width + "px";
+                            eleminbtn.style["left"] = defaultStyle.left + defaultStyle.width + "px";
+                            eleconversation.style["left"] = defaultStyle.left + "px";
+                        }
+
+                        if (!isNaN(defaultStyle.right)) {
+                            eleconversationlist.style["right"] = defaultStyle.right + "px";
+                            eleminbtn.style["right"] = defaultStyle.right + "px";
+                            eleconversation.style["right"] = defaultStyle.right + eleConversationListWidth + "px";
+                        }
+                    } else {
+                        throw new Error("config conversationListPosition value is invalid")
+                    }
+
+                    if (!isNaN(defaultStyle["top"])) {
+                        eleconversationlist.style["top"] = defaultStyle.top + "px";
+                        eleminbtn.style["top"] = defaultStyle.top + defaultStyle.height - eleminbtnHeight + "px";
+                        eleconversation.style["top"] = defaultStyle.top + "px";
+                    }
+
+                    if (!isNaN(defaultStyle["bottom"])) {
+                        eleconversationlist.style["bottom"] = defaultStyle.bottom + "px";
+                        eleminbtn.style["bottom"] = defaultStyle.bottom + "px";
+                        eleconversation.style["bottom"] = defaultStyle.bottom + "px";
+                    }
+                } else {
+                    eleminbtn.style["display"] = "none";
+                    eleconversationlist.style["display"] = "none";
+
+                    eleconversation.style["left"] = defaultStyle["left"] + "px";
+                    eleconversation.style["right"] = defaultStyle["right"] + "px";
+                    eleconversation.style["top"] = defaultStyle["top"] + "px";
+                    eleconversation.style["bottom"] = defaultStyle["bottom"] + "px";
                 }
+
             }
 
 
             widgetConfig.displayConversationList = defaultconfig.displayConversationList;
             widgetConfig.displayMinButton = defaultconfig.displayMinButton;
 
-            // RongIMLib.RongIMClient.init(defaultconfig.appkey);
             RongIMSDKServer.init(defaultconfig.appkey);
 
             RongIMSDKServer.connect(defaultconfig.token).then(function(userId) {
@@ -154,21 +174,21 @@ widget.factory("WebIMWidget", ["$q", "conversationServer",
                     if (defaultconfig.onError && typeof defaultconfig.onError == "function") {
                         defaultconfig.onError({ code: 0, info: "token 无效" });
                     }
-                    // console.log("token 无效");
                 } else {
                     if (defaultconfig.onError && typeof defaultconfig.onError == "function") {
                         defaultconfig.onError({ code: err.errorCode });
                     }
-                    // console.log("connect error:" + err.errorCode);
                 }
             })
 
             RongIMSDKServer.setConnectionStatusListener({
                 onChanged: function(status) {
+                    WebIMWidget.connected = false;
                     switch (status) {
                         //链接成功
                         case RongIMLib.ConnectionStatus.CONNECTED:
                             console.log('链接成功');
+                            WebIMWidget.connected = true;
                             break;
                         //正在链接
                         case RongIMLib.ConnectionStatus.CONNECTING:
@@ -186,24 +206,27 @@ widget.factory("WebIMWidget", ["$q", "conversationServer",
                     if (WebIMWidget.onConnectStatusChange) {
                         WebIMWidget.onConnectStatusChange(status);
                     }
+                    if (conversationListServer._onConnectStatusChange) {
+                        conversationListServer._onConnectStatusChange(status);
+                    }
                 }
             });
 
             RongIMSDKServer.setOnReceiveMessageListener({
                 onReceived: function(data) {
-                    console.log(data);
                     var msg = WidgetModule.Message.convert(data);
 
                     switch (data.messageType) {
-                        case WidgetModule.MessageType.ContactNotificationMessage:
-                            //好友通知自行处理
-                            break;
-                        case WidgetModule.MessageType.TextMessage:
                         case WidgetModule.MessageType.VoiceMessage:
+                            msg.content.isUnReade = true;
+                        case WidgetModule.MessageType.TextMessage:
                         case WidgetModule.MessageType.LocationMessage:
                         case WidgetModule.MessageType.ImageMessage:
                         case WidgetModule.MessageType.RichContentMessage:
                             addMessageAndOperation(msg);
+                            break;
+                        case WidgetModule.MessageType.ContactNotificationMessage:
+                            //好友通知自行处理
                             break;
                         case WidgetModule.MessageType.InformationNotificationMessage:
                             break;
@@ -230,7 +253,7 @@ widget.factory("WebIMWidget", ["$q", "conversationServer",
                             }
                         })
                     }
-                    conversationListServer.updateConversations();
+                    conversationListServer.updateConversations().then(function() { });
                 }
             });
 
@@ -262,6 +285,14 @@ widget.factory("WebIMWidget", ["$q", "conversationServer",
 
         WebIMWidget.EnumConversationType = WidgetModule.EnumConversationType;
 
+        WebIMWidget.show = function() {
+            WebIMWidget.display = true;
+            WebIMWidget.fullScreen = false;
+        }
+        WebIMWidget.hidden = function() {
+            WebIMWidget.display = false;
+        }
+
 
         return WebIMWidget;
     }]);
@@ -275,8 +306,10 @@ widget.directive("rongWidget", [function() {
 }]);
 
 widget.controller("rongWidgetController", ["$scope", "WebIMWidget", "widgetConfig", function($scope, WebIMWidget, widgetConfig: widgetConfig) {
+
     $scope.main = WebIMWidget;
     $scope.widgetConfig = widgetConfig;
+
     WebIMWidget.show = function() {
         WebIMWidget.display = true;
         WebIMWidget.fullScreen = false;
@@ -284,22 +317,24 @@ widget.controller("rongWidgetController", ["$scope", "WebIMWidget", "widgetConfi
             $scope.$apply();
         });
     }
+
     WebIMWidget.hidden = function() {
         WebIMWidget.display = false;
         setTimeout(function() {
             $scope.$apply();
         });
     }
+
     $scope.showbtn = function() {
         WebIMWidget.display = true;
     }
 }]);
 
-widget.filter('trustHtml', function($sce: angular.ISCEService) {
+widget.filter('trustHtml', ["$sce", function($sce: angular.ISCEService) {
     return function(str: any) {
         return $sce.trustAsHtml(str);
     }
-});
+}]);
 
 widget.filter("historyTime", ["$filter", function($filter: angular.IFilterService) {
     return function(time: Date) {
@@ -314,6 +349,17 @@ widget.filter("historyTime", ["$filter", function($filter: angular.IFilterServic
     };
 }]);
 
+interface widgetConfig {
+    displayConversationList: boolean
+    displayMinButton: boolean
+    config: any
+}
+
+interface providerdata {
+    getUserInfo: UserInfoProvider
+    getGroupInfo: GroupInfoProvider
+}
+
 interface Config {
     appkey: string;
     token: string;
@@ -324,9 +370,13 @@ interface Config {
     conversationListPosition: any;
     displayMinButton: boolean;
     style: {
-        height: string;
-        width: string;
-        center: boolean;
+        positionFixed: boolean;
+        height: number;
+        width: number;
+        bottom: number;
+        right: number;
+        top?: number;
+        left?: number;
     }
 }
 
@@ -338,6 +388,7 @@ interface WebIMWidget {
     hidden(): void
     display: boolean
     fullScreen: boolean
+    connected: boolean
 
     setConversation(targetType: number, targetId: string, title: string): void
 
@@ -345,7 +396,7 @@ interface WebIMWidget {
 
     onSentMessage(msg: WidgetModule.Message): void
 
-    onClose(): void
+    onClose(data: any): void
 
     onCloseBefore(obj: any): boolean
 

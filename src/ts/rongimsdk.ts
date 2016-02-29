@@ -216,7 +216,6 @@ SDKServer.factory("RongIMSDKServer", ["$q", function($q: angular.IQService) {
         var defer = $q.defer();
         RongIMLib.RongIMClient.getInstance().getHistoryMessages(type, targetId, null, num, {
             onSuccess: function(data, has) {
-                console.log(has);
                 defer.resolve({
                     data: data,
                     has: has

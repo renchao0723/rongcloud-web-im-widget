@@ -185,7 +185,11 @@ module WidgetModule {
                     break;
                 case MessageType.LocationMessage:
                     var location = new LocationMessage();
-                    location.content = SDKmsg.content.content;
+                    var content = SDKmsg.content.content || "";
+                    if (content.indexOf("base64,") == -1) {
+                        content = "data:image/png;base64," + content;
+                    }
+                    location.content = content;
                     location.latiude = SDKmsg.content.latiude;
                     location.longitude = SDKmsg.content.longitude;
                     location.poi = SDKmsg.content.poi;
@@ -306,7 +310,7 @@ module WidgetModule {
         constructor(targetType?: number, targetId?: string, title?: string) {
             this.targetType = targetType;
             this.targetId = targetId;
-            this.title = title;
+            this.title = title || "";
         }
 
         static onvert(item: RongIMLib.Conversation) {

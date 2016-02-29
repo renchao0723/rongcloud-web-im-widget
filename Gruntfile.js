@@ -37,10 +37,6 @@ module.exports = function(grunt) {
             cwd: "./src/images/",
             src: "./**",
             dest: "./build/images/"
-          },
-          {
-            src:"./src/css/conversation.css",
-            dest:"./build/css/conversation.css"
           }
         ]
       },
@@ -51,10 +47,6 @@ module.exports = function(grunt) {
             cwd: "./src/images/",
             src: "./**",
             dest: "./dist/images/"
-          },
-          {
-            src:"./src/css/conversation.css",
-            dest:"./dist/css/conversation.css"
           }
         ]
       }
@@ -111,21 +103,62 @@ module.exports = function(grunt) {
       build: {
         files:[
           {
-            src:['./temp/main.js','./temp/myAppHTMLCache.js','./vendor/loadscript/script.min.js','./vendor/qiniu/qiniu.js'],
+            src:[
+              './bower_components/jquery/dist/jquery.min.js',
+              './bower_components/jquery.nicescroll/dist/jquery.nicescroll.min.js',
+              './vendor/jqueryrebox/jquery-rebox.js',
+              './temp/main.js','./temp/myAppHTMLCache.js',
+              './vendor/loadscript/script.min.js','./vendor/qiniu/qiniu.js'],
             dest:'./build/main.js'
+          },
+          {
+            src:[
+              './vendor/jqueryrebox/jquery-rebox.css','./src/css/conversation.css',
+            ],
+            dest:'./build/css/conversation.css'
           }
         ]
       },
       release:{
         files:[
           {
-            src:['./temp/main.js','./temp/myAppHTMLCache.js','./vendor/loadscript/script.min.js','./vendor/qiniu/qiniu.js'],
+            src:[
+              './bower_components/jquery/dist/jquery.min.js',
+              './bower_components/jquery.nicescroll/dist/jquery.nicescroll.min.js',
+              './vendor/jqueryrebox/jquery-rebox.js',
+              './temp/main.js','./temp/myAppHTMLCache.js',
+            './vendor/loadscript/script.min.js','./vendor/qiniu/qiniu.js'],
             dest:'./dist/main.js'
+          },
+          {
+            src:[
+              './vendor/jqueryrebox/jquery-rebox.css','./src/css/conversation.css',
+            ],
+            dest:'./dist/css/conversation.css'
           }
         ]
       }
     },
-
+    uglify:{
+      build:{
+        src:'./build/main.js',
+        dest:'./build/main.min.js'
+      },
+      release:{
+        src:'./dist/main.js',
+        dest:'./dist/main.min.js'
+      }
+    },
+    cssmin:{
+      build:{
+        src:'./build/css/conversation.css',
+        dest:'./build/css/conversation.min.css'
+      },
+      release:{
+        src:'./dist/css/conversation.css',
+        dest:'./dist/css/conversation.min.css',
+      }
+    },
 
     ngtemplates: {
       app: {
@@ -158,17 +191,19 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-angular-templates');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-cssmin');
 
   grunt.registerTask("default", function() {
     grunt.log.writeln("env" + process.env.path);
   });
 
   grunt.registerTask("build", ["clean:build", "typescript:build",
-    "ngtemplates:app","concat:build", "copy:build","clean:temp"
+    "ngtemplates:app","concat:build", "copy:build","clean:temp","uglify:build","cssmin:build"
   ]);
 
   grunt.registerTask("release", ["clean:release", "typescript:release",
-    "ngtemplates:app","concat:release", "copy:release","clean:temp"
+    "ngtemplates:app","concat:release", "copy:release","clean:temp","uglify:release","cssmin:release"
   ]);
 
 

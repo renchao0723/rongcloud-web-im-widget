@@ -9,9 +9,9 @@
             </div>
         </div>
         <div class="content">
-            <div class="netStatus hide"><!--online-->
+            <div class="netStatus" ng-hide="connected"><!--online-->
                 <div class="sprite"></div>
-                <span>网络连接成功</span>
+                <span>网络连接断开</span>
             </div>
             <div class="">
                 <conversation-item ng-repeat="item in conversationListServer.conversationList" item="item"></conversation-item>

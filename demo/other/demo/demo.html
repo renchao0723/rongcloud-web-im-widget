@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>IM测试</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+</head>
+<body>
+<div>IM测试</div>
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript">
+window.WEB_XHR_POLLING = true;
+</script>
+<!-- <script type="text/javascript" src="rongyun.min.js?ver=20160215"></script> -->
+<script type="text/javascript" src="../RongIMClient.js"></script>
+<script type="text/javascript" src="rongyun.emoji.min.js?ver=20160215"></script>
+<script type="text/javascript" src="rongyun.voice.min.js?ver=20160215"></script>
+<script type="text/javascript">
+var appKey = "vnroth0krmclo",
+    token = "0tae90ucy3lBsPhT1alkIXEpYaJWoxVh8KSPNcY3itx4lc2jh95XpnVMy3gJ1OWDVgGIvUfxgAcGNpUxmx6d+9fzcLav52knZEZcrqF2bIU4mPdO31CSFQLaHcqKnbtxzNUqdi3JlqM=";
+$(function(){
+    //初始化
+    RongIMClient.init(appKey);
+    //连接状态监听器
+    RongIMClient.setConnectionStatusListener({
+        onChanged: function(status){
+            switch(status){
+                //链接成功
+                case RongIMClient.ConnectionStatus.CONNECTED:
+                    console.log('链接成功');
+                    break;
+                //正在链接
+                case RongIMClient.ConnectionStatus.CONNECTING:
+                    console.log('正在链接');
+                    break;
+                //重新链接
+                case RongIMClient.ConnectionStatus.RECONNECT:
+                    console.log('重新链接');
+                    break;
+                //其他设备登陆
+                case RongIMClient.ConnectionStatus.OTHER_DEVICE_LOGIN:
+                    console.log('其他设备登陆');
+                    break;
+                //链接关闭
+                case RongIMClient.ConnectionStatus.CLOSURE:
+                    console.log('链接关闭');
+                    break;
+                //未知错误
+                case RongIMClient.ConnectionStatus.UNKNOWN_ERROR:
+                    console.log('未知错误');
+                    break;
+                //登出
+                case RongIMClient.ConnectionStatus.LOGOUT:
+                    console.log('登出');
+                    break;
+                //用户已被封禁
+                case RongIMClient.ConnectionStatus.BLOCK:
+                    console.log('用户已被封禁');
+                    break;
+                default:
+                    console.log('链接状态无效');
+                    return false;
+            }
+        }
+    });
+    //消息监听器
+    RongIMClient.getInstance().setOnReceiveMessageListener({
+        //接收到的消息
+        onReceived: function(message){
+            console.log("收到消息！");
+        }
+    });
+    //连接融云服务器
+    console.log(token);
+    RongIMClient.connect(token, {
+        onSuccess: function(userId){
+            //此处处理连接成功
+            console.log("链接成功！");
+            //获取某个讨论组信息
+            RongIMClient.getInstance().getDiscussion("32827622-72b8-4cc7-b0c7-e63d846086db", {
+                onSuccess: function(info){
+                    console.log("获取讨论组信息成功！");
+                },
+                onError: function(err){
+                    console.log("获取讨论组信息失败！");
+                    console.log(err);
+                }
+            });
+        },
+        onError: function(errorCode){
+            //此处处理连接错误
+            var info = '';
+            switch (errorCode){
+               case RongIMClient.callback.ErrorCode.TIMEOUT:
+                    info = '超时';
+                    break;
+               case RongIMClient.callback.ErrorCode.UNKNOWN_ERROR:
+                    info = '未知错误';
+                    break;
+               case RongIMClient.ConnectErrorStatus.UNACCEPTABLE_PROTOCOL_VERSION:
+                    info = '不可接受的协议版本';
+                    break;
+               case RongIMClient.ConnectErrorStatus.IDENTIFIER_REJECTED:
+                    info = 'appkey不正确';
+                    break;
+               case RongIMClient.ConnectErrorStatus.SERVER_UNAVAILABLE:
+                    info = '服务器不可用';
+                    break;
+               case RongIMClient.ConnectErrorStatus.TOKEN_INCORRECT:
+                    info = 'token无效';
+                    break;
+               case RongIMClient.ConnectErrorStatus.NOT_AUTHORIZED:
+                    info = '未认证';
+                    break;
+               case RongIMClient.ConnectErrorStatus.REDIRECT:
+                    info = '重新获取导航';
+                    break;
+               case RongIMClient.ConnectErrorStatus.PACKAGE_ERROR:
+                    info = '包名错误';
+                    break;
+               case RongIMClient.ConnectErrorStatus.APP_BLOCK_OR_DELETE:
+                    info = '应用已被封禁或已被删除';
+                    break;
+               case RongIMClient.ConnectErrorStatus.BLOCK:
+                    info = '用户被封禁';
+                    break;
+               case RongIMClient.ConnectErrorStatus.TOKEN_EXPIRE:
+                    info = 'token已过期';
+                    break;
+               case RongIMClient.ConnectErrorStatus.DEVICE_ERROR:
+                    info = '设备号错误';
+                    break;
+            }
+            console.log("连接失败，原因是："+ info);
+        }
+    });
+});
+</script>
+</body>
+</html>

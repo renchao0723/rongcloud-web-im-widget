@@ -21,14 +21,15 @@ demo.controller("main", ["$scope", "WebIMWidget", function($scope,
   angular.element(document).ready(function() {
 
     WebIMWidget.init({
-      appkey: "bmdehs6pdw0ss",
-      token: "rlBAHroVZX+axQvd3K0t9MvVz5jKjrGTX+4hbq436lzCcH9bZH8Dc8hhnR9pa8hBAoL8QbzPDDo=",
+      appkey: "z3v5yqkbv8v30",
+      token: "/jmqZI8QkQjkIf3pW6fMt7I6ZiT8q7s0UEaMPWY0lMyxu55c8bJO3/VqHhVG+5rbgoBbb9WE1cARaIf9YN+emg==",
       style:{
-        center:true,
-        width:"600px",
+        width:600,
+        left:100,
+        top:100
       },
       displayConversationList:true,
-      displayMinButton:false,
+      displayMinButton:true,
       conversationListPosition:WebIMWidget.EnumConversationListPosition.left,
       onError:function(error){
         console.log("error:"+error);

@@ -81,6 +81,8 @@ conversationListSer.factory("conversationListServer", ["$q", "providerdata",
             server.conversationList.unshift(conversation);
         }
 
+        server._onConnectStatusChange=function(){}
+
         return server;
     }]);
 interface conversationListServer {
@@ -89,4 +91,5 @@ interface conversationListServer {
     refreshConversationList(): void
     getConversation(type: number, id: string): WidgetModule.Conversation
     addConversation(con: WidgetModule.Conversation): void
+    _onConnectStatusChange(status: any): void
 }

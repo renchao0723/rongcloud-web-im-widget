@@ -8,9 +8,8 @@ conversationController.controller("conversationController", ["$scope",
         WebIMWidget: WebIMWidget, conversationListServer: conversationListServer,
         widgetConfig: widgetConfig) {
 
-        console.log("conversation controller");
-
         var ImageDomain = "http://7xogjk.com1.z0.glb.clouddn.com/";
+        var notExistConversation = true;
 
         function adjustScrollbars() {
             setTimeout(function() {
@@ -67,8 +66,10 @@ conversationController.controller("conversationController", ["$scope",
                 $scope.resoures.display = true;
             }
 
+            //会话为空清除页面各项值
             if (!conversation || !conversation.targetId) {
                 $scope.messageList = [];
+                $scope.currentConversation = null;
                 conversationServer.current = null;
                 setTimeout(function() {
                     $scope.$apply();
@@ -78,12 +79,8 @@ conversationController.controller("conversationController", ["$scope",
             conversationServer.current = conversation;
             $scope.currentConversation = conversation;
 
-            if (!conversationListServer.getConversation(conversation.targetType, conversation.targetId)) {
-                conversationListServer.addConversation(conversation);
-            }
 
             //TODO:获取历史消息
-            //
 
             conversationServer._cacheHistory[conversation.targetType + "_" + conversation.targetId] = conversationServer._cacheHistory[conversation.targetType + "_" + conversation.targetId] || []
 
@@ -113,14 +110,15 @@ conversationController.controller("conversationController", ["$scope",
         $scope.$watch("currentConversation.messageContent", function(newVal: string, oldVal: string) {
             if (newVal === oldVal)
                 return;
-
-            RongIMLib.RongIMClient.getInstance().saveTextMessageDraft(+$scope.currentConversation.targetType, $scope.currentConversation.targetId, newVal)
+            if ($scope.currentConversation) {
+                RongIMLib.RongIMClient.getInstance().saveTextMessageDraft(+$scope.currentConversation.targetType, $scope.currentConversation.targetId, newVal)
+            }
 
         });
 
         conversationServer.onReceivedMessage = function(msg: WidgetModule.Message) {
             // $scope.messageList.splice(0, $scope.messageList.length);
-            if (msg.targetId == $scope.currentConversation.targetId && msg.conversationType == $scope.currentConversation.targetType) {
+            if ($scope.currentConversation && msg.targetId == $scope.currentConversation.targetId && msg.conversationType == $scope.currentConversation.targetType) {
                 $scope.$apply();
                 if (msg.messageType == WidgetModule.MessageType.ImageMessage) {
                     setTimeout(function() {
@@ -129,7 +127,6 @@ conversationController.controller("conversationController", ["$scope",
                 } else {
                     adjustScrollbars();
                 }
-                console.log("刷新页面");
             }
         }
 
@@ -181,9 +178,13 @@ conversationController.controller("conversationController", ["$scope",
             } else {
                 $scope.resoures.display = false;
             }
+            $scope.messageList = [];
+            $scope.currentConversation = null;
+            conversationServer.current = null;
         }
 
         $scope.close = function() {
+            var obj = $scope.currentConversation;
             if (WebIMWidget.onCloseBefore && typeof WebIMWidget.onCloseBefore === "function") {
                 var isClose = WebIMWidget.onCloseBefore({
                     close: function() {
@@ -192,14 +193,14 @@ conversationController.controller("conversationController", ["$scope",
                             $scope.$apply();
                         })
                         if (WebIMWidget.onClose && typeof WebIMWidget.onClose === "function") {
-                            WebIMWidget.onClose();
+                            WebIMWidget.onClose(obj);
                         }
                     }
                 });
             } else {
                 closeState();
                 if (WebIMWidget.onClose && typeof WebIMWidget.onClose === "function") {
-                    WebIMWidget.onClose();
+                    WebIMWidget.onClose(obj);
                 }
             }
 
@@ -208,10 +209,7 @@ conversationController.controller("conversationController", ["$scope",
 
 
         $scope.send = function() {
-            console.log($scope.currentConversation, conversationServer.loginUser);
-
             if (!$scope.currentConversation.targetId || !$scope.currentConversation.targetType) {
-                console.log("请设置会话");
                 alert("请先选择一个会话目标。")
                 return;
             }
@@ -219,22 +217,20 @@ conversationController.controller("conversationController", ["$scope",
                 return;
             }
 
-            // var con = $scope.currentConversation.messageContent.replace(/\[.+?\]/g, function(x: any) {
-            //     return RongIMLib.Expression.getEmojiObjByEnglishNameOrChineseName(x.slice(1, x.length - 1)).tag || x;
-            // });
 
             var con = RongIMLib.RongIMEmoji.symbolToEmoji($scope.currentConversation.messageContent);
 
             var msg = RongIMLib.TextMessage.obtain(con);
             var userinfo = new RongIMLib.UserInfo(conversationServer.loginUser.id, conversationServer.loginUser.name, conversationServer.loginUser.portraitUri);
-            // userinfo.userId = conversationServer.loginUser.id;
-            // userinfo.name = conversationServer.loginUser.name;
-            // userinfo.portraitUri = conversationServer.loginUser.portraitUri;
+
             msg.userInfo = userinfo;
 
             RongIMLib.RongIMClient.getInstance().sendMessage(+$scope.currentConversation.targetType, $scope.currentConversation.targetId, msg, {
                 onSuccess: function(retMessage: RongIMLib.Message) {
-                    console.log("send success");
+
+                    conversationListServer.updateConversations().then(function() {
+
+                    });
                 },
                 onError: function(error) {
                     console.log(error);
@@ -252,21 +248,6 @@ conversationController.controller("conversationController", ["$scope",
             var obj = document.getElementById("inputMsg");
             WidgetModule.Helper.getFocus(obj);
         }
-
-        // $script.ready("qiniu", function() {
-        //     if (conversationServer._uploadToken) {
-        //         uploadFileInit();
-        //     } else {
-        //         var upload = document.getElementById("upload-file");
-        //         RongIMLib.RongIMClient.getInstance().getQnTkn(RongIMLib.FileType.IMAGE, {
-        //             onSuccess: function(data) {
-        //                 conversationServer._uploadToken = data.token;
-        //                 uploadFileInit();
-        //             }
-        //         })
-        //
-        //     }
-        // })
 
         conversationServer._onConnectSuccess = function() {
             RongIMLib.RongIMClient.getInstance().getFileToken(RongIMLib.FileType.IMAGE, {
@@ -310,9 +291,7 @@ conversationController.controller("conversationController", ["$scope",
                     'UploadComplete': function() {
                     },
                     'FileUploaded': function(up: any, file: any, info: any) {
-                        console.log(info);
                         if (!$scope.currentConversation.targetId || !$scope.currentConversation.targetType) {
-                            console.log("请设置会话");
                             alert("请先选择一个会话目标。")
                             return;
                         }
@@ -321,12 +300,14 @@ conversationController.controller("conversationController", ["$scope",
                             onSuccess: function(url) {
 
                                 WidgetModule.Helper.ImageHelper.getThumbnail(file.getNative(), 60000, function(obj: any, data: any) {
-                                    var im = RongIMLib.ImageMessage.obtain(data, url);
+                                    var im = RongIMLib.ImageMessage.obtain(data, url.downloadUrl);
 
                                     var content = packDisplaySendMessage(im, WidgetModule.MessageType.ImageMessage);
                                     RongIMLib.RongIMClient.getInstance().sendMessage($scope.currentConversation.targetType, $scope.currentConversation.targetId, im, {
                                         onSuccess: function() {
+                                            conversationListServer.updateConversations().then(function() {
 
+                                            });
                                         },
                                         onError: function() {
 

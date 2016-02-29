@@ -1,3 +1,46 @@
+.rebox { cursor: pointer; position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: 1000; -webkit-filter: none !important;
+    background: rgb(0, 0, 0); /* IE Fallback (Solid Colour) */
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAIElEQVQ4T2NkYGDYDMRkA8ZRAxhGw4BhNAyA+WAYpAMAIFgLQfO9BoEAAAAASUVORK5CYII=);
+    background: rgba(0, 0, 0, 0.7); }
+.rebox *{ -webkit-box-sizing: border-box; -moz-box-sizing: border-box; -ms-box-sizing: border-box; -o-box-sizing: border-box; box-sizing: border-box; padding: 0; margin: 0; }
+.rebox-contents { position: absolute; top: 5%; left: 5%; text-align: center; width: 90%; height: 90%; }
+.rebox-contents .rebox-content { border: 5px solid #fff; box-shadow: 0 0 20px #000; border-radius: 1px; max-width: 100%; max-height: 100%; }
+.rebox-loading { width: 31px; height: 31px; margin: -16px 0 0 -16px; position: absolute; top: 48%; left: 50%; }
+.rebox-caption { display: none; position: absolute; left: 0; bottom: 0; width: 100%; text-align: center; z-index: 1000; background: #000; background: rgba(0,0,0,0.7); }
+.rebox-caption p { margin: 0 auto; max-width: 70%; display: inline-block; *display: inline; *zoom: 1; padding: 10px; color: #fff; font-size: 12px; line-height: 18px; }
+
+.rebox-button { position: absolute; z-index: 9999; min-width: 40px; height: 40px; line-height: 40px; background: rgb(0, 0, 0); opacity:0.4; 
+    text-decoration: none; font-size: 24px; color: #fff; text-align: center; vertical-align: middle;
+    -webkit-border-radius: 32px; -moz-border-radius: 32px; -ms-border-radius: 32px; border-radius: 32px;
+    -webkit-transition: all 0.3s; -moz-transition: all 0.3s; -ms-transition: all 0.3s; transition: all 0.3s; }
+.rebox-button:hover,
+.rebox-button:focus { opacity: 1; -webkit-transform: scale(1.4); -moz-transform: scale(1.4); -ms-transform: scale(1.4); transform: scale(1.4); }
+.rebox-close { right: 10px; top: 10px; }
+.rebox-next { right: 10px; top: 48%; }
+.rebox-prev { left: 10px; top: 48%; }
+.rebox-loading { left: 50%; top: 48%;
+    -webkit-animation-name: spin; -webkit-animation-duration: 2000ms; -webkit-animation-iteration-count: infinite; -webkit-animation-timing-function: linear;
+    -moz-animation-name: spin; -moz-animation-duration: 2000ms; -moz-animation-iteration-count: infinite; -moz-animation-timing-function: linear;
+    -ms-animation-name: spin; -ms-animation-duration: 2000ms; -ms-animation-iteration-count: infinite; -ms-animation-timing-function: linear;    
+    animation-name: spin; animation-duration: 2000ms; animation-iteration-count: infinite; animation-timing-function: linear;
+}
+
+@-ms-keyframes spin {
+    from { -ms-transform: rotate(0deg); }
+    to { -ms-transform: rotate(360deg); }
+}
+@-moz-keyframes spin {
+    from { -moz-transform: rotate(0deg); }
+    to { -moz-transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+    from { -webkit-transform: rotate(0deg); }
+    to { -webkit-transform: rotate(360deg); }
+}
+@keyframes spin {
+    from { transform:rotate(0deg); }
+    to { transform:rotate(360deg); }
+}
 *,*:before,*:after {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -22,7 +65,7 @@ body,html {
     width: 100%;
     height: 100%;
     border: 0;
-    overflow: hidden;
+    /*overflow: hidden;*/
     font-family: "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
 }
 
@@ -122,6 +165,7 @@ textarea {
     /*right: 0px;*/
     position: absolute;
     display: none;
+    /*position: fixed;*/
 }
 .kefuBtn{
     text-decoration: none;
@@ -160,12 +204,14 @@ textarea {
     width: 194px;
     height: 470px;
     position: absolute;
-    bottom: 0px;
-    top:0px;
+    /*bottom: 0px;*/
+    /*top:0px;*/
     overflow: hidden;
     z-index: 999;
     box-shadow: 1px 1px #f9fafb;
     /*transition: all 0.3s ease-in-out 0.1s;*/
+    /*position: fixed;*/
+    background-color: white;
 }
 #zhichiBtnBox .people{
     background-position: 0 -411px;
@@ -227,6 +273,15 @@ textarea {
     font-size: 12px;
     margin: 0;
     padding: 0;
+}
+.kefuListBox .kefuList .content{
+    position: absolute;
+    top:36px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 .kefuListBox .kefuList .content .netStatus{
     height: 40px;
@@ -531,10 +586,11 @@ textarea {
     z-index: 1000;
     opacity: 0;
     transition: all 0.3s ease-in-out 0.1s;
-    left:195px;
+    /*left:195px;
     right: 0px;
     top:0px;
-    bottom: 0px;
+    bottom: 0px;*/
+    /*position: fixed;*/
 }
 .kefuChatBox.both{
     border-radius: 5px 0 0 0;
@@ -679,7 +735,29 @@ textarea {
     background-color: #f9fbfd;
     display: inline-block;
     padding: 0 20px;
+    cursor:default;
 }
+.Messages-history {
+    text-align: center;
+    padding: 10px 20px;
+    border-bottom: 1px solid #e4e7ea;
+    margin-bottom: 30px;
+    height: 10px;
+}
+
+.Messages-history b {
+    font-size: 9pt;
+    font-weight: normal;
+    color: #8e969f;
+    background-color: #f9fbfd;
+    display: inline-block;
+    padding: 0 20px;
+    cursor:pointer;
+}
+.Messages-history b:hover{
+  color: #0099ff;
+}
+
 
 .Message-wrapper > div:last-child {
     padding-bottom: 10px;
@@ -979,8 +1057,11 @@ textarea {
     display: block;
 }
 .text {
-    width: 100%;
-    height: 40px;
+    /*width: 100%;*/
+    position: absolute;
+    left:5px;
+    right:80px;
+    height: 80px;
     margin: 5px 0 0;
     padding: 0;
     border: 0;
@@ -994,12 +1075,14 @@ textarea {
     outline: 0;
 }
 .powBox {
-    position: relative;
-    width: 100%;
+    position: absolute;
+    right: 0px;
+    /*width: 100%;*/
     height: 24px;
 }
 .send-btn {
     position: absolute;
+    top:30px;
     right: 10px;
     bottom: 0;
     margin: 0;
@@ -1670,8 +1753,20 @@ textarea {
     animation: animations-flip 2s ease-out
 }
 
-#rong-widget-box {
+/*#rong-widget-box {
   position: absolute;
   width: 600px;
   min-height: 470px;
+}*/
+
+/* 图片预览 */
+.rebox-contents .rebox-content {
+    border: none!important;
+    box-shadow: 0 0 8px #222!important;
+    margin: auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
 }

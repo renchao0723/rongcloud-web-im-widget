@@ -24,8 +24,6 @@ demo.controller("main", ["$scope", "WebIMWidget", function($scope,
       appkey: "bmdehs6pdw0ss",
       token: "0MR6diLid4RCH4IOrf7nDbgtZuR3CES6Xp+I56nDnYRbr6K9RiBhz1zki27LadwQibmmbEbLg9yvTecpF41gzw==",
       style:{
-        center:true,
-        width:"600px",
       },
       onError:function(error){
         console.log("error:"+error);

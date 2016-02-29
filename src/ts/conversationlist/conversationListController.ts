@@ -5,18 +5,27 @@ var conversationListCtr = angular.module("RongWebIMWidget.conversationListContro
 conversationListCtr.controller("conversationListController", ["$scope", "conversationListServer", "WebIMWidget",
     function($scope: any, conversationListServer: conversationListServer, WebIMWidget: WebIMWidget) {
         $scope.conversationListServer = conversationListServer;
+        $scope.WebIMWidget = WebIMWidget;
         conversationListServer.refreshConversationList = function() {
             setTimeout(function() {
                 $scope.$apply();
             });
         }
 
-        $scope.$watch("conversationListServer.conversationList", function(newVal) {
-            console.log(newVal);
-        })
-
         $scope.minbtn = function() {
             WebIMWidget.display = false;
+        }
 
+        $scope.connected = true;
+
+        conversationListServer._onConnectStatusChange = function(status: any) {
+            if (status == RongIMLib.ConnectionStatus.CONNECTED) {
+                $scope.connected = true;
+            } else {
+                $scope.connected = false;
+            }
+            setTimeout(function() {
+                $scope.$apply();
+            })
         }
     }])

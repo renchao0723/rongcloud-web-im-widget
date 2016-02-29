@@ -19,13 +19,13 @@ demo.controller("main", ["$scope", "WebIMWidget", function($scope,
   }
 
   angular.element(document).ready(function() {
-    
+
     WebIMWidget.init({
       appkey: "bmdehs6pdw0ss",
       token: "9yQ9dU/CnmCJpvUKnbrAQWmWxWM7S9FuTBrjDXeo1q6kuk+C3lpXDpLA8+ELH7yBGmRoBX2kgFCZjfEOfKApsQ==",
       style:{
-        center:true,
-        width:"600px",
+        width:600,
+        positionFixed:true
       },
       displayConversationList:true,
       conversationListPosition:WebIMWidget.EnumConversationListPosition.right,

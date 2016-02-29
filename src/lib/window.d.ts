@@ -16,11 +16,21 @@ declare module RongIMLib {
         static symbolToHTML(str: string): string
         static emojiToHTML(str: string): string
     }
+    class RongIMVoice {
+        static init(): void
+        static play(data: string, duration: number): void
+        static stop(): void
+        static onprogress(): void
+    }
 }
 
 interface Window {
     webkitURL: any
     RongIMLib: any
+}
+interface JQuery {
+    rebox(target: any): void
+    niceScroll(config: any): any
 }
 
 declare var Qiniu: Qiniu;

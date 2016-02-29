@@ -7,7 +7,25 @@ conversationDirective.directive("rongConversation", [function() {
     return {
         restrict: "E",
         templateUrl: "./src/ts/conversation/template.tpl.html",
-        controller: "conversationController"
+        controller: "conversationController",
+        link: function(scope: any, ele: angular.IRootElementService) {
+            $("#Messages").niceScroll({
+                'cursorcolor': "#0099ff",
+                'cursoropacitymax': 1,
+                'touchbehavior': false,
+                'cursorwidth': "8px",
+                'cursorborder': "0",
+                'cursorborderradius': "5px"
+            });
+            $("#inputMsg").niceScroll({
+                'cursorcolor': "#0099ff",
+                'cursoropacitymax': 1,
+                'touchbehavior': false,
+                'cursorwidth': "8px",
+                'cursorborder': "0",
+                'cursorborderradius': "5px"
+            });
+        }
     }
 }]);
 
@@ -171,28 +189,69 @@ conversationDirective.directive("imagemessage", [function() {
         scope: { msg: "=" },
         template: '<div class="">' +
         '<div class="Message-img">' +
-        '<span class="Message-entry" style="">' +
+        '<span id="{{\'rebox_\'+$id}}"  class="Message-entry" style="">' +
         // '<p>发给您一张示意图</p>' +
-        '<img ng-src="{{msg.content}}" alt="">' +
+        // '<img ng-src="{{msg.content}}" alt="">' +
+        '<a href="{{msg.imageUri}}"><img ng-src="{{msg.content}}"  data-image="{{msg.imageUri}}" alt=""/></a>' +
         '</span>' +
         '</div>' +
-        '</div>'
+        '</div>',
+        link: function(scope: any, ele: angular.IRootElementService, attr: any) {
+            var img = new Image();
+            img.src = scope.msg.imageUri;
+            setTimeout(function() {
+                $('#rebox_' + scope.$id).rebox({ selector: 'a' });
+            })
+            img.onload = function() {
+                //scope.isLoaded = true;
+                scope.$apply(function() {
+                    scope.msg.content = scope.msg.imageUri
+                });
+            }
+            // setTimeout(function() {
+            //     Intense(ele.find("img")[0]);
+            // }, 0);
+            scope.showBigImage = function() {
+
+            }
+        }
     }
 }]);
 
-conversationDirective.directive("voicemessage", [function() {
+conversationDirective.directive("voicemessage", ["$timeout", function($timeout: angular.ITimeoutService) {
     return {
         restrict: "E",
         scope: { msg: "=" },
         template: '<div class="">' +
         '<div class="Message-audio">' +
         '<span class="Message-entry" style="">' +
-        '<span class="audioBox clearfix animate"><i></i><i></i><i></i></span>' +
-        '<div style="display: inline-block;"><span class="audioTimer">30”</span><span class="audioState"></span></div>' +
+        '<span class="audioBox clearfix " ng-click="play()" ng-class="{\'animate\':isplaying}" ><i></i><i></i><i></i></span>' +
+        '<div style="display: inline-block;" ><span class="audioTimer">{{msg.duration}}”</span><span class="audioState" ng-show="msg.isUnReade"></span></div>' +
         '</span>' +
         '</div>' +
         '</div>',
         link: function(scope, ele, attr) {
+            scope.msg.duration = parseInt(scope.msg.duration || scope.msg.content.length / 1024);
+
+            scope.play = function() {
+                RongIMLib.RongIMVoice.stop();
+                if (!scope.isplaying) {
+
+                    scope.msg.isUnReade = false;
+                    RongIMLib.RongIMVoice.play(scope.msg.content, scope.msg.duration);
+                    scope.isplaying = true;
+                    if (scope.timeoutid) {
+                        $timeout.cancel(scope.timeoutid);
+                    }
+                    scope.timeoutid = $timeout(function() {
+                        scope.isplaying = false;
+                    }, scope.msg.duration*1000);
+
+                } else {
+                    scope.isplaying = false;
+                    $timeout.cancel(scope.timeoutid);
+                }
+            }
 
         }
     }
