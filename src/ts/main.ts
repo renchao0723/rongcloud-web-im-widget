@@ -6,11 +6,11 @@ var widget = angular.module("RongWebIMWidget", ["RongWebIMWidget.conversationSer
 widget.run(["$http", "WebIMWidget", "widgetConfig", function($http: angular.IHttpService,
     WebIMWidget: WebIMWidget, widgetConfig: widgetConfig) {
 
-    $script.get("http://cdn.ronghub.com/RongIMLib-2.1.1.beta.min.js", function() {
-        $script.get("http://cdn.ronghub.com/RongEmoji-2.0.2.beta.min.js", function() {
+    $script.get("http://cdn.ronghub.com/RongIMLib-2.0.12.min.js", function() {
+        $script.get("http://cdn.ronghub.com/RongEmoji-2.0.3.min.js", function() {
             RongIMLib.RongIMEmoji && RongIMLib.RongIMEmoji.init();
         });
-        $script.get("http://cdn.ronghub.com/RongIMVoice-2.0.0.beta.min.js", function() {
+        $script.get("http://cdn.ronghub.com/RongIMVoice-2.0.2.min.js", function() {
             RongIMLib.RongIMVoice && RongIMLib.RongIMVoice.init();
         });
         if (widgetConfig.config) {

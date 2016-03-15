@@ -21,7 +21,6 @@
     "!node_modules/**"
   ],
   "files": [
-    "demo - 副本/qiniu/qiniu.d.ts",
     "src/lib/RongIMLib.d.ts",
     "src/lib/window.d.ts",
     "src/ts/conversation/conversationController.ts",

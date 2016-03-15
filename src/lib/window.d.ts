@@ -29,7 +29,7 @@ interface Window {
     RongIMLib: any
 }
 interface JQuery {
-    rebox(target: any): void
+    rebox(target: any): JQuery
     niceScroll(config: any): any
 }
 

@@ -18,14 +18,10 @@
 
 <script type="text/javascript">
 
-    var appkey = "tdrvipksrbfd5";
-    // var token = "2MyB7VkTuEjg92ysEa6Vw+d7thus41lYTQFz6beaURs1Yxfx0ORw5w+XHipbvRHd4C1jtDntnVurov7uHeMgcsIRxitX7yU4";
-    var token = "3E6RLrKjLfyFOcTIzOfl9fpOH85dnBEW828XrijEIIAxtxsuY8IywJLr1uv1l3kM6FnxBW4HI7dEWG08gdYUaG9UfVRDhn9niGpKjg0q0D+cFSMEbWuOr+AX3/ZrL9Mk";
-    // var token="qzthJgQnyxpLDg8SnfMoPZT/5U85PkuG4wzP+s+1O12KAWwH4ZS5CCNewKzuCrnGwBuPKFpVrVGooRas0gtZ/A==";
+    var appkey = "m7ua80gbuifem";
+    var token = "7E0fFpH/6VBy+98guLBtTGfCbFkkf+AGxQ376NI9ESCY87rTP+Wn0yutCp7TFCX5kyFutcJjoxtskTF6nQ73m9AM4euEB+rLsfxmB11CNa+hxkJbKFOgP+L74DZGbkrf3eT1ouGBLdg=";
 
 	RongIMClient.init(appkey);
-	 // var token="8zACV5GzpA3wLavx2GcqFZ1YDkt/uRq44MP/ipJKA9cPxkxlQQ6GZKFg1A2alOco6IlYgy39BOk=";
-        // 连接融云服务器。
         var $scope = {};
 
     function initConversationList() {

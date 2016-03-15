@@ -54,8 +54,8 @@ conversationDirective.directive("emoji", [function() {
 
 conversationDirective.directive('contenteditableDire', function() {
     return {
-        restrict: 'A', // only activate on element attribute
-        require: '?ngModel', // get a hold of NgModelController
+        restrict: 'A',
+        require: '?ngModel',
         link: function(scope: any, element: angular.IRootElementService, attrs: angular.IAttributes, ngModel: angular.INgModelController) {
             function replacemy(e: string) {
                 return e.replace(new RegExp("<[\\s\\S.]*?>", "ig"), "");
@@ -87,7 +87,7 @@ conversationDirective.directive('contenteditableDire', function() {
             });
 
 
-            if (!ngModel) return; // do nothing if no ng-model
+            if (!ngModel) return;
 
             element.bind("paste", function(e: any) {
                 var that = this, ohtml = that.innerHTML;
@@ -99,26 +99,16 @@ conversationDirective.directive('contenteditableDire', function() {
                 }, 50);
             });
 
-
-            // Specify how UI should be updated
             ngModel.$render = function() {
                 element.html(ngModel.$viewValue || '');
             };
 
-            // Listen for change events to enable binding
             WidgetModule.Helper.browser.msie ? element.bind("keyup paste", read) : element.bind("input", read);
-            // element.on('blur keyup change', function() {
-            //     scope.$apply(read);
-            // });
-            //read(); // initialize
 
-            // Write data to the model
             function read() {
                 var html = element.html();
                 html = html.replace(/^<br>$/i, "");
                 html = html.replace(/<br>/gi, "\n");
-                // When we clear the content editable the browser leaves a <br> behind
-                // If strip-br attribute is provided then we strip this out
                 if (attrs["stripBr"] && html == '<br>') {
                     html = '';
                 }
@@ -200,7 +190,17 @@ conversationDirective.directive("imagemessage", [function() {
             var img = new Image();
             img.src = scope.msg.imageUri;
             setTimeout(function() {
-                $('#rebox_' + scope.$id).rebox({ selector: 'a' });
+                $('#rebox_' + scope.$id).rebox({ selector: 'a' }).bind("rebox:open", function() {
+                    //jQuery rebox 点击空白关闭
+                    var rebox = <any>document.getElementsByClassName("rebox")[0];
+                    rebox.onclick = function(e: any) {
+                        if (e.target.tagName.toLowerCase() != "img") {
+                            var rebox_close = <any>document.getElementsByClassName("rebox-close")[0];
+                            rebox_close.click();
+                            rebox = null; rebox_close = null;
+                        }
+                    }
+                });
             })
             img.onload = function() {
                 //scope.isLoaded = true;
@@ -236,7 +236,6 @@ conversationDirective.directive("voicemessage", ["$timeout", function($timeout: 
             scope.play = function() {
                 RongIMLib.RongIMVoice.stop();
                 if (!scope.isplaying) {
-
                     scope.msg.isUnReade = false;
                     RongIMLib.RongIMVoice.play(scope.msg.content, scope.msg.duration);
                     scope.isplaying = true;
@@ -245,8 +244,7 @@ conversationDirective.directive("voicemessage", ["$timeout", function($timeout: 
                     }
                     scope.timeoutid = $timeout(function() {
                         scope.isplaying = false;
-                    }, scope.msg.duration*1000);
-
+                    }, scope.msg.duration * 1000);
                 } else {
                     scope.isplaying = false;
                     $timeout.cancel(scope.timeoutid);

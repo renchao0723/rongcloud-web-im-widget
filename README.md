@@ -2,7 +2,8 @@
 
 ---
 
-**Web IM Widget for Angular** 是一个angular插件。通信部分依赖 `RongIMLib`。
+**Web IM Widget for Angular** 是一个angular插件。通信部分依赖 `RongIMLib`。  
+支持IE9+、Chrome、Firefox等
 
 ```
 npm install -g typescript@1.6.0beta tsd grunt-cli

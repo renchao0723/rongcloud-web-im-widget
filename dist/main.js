@@ -539,7 +539,7 @@ conversationDirective.directive('contenteditableDire', function () {
                 }
             });
             if (!ngModel)
-                return; // do nothing if no ng-model
+                return;
             element.bind("paste", function (e) {
                 var that = this, ohtml = that.innerHTML;
                 timeoutid && clearTimeout(timeoutid);
@@ -549,23 +549,14 @@ conversationDirective.directive('contenteditableDire', function () {
                     timeoutid = null;
                 }, 50);
             });
-            // Specify how UI should be updated
             ngModel.$render = function () {
                 element.html(ngModel.$viewValue || '');
             };
-            // Listen for change events to enable binding
             WidgetModule.Helper.browser.msie ? element.bind("keyup paste", read) : element.bind("input", read);
-            // element.on('blur keyup change', function() {
-            //     scope.$apply(read);
-            // });
-            //read(); // initialize
-            // Write data to the model
             function read() {
                 var html = element.html();
                 html = html.replace(/^<br>$/i, "");
                 html = html.replace(/<br>/gi, "\n");
-                // When we clear the content editable the browser leaves a <br> behind
-                // If strip-br attribute is provided then we strip this out
                 if (attrs["stripBr"] && html == '<br>') {
                     html = '';
                 }
@@ -644,7 +635,18 @@ conversationDirective.directive("imagemessage", [function () {
                 var img = new Image();
                 img.src = scope.msg.imageUri;
                 setTimeout(function () {
-                    $('#rebox_' + scope.$id).rebox({ selector: 'a' });
+                    $('#rebox_' + scope.$id).rebox({ selector: 'a' }).bind("rebox:open", function () {
+                        //jQuery rebox 点击空白关闭
+                        var rebox = document.getElementsByClassName("rebox")[0];
+                        rebox.onclick = function (e) {
+                            if (e.target.tagName.toLowerCase() != "img") {
+                                var rebox_close = document.getElementsByClassName("rebox-close")[0];
+                                rebox_close.click();
+                                rebox = null;
+                                rebox_close = null;
+                            }
+                        };
+                    });
                 });
                 img.onload = function () {
                     //scope.isLoaded = true;
@@ -966,14 +968,12 @@ conversationListSer.factory("conversationListServer", ["$q", "providerdata",
 /// <reference path="../../vendor/loadscript/script.d.ts"/>
 var widget = angular.module("RongWebIMWidget", ["RongWebIMWidget.conversationServer", "RongWebIMWidget.conversationListServer", "RongIMSDKModule"]);
 widget.run(["$http", "WebIMWidget", "widgetConfig", function ($http, WebIMWidget, widgetConfig) {
-        $script.get("http://cdn.ronghub.com/RongIMLib-2.1.1.beta.min.js", function () {
-            $script.get("http://cdn.ronghub.com/RongEmoji-2.0.2.beta.min.js", function () {
-                RongIMLib.RongIMEmoji.init();
+        $script.get("http://cdn.ronghub.com/RongIMLib-2.0.12.min.js", function () {
+            $script.get("http://cdn.ronghub.com/RongEmoji-2.0.3.min.js", function () {
+                RongIMLib.RongIMEmoji && RongIMLib.RongIMEmoji.init();
             });
-            $script.get("http://cdn.ronghub.com/RongIMVoice-2.0.0.beta.min.js", function () {
-                if (RongIMLib.RongIMVoice) {
-                    RongIMLib.RongIMVoice.init();
-                }
+            $script.get("http://cdn.ronghub.com/RongIMVoice-2.0.2.min.js", function () {
+                RongIMLib.RongIMVoice && RongIMLib.RongIMVoice.init();
             });
             if (widgetConfig.config) {
                 WebIMWidget.init(widgetConfig.config);
@@ -987,17 +987,11 @@ widget.factory("providerdata", [function () {
 widget.factory("widgetConfig", [function () {
         return {};
     }]);
-// var RongIMLib: any;
 widget.factory("WebIMWidget", ["$q", "conversationServer",
     "conversationListServer", "providerdata", "widgetConfig", "RongIMSDKServer",
     function ($q, conversationServer, conversationListServer, providerdata, widgetConfig, RongIMSDKServer) {
         var WebIMWidget = {};
         var messageList = {};
-        //TODO:是否要加限制可用css
-        var availableStyleConfig = {
-            height: true, width: true,
-            top: true, left: true, right: true, bottom: true
-        };
         var eleConversationListWidth = 195, eleminbtnHeight = 50;
         var defaultconfig = {
             displayMinButton: true,
@@ -1019,9 +1013,6 @@ widget.factory("WebIMWidget", ["$q", "conversationServer",
             var defaultStyle = defaultconfig.style;
             angular.extend(defaultconfig, config);
             angular.extend(defaultStyle, config.style);
-            // if (config)
-            //
-            // var elebox = document.getElementById("rong-widget-box");
             var eleconversation = document.getElementById("rong-conversation");
             var eleconversationlist = document.getElementById("rong-conversation-list");
             var eleminbtn = document.getElementById("rong-widget-minbtn");
@@ -1091,7 +1082,6 @@ widget.factory("WebIMWidget", ["$q", "conversationServer",
             }
             widgetConfig.displayConversationList = defaultconfig.displayConversationList;
             widgetConfig.displayMinButton = defaultconfig.displayMinButton;
-            // RongIMLib.RongIMClient.init(defaultconfig.appkey);
             RongIMSDKServer.init(defaultconfig.appkey);
             RongIMSDKServer.connect(defaultconfig.token).then(function (userId) {
                 console.log("connect success:" + userId);
