@@ -968,18 +968,18 @@ conversationListSer.factory("conversationListServer", ["$q", "providerdata",
 /// <reference path="../../vendor/loadscript/script.d.ts"/>
 var widget = angular.module("RongWebIMWidget", ["RongWebIMWidget.conversationServer", "RongWebIMWidget.conversationListServer", "RongIMSDKModule"]);
 widget.run(["$http", "WebIMWidget", "widgetConfig", function ($http, WebIMWidget, widgetConfig) {
-        $script.get("http://cdn.ronghub.com/RongIMLib-2.0.12.min.js", function () {
-            $script.get("http://cdn.ronghub.com/RongEmoji-2.0.3.min.js", function () {
+        $script.get("//cdn.ronghub.com/RongIMLib-2.0.12.min.js", function () {
+            $script.get("//cdn.ronghub.com/RongEmoji-2.0.3.min.js", function () {
                 RongIMLib.RongIMEmoji && RongIMLib.RongIMEmoji.init();
             });
-            $script.get("http://cdn.ronghub.com/RongIMVoice-2.0.2.min.js", function () {
+            $script.get("//cdn.ronghub.com/RongIMVoice-2.0.2.min.js", function () {
                 RongIMLib.RongIMVoice && RongIMLib.RongIMVoice.init();
             });
             if (widgetConfig.config) {
                 WebIMWidget.init(widgetConfig.config);
             }
         });
-        $script.get("http://cdn.bootcss.com/plupload/2.1.8/plupload.full.min.js", function () { });
+        $script.get("//cdn.bootcss.com/plupload/2.1.8/plupload.full.min.js", function () { });
     }]);
 widget.factory("providerdata", [function () {
         return {};
