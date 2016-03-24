@@ -238,6 +238,14 @@ widget.factory("WebIMWidget", ["$q", "conversationServer",
                             break;
                     }
 
+                    if (msg.content) {
+                        providerdata.getUserInfo(msg.senderUserId, {
+                            onSuccess: function(obj) {
+                                msg.content.userInfo = new WidgetModule.UserInfo(obj.userId, obj.name, obj.portraitUri);
+                            }
+                        })
+                    }
+
                     if (WebIMWidget.onReceivedMessage) {
                         WebIMWidget.onReceivedMessage(msg);
                     }

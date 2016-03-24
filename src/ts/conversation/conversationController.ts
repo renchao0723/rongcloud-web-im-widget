@@ -159,7 +159,7 @@ conversationController.controller("conversationController", ["$scope",
         function packDisplaySendMessage(msg: any, messageType: string) {
             var ret = new RongIMLib.Message();
             var userinfo = new RongIMLib.UserInfo(conversationServer.loginUser.id, conversationServer.loginUser.name, conversationServer.loginUser.portraitUri);
-            msg.userInfo = userinfo;
+            msg.user = userinfo;
             ret.content = msg;
             ret.conversationType = $scope.currentConversation.targetType;
             ret.targetId = $scope.currentConversation.targetId;

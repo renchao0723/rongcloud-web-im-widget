@@ -2,7 +2,7 @@
 
 var conversationServer = angular.module("RongWebIMWidget.conversationServer", ["RongWebIMWidget.conversationDirective"]);
 
-conversationServer.factory("conversationServer", ["$q", function($q: angular.IQService) {
+conversationServer.factory("conversationServer", ["$q", "providerdata", function($q: angular.IQService, providerdata: providerdata) {
 
     var conversationServer = <ConversationServer>{}
 
@@ -31,6 +31,15 @@ conversationServer.factory("conversationServer", ["$q", function($q: angular.IQS
                 while (msglen--) {
                     var msg = WidgetModule.Message.convert(data[msglen]);
                     unshiftHistoryMessages(targetId, targetType, msg);
+                    if (msg.content) {
+                        (function(msg) {
+                            providerdata.getUserInfo(msg.senderUserId, {
+                                onSuccess: function(obj) {
+                                    msg.content.userInfo = new WidgetModule.UserInfo(obj.userId, obj.name, obj.portraitUri);
+                                }
+                            })
+                        })(msg)
+                    }
                 }
 
                 defer.resolve({ data: data, has: has });
@@ -87,7 +96,7 @@ interface ConversationServer {
     loginUser: any
     onConversationChangged(conversation: WidgetModule.Conversation): void
     onReceivedMessage(message: WidgetModule.Message): void
-    _onConnectSuccess():void
+    _onConnectSuccess(): void
     _uploadToken: string
     _cacheHistory: any
     _getHistoryMessages(targetType: number, targetId: string, number: number): angular.IPromise<any>

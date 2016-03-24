@@ -215,7 +215,7 @@ module WidgetModule {
                     break;
             }
             if (msg.content) {
-                msg.content.userInfo = SDKmsg.content.userInfo;
+                msg.content.userInfo = SDKmsg.content.user;
             }
 
             return msg;
