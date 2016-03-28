@@ -34,7 +34,7 @@ conversationListDir.directive("conversationItem", ["conversationServer", "conver
         '</p>' +
         '</div>' +
         '<div class="photo">' +
-        '<img class="img" src="images/webBg.png" alt="">' +
+        '<img class="img" ng-src="{{item.portraitUri}}" err-src="../widget/images/webBg.png" alt="">' +
         // '<i class="Presence Presence--stacked Presence--mainBox"></i>' +
         '</div>' +
         '<div class="info">' +
