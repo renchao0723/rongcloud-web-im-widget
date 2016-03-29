@@ -1,6 +1,7 @@
 bower_components
 demo - 副本
 node_modules
+demo/*
 build
 temp
 typings

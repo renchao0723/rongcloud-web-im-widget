@@ -104,9 +104,9 @@ module.exports = function(grunt) {
         files:[
           {
             src:[
-              './bower_components/jquery/dist/jquery.min.js',
-              './bower_components/jquery.nicescroll/dist/jquery.nicescroll.min.js',
+              './bower_components/jquery/dist/jquery.js',
               './vendor/jqueryrebox/jquery-rebox.js',
+              './bower_components/jquery.nicescroll/dist/jquery.nicescroll.min.js',
               './temp/main.js','./temp/myAppHTMLCache.js',
               './vendor/loadscript/script.min.js','./vendor/qiniu/qiniu.js'],
             dest:'./build/main.js'
@@ -123,9 +123,9 @@ module.exports = function(grunt) {
         files:[
           {
             src:[
-              './bower_components/jquery/dist/jquery.min.js',
-              './bower_components/jquery.nicescroll/dist/jquery.nicescroll.min.js',
+              './bower_components/jquery/dist/jquery.js',
               './vendor/jqueryrebox/jquery-rebox.js',
+              './bower_components/jquery.nicescroll/dist/jquery.nicescroll.min.js',
               './temp/main.js','./temp/myAppHTMLCache.js',
             './vendor/loadscript/script.min.js','./vendor/qiniu/qiniu.js'],
             dest:'./dist/main.js'

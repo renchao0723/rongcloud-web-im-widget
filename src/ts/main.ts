@@ -1,31 +1,51 @@
 /// <reference path="../../typings/tsd.d.ts"/>
 /// <reference path="../../vendor/loadscript/script.d.ts"/>
 
-var widget = angular.module("RongWebIMWidget", ["RongWebIMWidget.conversationServer", "RongWebIMWidget.conversationListServer", "RongIMSDKModule"]);
+var widget = angular.module("RongWebIMWidget", ["RongWebIMWidget.conversationServer",
+    "RongWebIMWidget.conversationListServer", "RongIMSDKModule", "Evaluate"]);
 
 widget.run(["$http", "WebIMWidget", "widgetConfig", function($http: angular.IHttpService,
     WebIMWidget: WebIMWidget, widgetConfig: widgetConfig) {
-
-    $script.get("//cdn.ronghub.com/RongIMLib-2.0.12.min.js", function() {
-        $script.get("//cdn.ronghub.com/RongEmoji-2.0.3.min.js", function() {
+    var protocol = location.protocol === "https:" ? "https:" : "http:";
+    $script.get(protocol + "//cdn.ronghub.com/RongIMLib-2.0.14.min.js", function() {
+        $script.get(protocol + "//cdn.ronghub.com/RongEmoji-2.0.14.min.js", function() {
             RongIMLib.RongIMEmoji && RongIMLib.RongIMEmoji.init();
         });
-        $script.get("//cdn.ronghub.com/RongIMVoice-2.0.2.min.js", function() {
+        $script.get(protocol + "//cdn.ronghub.com/RongIMVoice-2.0.14.min.js", function() {
             RongIMLib.RongIMVoice && RongIMLib.RongIMVoice.init();
         });
         if (widgetConfig.config) {
             WebIMWidget.init(widgetConfig.config);
         }
     });
-    $script.get("//cdn.bootcss.com/plupload/2.1.8/plupload.full.min.js", function() { });
+    $script.get(protocol + "//cdn.bootcss.com/plupload/2.1.8/plupload.full.min.js", function() { });
 }]);
 
 widget.factory("providerdata", [function() {
-    return {}
+    var obj = {
+        _cacheUserInfo: <WidgetModule.UserInfo[]>[],
+        getCacheUserInfo: function(id) {
+            for (var i = 0, len = obj._cacheUserInfo.length; i < len; i++) {
+                if (obj._cacheUserInfo[i].userId == id) {
+                    return obj._cacheUserInfo[i];
+                }
+            }
+            return null;
+        },
+        addUserInfo: function(user: WidgetModule.UserInfo) {
+            var olduser = obj.getCacheUserInfo(user.userId);
+            if (olduser) {
+                angular.extend(olduser, user);
+            } else {
+                obj._cacheUserInfo.push(user);
+            }
+        }
+    };
+    return obj;
 }]);
 
 widget.factory("widgetConfig", [function() {
-    return {};
+    return {}
 }]);
 
 
@@ -39,7 +59,7 @@ widget.factory("WebIMWidget", ["$q", "conversationServer",
 
         var messageList = {};
 
-        var eleConversationListWidth = 195, eleminbtnHeight = 50;
+        var eleConversationListWidth = 195, eleminbtnHeight = 50, eleminbtnWidth = 195;
 
         var defaultconfig = <Config>{
             displayMinButton: true,
@@ -134,15 +154,22 @@ widget.factory("WebIMWidget", ["$q", "conversationServer",
                         eleconversation.style["bottom"] = defaultStyle.bottom + "px";
                     }
                 } else {
-                    eleminbtn.style["display"] = "none";
+                    eleminbtn.style["display"] = "inline-block";
                     eleconversationlist.style["display"] = "none";
 
                     eleconversation.style["left"] = defaultStyle["left"] + "px";
                     eleconversation.style["right"] = defaultStyle["right"] + "px";
                     eleconversation.style["top"] = defaultStyle["top"] + "px";
                     eleconversation.style["bottom"] = defaultStyle["bottom"] + "px";
-                }
 
+                    eleminbtn.style["top"] = defaultStyle.top + defaultStyle.height - eleminbtnHeight + "px";
+                    eleminbtn.style["bottom"] = defaultStyle.bottom + "px";
+                    eleminbtn.style["left"] = defaultStyle.left + defaultStyle.width / 2 - eleminbtnWidth / 2 + "px";
+                    eleminbtn.style["right"] = defaultStyle.right + defaultStyle.width / 2 - eleminbtnWidth / 2 + "px";
+                }
+            }
+            if (defaultconfig.displayMinButton == false) {
+                eleminbtn.style["display"] = "none";
             }
 
 
@@ -214,6 +241,7 @@ widget.factory("WebIMWidget", ["$q", "conversationServer",
 
             RongIMSDKServer.setOnReceiveMessageListener({
                 onReceived: function(data) {
+                    console.log(data);
                     var msg = WidgetModule.Message.convert(data);
 
                     switch (data.messageType) {
@@ -229,6 +257,7 @@ widget.factory("WebIMWidget", ["$q", "conversationServer",
                             //好友通知自行处理
                             break;
                         case WidgetModule.MessageType.InformationNotificationMessage:
+                            addMessageAndOperation(msg);
                             break;
                         case WidgetModule.MessageType.UnknownMessage:
                             //未知消息自行处理
@@ -237,15 +266,15 @@ widget.factory("WebIMWidget", ["$q", "conversationServer",
                             //未捕获的消息类型
                             break;
                     }
-
-                    if (msg.content) {
+                    if (WidgetModule.Helper.checkType(providerdata.getUserInfo) == "function" && msg.content) {
                         providerdata.getUserInfo(msg.senderUserId, {
-                            onSuccess: function(obj) {
-                                msg.content.userInfo = new WidgetModule.UserInfo(obj.userId, obj.name, obj.portraitUri);
+                            onSuccess: function(data) {
+                                if (data) {
+                                    msg.content.userInfo = new WidgetModule.UserInfo(data.userId, data.name, data.portraitUri);
+                                }
                             }
                         })
                     }
-
                     if (WebIMWidget.onReceivedMessage) {
                         WebIMWidget.onReceivedMessage(msg);
                     }
@@ -271,7 +300,7 @@ widget.factory("WebIMWidget", ["$q", "conversationServer",
         function addMessageAndOperation(msg: WidgetModule.Message) {
             var hislist = conversationServer._cacheHistory[msg.conversationType + "_" + msg.targetId] = conversationServer._cacheHistory[msg.conversationType + "_" + msg.targetId] || []
             if (hislist.length == 0) {
-                hislist.push(new WidgetModule.GetHistoryPanel());
+                // hislist.push(new WidgetModule.GetHistoryPanel());
                 hislist.push(new WidgetModule.TimePanl(msg.sentTime));
             }
             conversationServer._addHistoryMessages(msg);
@@ -301,6 +330,9 @@ widget.factory("WebIMWidget", ["$q", "conversationServer",
             WebIMWidget.display = false;
         }
 
+        WebIMWidget.getCurrentConversation = function() {
+            return conversationServer.current;
+        }
 
         return WebIMWidget;
     }]);
@@ -313,30 +345,35 @@ widget.directive("rongWidget", [function() {
     }
 }]);
 
-widget.controller("rongWidgetController", ["$scope", "WebIMWidget", "widgetConfig", function($scope, WebIMWidget, widgetConfig: widgetConfig) {
+widget.controller("rongWidgetController", ["$scope", "WebIMWidget", "widgetConfig",
+    function($scope, WebIMWidget, widgetConfig: widgetConfig
+    ) {
 
-    $scope.main = WebIMWidget;
-    $scope.widgetConfig = widgetConfig;
+        $scope.main = WebIMWidget;
+        $scope.widgetConfig = widgetConfig;
 
-    WebIMWidget.show = function() {
-        WebIMWidget.display = true;
-        WebIMWidget.fullScreen = false;
-        setTimeout(function() {
-            $scope.$apply();
-        });
-    }
+        WebIMWidget.show = function() {
+            WebIMWidget.display = true;
+            WebIMWidget.fullScreen = false;
+            WebIMWidget.onShow && WebIMWidget.onShow();
+            setTimeout(function() {
+                $scope.$apply();
+            });
+        }
 
-    WebIMWidget.hidden = function() {
-        WebIMWidget.display = false;
-        setTimeout(function() {
-            $scope.$apply();
-        });
-    }
+        WebIMWidget.hidden = function() {
+            WebIMWidget.display = false;
+            setTimeout(function() {
+                $scope.$apply();
+            });
+        }
 
-    $scope.showbtn = function() {
-        WebIMWidget.display = true;
-    }
-}]);
+        $scope.showbtn = function() {
+            WebIMWidget.display = true;
+            WebIMWidget.onShow && WebIMWidget.onShow();
+        }
+
+    }]);
 
 widget.filter('trustHtml', ["$sce", function($sce: angular.ISCEService) {
     return function(str: any) {
@@ -366,23 +403,25 @@ interface widgetConfig {
 interface providerdata {
     getUserInfo: UserInfoProvider
     getGroupInfo: GroupInfoProvider
+    getCacheUserInfo(id): WidgetModule.UserInfo
+    addUserInfo(user: WidgetModule.UserInfo): void
 }
 
 interface Config {
-    appkey: string;
-    token: string;
-    onSuccess(userId: string): void;
-    onError(error: any): void;
+    appkey?: string;
+    token?: string;
+    onSuccess?(userId: string): void;
+    onError?(error: any): void;
     // animation: number;
-    displayConversationList: boolean;
-    conversationListPosition: any;
-    displayMinButton: boolean;
-    style: {
-        positionFixed: boolean;
-        height: number;
-        width: number;
-        bottom: number;
-        right: number;
+    displayConversationList?: boolean;
+    conversationListPosition?: any;
+    displayMinButton?: boolean;
+    style?: {
+        positionFixed?: boolean;
+        height?: number;
+        width?: number;
+        bottom?: number;
+        right?: number;
         top?: number;
         left?: number;
     }
@@ -393,6 +432,7 @@ interface WebIMWidget {
     init(config: Config): void
 
     show(): void
+    onShow(): void
     hidden(): void
     display: boolean
     fullScreen: boolean
@@ -406,9 +446,11 @@ interface WebIMWidget {
 
     onClose(data: any): void
 
-    onCloseBefore(obj: any): boolean
+    onCloseBefore(obj: any): void
 
     onConnectStatusChange(status: number): void
+
+    getCurrentConversation(): WidgetModule.Conversation
 
 
     setUserInfoProvider(fun: UserInfoProvider)

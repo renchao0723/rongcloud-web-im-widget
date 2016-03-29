@@ -112,19 +112,6 @@ SDKServer.factory("RongIMSDKServer", ["$q", function($q: angular.IQService) {
         RongIMLib.RongIMClient.reconnect(callback);
     }
 
-    RongIMSDKServer.clearMessagesUnreadStatus = function(type: number, targetid: string) {
-        var defer = $q.defer();
-        RongIMLib.RongIMClient.getInstance().clearMessagesUnreadStatus(type, targetid, {
-            onSuccess: function(data) {
-                defer.resolve(data);
-            },
-            onError: function(error) {
-                defer.reject(error);
-            }
-        });
-        return defer.promise;
-    }
-
     RongIMSDKServer.clearUnreadCount = function(type: number, targetid: string) {
         var defer = $q.defer();
         RongIMLib.RongIMClient.getInstance().clearUnreadCount(type, targetid, {

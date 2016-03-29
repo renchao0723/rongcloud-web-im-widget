@@ -17,14 +17,6 @@ conversationDirective.directive("rongConversation", [function() {
                 'cursorborder': "0",
                 'cursorborderradius': "5px"
             });
-            $("#inputMsg").niceScroll({
-                'cursorcolor': "#0099ff",
-                'cursoropacitymax': 1,
-                'touchbehavior': false,
-                'cursorwidth': "8px",
-                'cursorborder': "0",
-                'cursorborderradius': "5px"
-            });
         }
     }
 }]);
@@ -36,10 +28,10 @@ conversationDirective.directive("emoji", [function() {
             item: "=",
             content: "="
         },
-        template: "",
+        template: '<div style="display:inline-block"></div>',
         link: function(scope: any, ele: angular.IRootElementService, attr: angular.IAttributes) {
 
-            ele.append(scope.item);
+            ele.find("div").append(scope.item);
             ele.on("click", function() {
                 scope.$parent.currentConversation.messageContent = scope.$parent.currentConversation.messageContent || "";
                 scope.$parent.currentConversation.messageContent = scope.$parent.currentConversation.messageContent.replace(/\n$/, "");
@@ -233,8 +225,10 @@ conversationDirective.directive("voicemessage", ["$timeout", function($timeout: 
         link: function(scope, ele, attr) {
             scope.msg.duration = parseInt(scope.msg.duration || scope.msg.content.length / 1024);
 
+            RongIMLib.RongIMVoice.preLoaded(scope.msg.content);
+
             scope.play = function() {
-                RongIMLib.RongIMVoice.stop();
+                RongIMLib.RongIMVoice.stop(scope.msg.content);
                 if (!scope.isplaying) {
                     scope.msg.isUnReade = false;
                     RongIMLib.RongIMVoice.play(scope.msg.content, scope.msg.duration);

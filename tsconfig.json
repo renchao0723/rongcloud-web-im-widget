@@ -29,6 +29,8 @@
     "src/ts/conversationlist/conversationListController.ts",
     "src/ts/conversationlist/conversationListDirective.ts",
     "src/ts/conversationlist/conversationListServer.ts",
+    "src/ts/evaluate/evaluateDirective.ts",
+    "src/ts/kefu.ts",
     "src/ts/main.ts",
     "src/ts/module.ts",
     "src/ts/rongimsdk.ts",

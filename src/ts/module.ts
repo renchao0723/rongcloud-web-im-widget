@@ -52,6 +52,10 @@ module WidgetModule {
         left = 1, right = 2, top = 3, bottom = 4
     }
 
+    export enum InputPanelType {
+        person = 0, robot = 1, robotSwitchPerson = 2, notService = 4
+    }
+
     export var MessageType = {
         DiscussionNotificationMessage: "DiscussionNotificationMessage ",
         TextMessage: "TextMessage",
@@ -65,7 +69,11 @@ module WidgetModule {
         InformationNotificationMessage: "InformationNotificationMessage",
         ContactNotificationMessage: "ContactNotificationMessage",
         ProfileNotificationMessage: "ProfileNotificationMessage",
-        CommandNotificationMessage: "CommandNotificationMessage"
+        CommandNotificationMessage: "CommandNotificationMessage",
+        HandShakeResponseMessage: "HandShakeResponseMessage",
+        ChangeModeResponseMessage: "ChangeModeResponseMessage",
+        TerminateMessage: "TerminateMessage",
+        CustomerStatusUpdateMessage: "CustomerStatusUpdateMessage"
     }
 
     export enum PanelType {
@@ -198,7 +206,8 @@ module WidgetModule {
                     break;
                 case MessageType.InformationNotificationMessage:
                     var info = new InformationNotificationMessage();
-                    info.content = SDKmsg.content.content;
+                    msg.panelType = 2;//灰条消息
+                    info.content = SDKmsg.content.message;
 
                     msg.content = info;
                     break;
@@ -210,6 +219,30 @@ module WidgetModule {
                     discussion.isHasReceived = SDKmsg.content.isHasReceived;
 
                     msg.content = discussion;
+                case WidgetModule.MessageType.HandShakeResponseMessage:
+                    var handshak = new HandShakeResponseMessage();
+                    handshak.status = SDKmsg.content.status;
+                    handshak.msg = SDKmsg.content.msg;
+                    handshak.data = SDKmsg.content.data;
+                    msg.content = handshak;
+                    break;
+                case WidgetModule.MessageType.ChangeModeResponseMessage:
+                    var change = new ChangeModeResponseMessage();
+                    change.code = SDKmsg.content.code;
+                    change.data = SDKmsg.content.data;
+                    change.status = SDKmsg.content.status;
+                    msg.content = change;
+                    break;
+                case WidgetModule.MessageType.CustomerStatusUpdateMessage:
+                    var up = new CustomerStatusUpdateMessage();
+                    up.serviceStatus = SDKmsg.content.serviceStatus;
+                    msg.content = up;
+                    break;
+                case WidgetModule.MessageType.TerminateMessage:
+                    var ter = new TerminateMessage();
+                    ter.code = SDKmsg.content.code;
+                    msg.content = ter;
+                    break;
                 default:
                     console.log("未处理消息类型:" + SDKmsg.messageType);
                     break;
@@ -254,6 +287,36 @@ module WidgetModule {
             this.userInfo = msg.userInfo;
         }
     }
+    export class HandShakeResponseMessage {
+        status: string
+        msg: string
+        data: {
+            uid: string,
+            pid: string,
+            sid: string,
+            serviceType: string,
+            isblack: string,
+            notAutoCha: string,
+            roboWelcome: string,
+            robotName: string,
+            robotIcon: string,
+            humanWelcome: string,
+            companyName: string,
+            noOneOnlineTip: string
+        }
+    }
+    export class ChangeModeResponseMessage {
+        code: string
+        data: any//1成功，2没有客服在线，3用户被拉黑，4用户已转人工
+        status: string
+    }
+    export class TerminateMessage {
+        code: string //0表示会话结束，1转为机器人
+    }
+    export class CustomerStatusUpdateMessage {
+        serviceStatus: string//1机器人，2人工，3无法服务
+    }
+
     export class InformationNotificationMessage {
         userInfo: UserInfo;
         content: string;
@@ -403,6 +466,7 @@ module WidgetModule {
 
                     try {
                         var _canvas = canvas.toDataURL("image/jpeg", 0.5);
+                        _canvas = _canvas.substr(23);
                         callback(obj, _canvas);
                     } catch (e) {
                         callback(obj, null);

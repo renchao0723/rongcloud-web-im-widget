@@ -7,21 +7,21 @@ declare module RongIMLib {
     class voice {
         static play(content: string, time: any): void
     }
-    class RongIMEmoji {
-        static emojis: any[]
-        static init(): void
-
-        static emojiToSymbol(str: string): string
-        static symbolToEmoji(str: string): string
-        static symbolToHTML(str: string): string
-        static emojiToHTML(str: string): string
-    }
-    class RongIMVoice {
-        static init(): void
-        static play(data: string, duration: number): void
-        static stop(): void
-        static onprogress(): void
-    }
+    // class RongIMEmoji {
+    //     static emojis: any[]
+    //     static init(): void
+    //
+    //     static emojiToSymbol(str: string): string
+    //     static symbolToEmoji(str: string): string
+    //     static symbolToHTML(str: string): string
+    //     static emojiToHTML(str: string): string
+    // }
+    // class RongIMVoice {
+    //     static init(): void
+    //     static play(data: string, duration: number): void
+    //     static stop(): void
+    //     static onprogress(): void
+    // }
 }
 
 interface Window {

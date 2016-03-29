@@ -1,0 +1,57 @@
+<div class="layermbox" ng-show="display">
+        <div class="laymshade"></div>
+        <div class="layermmain">
+            <div class="section">
+                <div class="layermchild" ng-show="!end">
+                    <div class="layermcont">
+                        <!--评价人工-->
+                        <div class="type1" ng-show="type==1">
+                            <h4>&nbsp;评价客服</h4>
+                            <div class="layerPanel1">
+                                <div class="star">
+                                  <span ng-repeat="item in stars track by $index" ><span ng-class="{'star-on':$index<data.stars,'star-off':$index>=data.stars}" ng-click="confirm($index+1)"></span></span>
+                                  <!-- <span ng-repeat="item in stars"><img src="images/star_off.png" alt="5" title="5"></span> -->
+                                  <!-- <img src="images/star_on.png" alt="1" title="1">&nbsp;<img src="images/star_on.png" alt="2" title="2">&nbsp;
+                                  <img src="images/star_off.png" alt="3" title="3">&nbsp;<img src="images/star_off.png" alt="4" title="4">&nbsp;
+                                  <img src="images/star_off.png" alt="5" title="5"> -->
+                                </div>
+                            </div>
+                        </div>
+                        <!--评价机器人-->
+                        <div class="type2" ng-show="type==2">
+                            <h4>&nbsp;&nbsp;是否解决了您的问题 ？</h4>
+                            <div class="layerPanel1">
+                                <a class="btn btnY" ng-class="{'cur':data.value===true}" href="javascript:void(0);" ng-click="confirm(true)">是</a>
+                                <a class="btn btnN" ng-class="{'cur':data.value===false}" href="javascript:void(0);" ng-click="confirm(false)">否</a>
+                            </div>
+                        </div>
+
+                        <!--评价内容-->
+                        <div class="layerPanel2" ng-show="displayDescribe">
+                            <p>是否有以下情况 ？</p>
+                            <div class="labels">
+                                <span ng-repeat="item in labels"><a class="btn" ng-class="{'cur':data.label==item}" ng-click="data.label=item" href="">{{item}}</a></span>
+                                <!-- <a class="btn" ng-click="" href="">答非所问</a>
+                                <a class="btn" ng-click="" href="">理解能力差</a>
+                                <a class="btn" ng-click="" href="">一问三不知</a>
+                                <a class="btn" ng-click="" href="">不礼貌</a> -->
+                            </div>
+                            <div class="suggestBox">
+                                <textarea name="" placeholder="欢迎给我们的服务提建议~" ng-model="data.describe"></textarea>
+                            </div>
+                            <div class="subBox">
+                                <a class="btn" href="" ng-click="commit()">提交评价</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layermbtn"><span ng-click="confirm()">跳过</span><span ng-click="cancle()">取消</span></div>
+                </div>
+                <!--反馈提示-->
+                <div class="layermchild feedback" ng-show="end">
+                    <div class="layermcont">
+                        感谢您的反馈 ^ - ^ ！
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

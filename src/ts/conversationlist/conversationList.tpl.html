@@ -11,29 +11,10 @@
         <div class="content">
             <div class="netStatus" ng-hide="connected"><!--online-->
                 <div class="sprite"></div>
-                <span>网络连接断开</span>
+                <span>与服务器连接断开</span>
             </div>
             <div class="">
                 <conversation-item ng-repeat="item in conversationListServer.conversationList" item="item"></conversation-item>
-                <!-- <div class="chatList">
-                    <div class="chat_item online ">
-                        <div class="ext">
-                            <p class="attr clearfix">
-                                <span class="badge">20</span>
-                                <i class="sprite no-remind"></i>
-                            </p>
-                        </div>
-                        <div class="photo">
-                            <img class="img" src="images/webBg.png" alt="">
-                            <i class="Presence Presence--stacked Presence--mainBox"></i>
-                        </div>
-                        <div class="info">
-                            <h3 class="nickname">
-                                <span class="nickname_text">融云</span>
-                            </h3>
-                        </div>
-                    </div>
-                </div> -->
             </div>
         </div>
     </div>

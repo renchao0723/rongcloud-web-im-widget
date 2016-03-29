@@ -3,10 +3,10 @@
 var conversationController = angular.module("RongWebIMWidget.conversationController", ["RongWebIMWidget.conversationServer"]);
 
 conversationController.controller("conversationController", ["$scope",
-    "conversationServer", "WebIMWidget", "conversationListServer", "widgetConfig",
+    "conversationServer", "WebIMWidget", "conversationListServer", "widgetConfig", "providerdata",
     function($scope: any, conversationServer: ConversationServer,
         WebIMWidget: WebIMWidget, conversationListServer: conversationListServer,
-        widgetConfig: widgetConfig) {
+        widgetConfig: widgetConfig, providerdata: providerdata) {
 
         var ImageDomain = "http://7xogjk.com1.z0.glb.clouddn.com/";
         var notExistConversation = true;
@@ -30,10 +30,13 @@ conversationController.controller("conversationController", ["$scope",
 
         $scope.messageContent = "";
 
-        $scope.resoures = WebIMWidget;
+        $scope.WebIMWidget = WebIMWidget;
         $scope.widgetConfig = widgetConfig;
+        $scope.conversationServer = conversationServer;
+        $scope._inputPanelState = WidgetModule.InputPanelType.person;
 
-        $scope.showPanel = false;
+        $scope.showSelf = false;
+
 
         //显示表情
         $scope.showemoji = false;
@@ -51,19 +54,36 @@ conversationController.controller("conversationController", ["$scope",
             if (newVal === oldVal)
                 return;
             if (!$scope.emojiList || $scope.emojiList.length == 0) {
-                //RongIMLib.RongIMEmoji.init();
                 $scope.emojiList = RongIMLib.RongIMEmoji.emojis.slice(0, 84);
             }
         });
 
+        $scope.$watch("currentConversation.messageContent", function(newVal: string, oldVal: string) {
+            if (newVal === oldVal)
+                return;
+            if ($scope.currentConversation) {
+                RongIMLib.RongIMClient.getInstance().saveTextMessageDraft(+$scope.currentConversation.targetType, $scope.currentConversation.targetId, newVal)
+            }
+        });
 
         conversationServer.onConversationChangged = function(conversation: WidgetModule.Conversation) {
 
             if (widgetConfig.displayConversationList) {
-                $scope.showPanel = true;
+                $scope.showSelf = true;
             } else {
-                $scope.showPanel = true;
-                $scope.resoures.display = true;
+                $scope.showSelf = true;
+                $scope.WebIMWidget.display = true;
+            }
+
+            if (conversation && conversation.targetType == WidgetModule.EnumConversationType.CUSTOMER_SERVICE && (!conversationServer.current || conversationServer.current.targetId != conversation.targetId)) {
+                RongIMLib.RongIMClient.getInstance().startCustomService(conversation.targetId, {
+                    onSuccess: function() {
+
+                    },
+                    onError: function() {
+                        console.log("连接客服失败");
+                    }
+                })
             }
 
             //会话为空清除页面各项值
@@ -93,11 +113,11 @@ conversationController.controller("conversationController", ["$scope",
                         if (data.has) {
                             $scope.messageList.unshift(new WidgetModule.GetMoreMessagePanel());
                         }
+                        adjustScrollbars();
                     }
-                    adjustScrollbars();
                 });
             } else {
-                $scope.messageList = conversationServer._cacheHistory[conversation.targetType + "_" + conversation.targetId];
+                $scope.messageList = currenthis;
             }
 
             //TODO:获取草稿
@@ -107,27 +127,127 @@ conversationController.controller("conversationController", ["$scope",
             })
         }
 
-        $scope.$watch("currentConversation.messageContent", function(newVal: string, oldVal: string) {
-            if (newVal === oldVal)
-                return;
-            if ($scope.currentConversation) {
-                RongIMLib.RongIMClient.getInstance().saveTextMessageDraft(+$scope.currentConversation.targetType, $scope.currentConversation.targetId, newVal)
-            }
 
-        });
 
         conversationServer.onReceivedMessage = function(msg: WidgetModule.Message) {
             // $scope.messageList.splice(0, $scope.messageList.length);
             if ($scope.currentConversation && msg.targetId == $scope.currentConversation.targetId && msg.conversationType == $scope.currentConversation.targetType) {
                 $scope.$apply();
-                if (msg.messageType == WidgetModule.MessageType.ImageMessage) {
-                    setTimeout(function() {
-                        adjustScrollbars();
-                    }, 200);
-                } else {
-                    adjustScrollbars();
+                var systemMsg = null;
+                switch (msg.messageType) {
+                    case WidgetModule.MessageType.HandShakeResponseMessage:
+                        conversationServer._customService.type = msg.content.data.serviceType;
+                        conversationServer._customService.companyName = msg.content.data.companyName;
+                        conversationServer._customService.robotName = msg.content.data.robotName;
+                        conversationServer._customService.robotIcon = msg.content.data.robotIcon;
+                        conversationServer._customService.robotWelcome = msg.content.data.robotWelcome;
+                        conversationServer._customService.humanWelcome = msg.content.data.humanWelcome;
+                        conversationServer._customService.noOneOnlineTip = msg.content.data.noOneOnlineTip;
+
+                        if (msg.content.data.serviceType == "1") {//仅机器人
+                            changeInputPanelState(WidgetModule.InputPanelType.robot);
+                            msg.content.data.robotWelcome && (systemMsg = packReceiveMessage(RongIMLib.TextMessage.obtain(msg.content.data.robotWelcome), WidgetModule.MessageType.TextMessage));
+                        } else if (msg.content.data.serviceType == "3") {
+                            msg.content.data.robotWelcome && (systemMsg = packReceiveMessage(RongIMLib.TextMessage.obtain(msg.content.data.robotWelcome), WidgetModule.MessageType.TextMessage));
+                            changeInputPanelState(WidgetModule.InputPanelType.robotSwitchPerson);
+                        } else {
+                            // msg.content.data.humanWelcome && (systemMsg = packReceiveMessage(RongIMLib.TextMessage.obtain(msg.content.data.humanWelcome), WidgetModule.MessageType.TextMessage));
+                            changeInputPanelState(WidgetModule.InputPanelType.person);
+                        }
+                        $scope.evaluate.valid = false;
+                        setTimeout(function() {
+                            $scope.evaluate.valid = true;
+                        }, 60 * 1000);
+
+                        break;
+                    case WidgetModule.MessageType.ChangeModeResponseMessage:
+                        switch (msg.content.data.status) {
+                            case 1:
+                                conversationServer._customService.human.name = msg.content.data.name || "客服人员";
+                                conversationServer._customService.human.headimgurl = msg.content.data.headimgurl;
+                                changeInputPanelState(WidgetModule.InputPanelType.person);
+                                break;
+                            case 2:
+                                if (conversationServer._customService.type == "2") {
+                                    changeInputPanelState(WidgetModule.InputPanelType.person);
+                                } else if (conversationServer._customService.type == "1" || conversationServer._customService.type == "3") {
+                                    changeInputPanelState(WidgetModule.InputPanelType.robotSwitchPerson);
+                                }
+                                break;
+                            case 3:
+                                changeInputPanelState(WidgetModule.InputPanelType.robot);
+                                systemMsg = packReceiveMessage(RongIMLib.InformationNotificationMessage.obtain("你被拉黑了"), WidgetModule.MessageType.InformationNotificationMessage);
+                                break;
+                            case 4:
+                                changeInputPanelState(WidgetModule.InputPanelType.person);
+                                systemMsg = packReceiveMessage(RongIMLib.InformationNotificationMessage.obtain("已经是人工了"), WidgetModule.MessageType.InformationNotificationMessage);
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    case WidgetModule.MessageType.TerminateMessage:
+                        //关闭客服
+                        if (msg.content.code == 0) {
+                            $scope.evaluate.CSTerminate = true;
+                            $scope.close();
+                        } else {
+                            if (conversationServer._customService.type == "1") {
+                                changeInputPanelState(WidgetModule.InputPanelType.robot);
+                            } else {
+                                changeInputPanelState(WidgetModule.InputPanelType.robotSwitchPerson);
+                            }
+                        }
+
+                        break;
+                    case WidgetModule.MessageType.CustomerStatusUpdateMessage:
+                        switch (Number(msg.content.serviceStatus)) {
+                            case 1:
+                                if (conversationServer._customService.type == "1") {
+                                    changeInputPanelState(WidgetModule.InputPanelType.robot);
+                                } else {
+                                    changeInputPanelState(WidgetModule.InputPanelType.robotSwitchPerson);
+                                }
+                                break;
+                            case 2:
+                                changeInputPanelState(WidgetModule.InputPanelType.person);
+                                break;
+                            case 3:
+                                changeInputPanelState(WidgetModule.InputPanelType.notService);
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    default:
+                        break;
                 }
+
+                if (systemMsg) {
+                    var wmsg = WidgetModule.Message.convert(systemMsg);
+                    addCustomService(wmsg);
+                    conversationServer._addHistoryMessages(wmsg);
+                }
+
+                addCustomService(msg);
+
+                setTimeout(function() {
+                    adjustScrollbars();
+                }, 200);
             }
+        }
+
+
+
+        conversationServer._onConnectSuccess = function() {
+            RongIMLib.RongIMClient.getInstance().getFileToken(RongIMLib.FileType.IMAGE, {
+                onSuccess: function(data) {
+                    conversationServer._uploadToken = data.token;
+                    uploadFileInit();
+                }, onError: function() {
+
+                }
+            })
         }
 
 
@@ -155,10 +275,39 @@ conversationController.controller("conversationController", ["$scope",
             });
         }
 
+        function addCustomService(msg: WidgetModule.Message) {
+            if (msg.conversationType == WidgetModule.EnumConversationType.CUSTOMER_SERVICE && msg.content) {
+                if (conversationServer._customService.currentType == "1") {
+                    msg.content.userInfo = {
+                        name: conversationServer._customService.human.name || "客服人员",
+                        portraitUri: conversationServer._customService.human.headimgurl || conversationServer._customService.robotIcon,
+                    }
+                } else {
+                    msg.content.userInfo = {
+                        name: conversationServer._customService.robotName,
+                        portraitUri: conversationServer._customService.robotIcon,
+                    }
+                }
+            }
+            return msg;
+        }
+
+        var changeInputPanelState = function(type) {
+            $scope._inputPanelState = type;
+            if (type == WidgetModule.InputPanelType.person) {
+                $scope.evaluate.type = 1;
+                conversationServer._customService.currentType = "1";
+                conversationServer.current.title = conversationServer._customService.human.name || "客服人员";
+            } else {
+                $scope.evaluate.type = 2;
+                conversationServer._customService.currentType = "2";
+                conversationServer.current.title = conversationServer._customService.robotName;
+            }
+        }
 
         function packDisplaySendMessage(msg: any, messageType: string) {
             var ret = new RongIMLib.Message();
-            var userinfo = new RongIMLib.UserInfo(conversationServer.loginUser.id, conversationServer.loginUser.name, conversationServer.loginUser.portraitUri);
+            var userinfo = new RongIMLib.UserInfo(conversationServer.loginUser.id, conversationServer.loginUser.name || "我", conversationServer.loginUser.portraitUri);
             msg.user = userinfo;
             ret.content = msg;
             ret.conversationType = $scope.currentConversation.targetType;
@@ -172,40 +321,111 @@ conversationController.controller("conversationController", ["$scope",
             return ret;
         }
 
+        function packReceiveMessage(msg: any, messageType: string) {
+            var ret = new RongIMLib.Message();
+            var userinfo = null;
+            msg.userInfo = userinfo;
+            ret.content = msg;
+            ret.conversationType = $scope.currentConversation.targetType;
+            ret.targetId = $scope.currentConversation.targetId;
+            ret.senderUserId = $scope.currentConversation.targetId;
+
+            ret.messageDirection = RongIMLib.MessageDirection.RECEIVE;
+            ret.sentTime = (new Date()).getTime() - RongIMLib.RongIMClient.getInstance().getDeltaTime();
+            ret.messageType = messageType;
+
+            return ret;
+        }
+
+
         function closeState() {
+
+            if (WebIMWidget.onClose && typeof WebIMWidget.onClose === "function") {
+                WebIMWidget.onClose($scope.currentConversation);
+            }
             if (widgetConfig.displayConversationList) {
-                $scope.showPanel = false;
+                $scope.showSelf = false;
             } else {
-                $scope.resoures.display = false;
+                $scope.WebIMWidget.display = false;
             }
             $scope.messageList = [];
             $scope.currentConversation = null;
             conversationServer.current = null;
         }
 
+        $scope.evaluate = {
+            type: 1,
+            showevaluate: false,
+            valid: false,
+            CSTerminate: false,
+            onConfirm: function(data) {
+                //发评价
+                if (data) {
+                    if ($scope.value == 1) {
+                        RongIMLib.RongIMClient.getInstance().evaluateHumanCustomService(conversationServer.current.targetId, data.stars, data.describe, {
+                            onSuccess: function() {
+
+                            }
+                        })
+                    } else {
+                        RongIMLib.RongIMClient.getInstance().evaluateRebotCustomService(conversationServer.current.targetId, data.value, data.describe, {
+                            onSuccess: function() {
+
+                            }
+                        })
+                    }
+                }
+                RongIMLib.RongIMClient.getInstance().stopCustomeService(conversationServer.current.targetId, {
+                    onSuccess: function() {
+
+                    },
+                    onError: function() {
+
+                    }
+                });
+
+                closeState();
+            },
+            onCancle: function() {
+                RongIMLib.RongIMClient.getInstance().stopCustomeService(conversationServer.current.targetId, {
+                    onSuccess: function() {
+
+                    },
+                    onError: function() {
+
+                    }
+                });
+                closeState();
+            }
+        }
+
         $scope.close = function() {
-            var obj = $scope.currentConversation;
             if (WebIMWidget.onCloseBefore && typeof WebIMWidget.onCloseBefore === "function") {
                 var isClose = WebIMWidget.onCloseBefore({
-                    close: function() {
-                        closeState();
-                        setTimeout(function() {
-                            $scope.$apply();
-                        })
-                        if (WebIMWidget.onClose && typeof WebIMWidget.onClose === "function") {
-                            WebIMWidget.onClose(obj);
+                    close: function(data) {
+                        if (conversationServer.current.targetType == WidgetModule.EnumConversationType.CUSTOMER_SERVICE) {
+                            if ($scope.evaluate.valid) {
+                                $scope.evaluate.showevaluate = true;
+                            } else {
+                                $scope.evaluate.onCancle();
+                            }
+                        } else {
+                            closeState();
                         }
                     }
                 });
             } else {
-                closeState();
-                if (WebIMWidget.onClose && typeof WebIMWidget.onClose === "function") {
-                    WebIMWidget.onClose(obj);
+                if (conversationServer.current.targetType == WidgetModule.EnumConversationType.CUSTOMER_SERVICE) {
+                    if ($scope.evaluate.valid) {
+                        $scope.evaluate.showevaluate = true;
+                    } else {
+                        $scope.evaluate.onCancle();
+                    }
+                } else {
+                    closeState();
                 }
             }
-
         }
-
 
 
         $scope.send = function() {
@@ -223,7 +443,7 @@ conversationController.controller("conversationController", ["$scope",
             var msg = RongIMLib.TextMessage.obtain(con);
             var userinfo = new RongIMLib.UserInfo(conversationServer.loginUser.id, conversationServer.loginUser.name, conversationServer.loginUser.portraitUri);
 
-            msg.userInfo = userinfo;
+            msg.user = userinfo;
 
             RongIMLib.RongIMClient.getInstance().sendMessage(+$scope.currentConversation.targetType, $scope.currentConversation.targetId, msg, {
                 onSuccess: function(retMessage: RongIMLib.Message) {
@@ -249,11 +469,17 @@ conversationController.controller("conversationController", ["$scope",
             WidgetModule.Helper.getFocus(obj);
         }
 
-        conversationServer._onConnectSuccess = function() {
-            RongIMLib.RongIMClient.getInstance().getFileToken(RongIMLib.FileType.IMAGE, {
-                onSuccess: function(data) {
-                    conversationServer._uploadToken = data.token;
-                    uploadFileInit();
+        $scope.minimize = function() {
+            WebIMWidget.display = false;
+        }
+
+        $scope.switchPerson = function() {
+            RongIMLib.RongIMClient.getInstance().switchToHumanMode(conversationServer.current.targetId, {
+                onSuccess: function() {
+
+                },
+                onError: function() {
+
                 }
             })
         }
@@ -317,6 +543,9 @@ conversationController.controller("conversationController", ["$scope",
                                     $scope.$apply();
                                     adjustScrollbars();
                                 })
+
+                            },
+                            onError: function() {
 
                             }
                         });

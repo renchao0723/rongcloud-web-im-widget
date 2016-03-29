@@ -24,6 +24,10 @@ demo.controller("main", ["$scope", "WebIMWidget", function($scope,
       appkey: "bmdehs6pdw0ss",
       token: "0MR6diLid4RCH4IOrf7nDbgtZuR3CES6Xp+I56nDnYRbr6K9RiBhz1zki27LadwQibmmbEbLg9yvTecpF41gzw==",
       style:{
+          right:10
+      },
+      onSuccess:function(){
+          WebIMWidget.setConversation("4", "cc", "呵呵");
       },
       onError:function(error){
         console.log("error:"+error);
@@ -48,10 +52,6 @@ demo.controller("main", ["$scope", "WebIMWidget", function($scope,
     }
 
     WebIMWidget.show();
-
-
-    //设置会话
-    //WebimWidget.setConversation("4", "cc", "呵呵");
 
 
   });

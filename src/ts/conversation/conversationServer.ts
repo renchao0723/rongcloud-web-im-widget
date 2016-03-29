@@ -31,7 +31,7 @@ conversationServer.factory("conversationServer", ["$q", "providerdata", function
                 while (msglen--) {
                     var msg = WidgetModule.Message.convert(data[msglen]);
                     unshiftHistoryMessages(targetId, targetType, msg);
-                    if (msg.content) {
+                    if (msg.content && providerdata.getUserInfo) {
                         (function(msg) {
                             providerdata.getUserInfo(msg.senderUserId, {
                                 onSuccess: function(obj) {
@@ -86,6 +86,9 @@ conversationServer.factory("conversationServer", ["$q", "providerdata", function
     conversationServer.onReceivedMessage = function() {
         //提供接口由coversation controller实现具体操作
     }
+    conversationServer._customService = <any>{
+        human: {}
+    }
 
     return conversationServer;
 
@@ -93,6 +96,21 @@ conversationServer.factory("conversationServer", ["$q", "providerdata", function
 
 interface ConversationServer {
     current: WidgetModule.Conversation
+    _customService: {
+        type: string,
+        currentType: string,
+        companyName: string,
+        robotName: string,
+        robotIcon: string,
+        robotWelcome: string,
+        humanWelcome: string,
+        noOneOnlineTip: string,
+        isblack: string,
+        human: {
+            name: string,
+            headimgurl: string
+        }
+    }
     loginUser: any
     onConversationChangged(conversation: WidgetModule.Conversation): void
     onReceivedMessage(message: WidgetModule.Message): void

@@ -32,19 +32,25 @@ declare module RongIMLib {
     }
     interface SendMessageCallback {
         onError(error: ErrorCode, result: Message): void;
-        onSuccess(result: Message): void;
+        onSuccess(result?: Message): void;
     }
     interface GetHistoryMessagesCallback {
         onError(error: ErrorCode): void;
-        onSuccess(result: Message[], hasMoreMessages: boolean): void;
+        onSuccess(result: Message[], hasMoreMessages?: boolean): void;
     }
 }
-declare function MD5(str: string): any;
+declare function md5(str: string): any;
 declare var Modules: any;
 declare var require: any;
 declare var module: any;
 declare var define: any;
 declare var exports: any;
+declare var dcodeIO: any;
+declare var Polling: any;
+declare var escape: any;
+declare var AMR: any;
+declare var swfobject: any;
+declare var openDatabase: any;
 declare class XDomainRequest {
 }
 interface Window {
@@ -53,8 +59,15 @@ interface Window {
     RCCallback: any;
     RongIMClient: any;
     getServerEndpoint: any;
+    WEB_XHR_POLLING: any;
+    SCHEMETYPE: any;
     XDomainRequest: any;
     JSON: any;
+    Modules: any;
+    handleFileSelect: any;
+}
+interface Document {
+    createStyleSheet: any;
 }
 interface HTMLScriptElement {
     onreadystatechange: any;
@@ -87,6 +100,12 @@ declare module RongIMLib {
         HTTP = 0,
         HTTPS = 1,
     }
+    enum CustomerType {
+        ONLY_ROBOT = 1,
+        ONLY_HUMAN = 2,
+        ROBOT_FIRST = 3,
+        HUMAN_FIRST = 4,
+    }
     enum ConnectionStatus {
         /**
          * 连接成功。
@@ -107,7 +126,7 @@ declare module RongIMLib {
         /**
          * 网络不可用。
          */
-        NETWORK_UNAVAILABLE = -1,
+        NETWORK_UNAVAILABLE = 3,
     }
     enum ConversationNotificationStatus {
         /**
@@ -120,13 +139,13 @@ declare module RongIMLib {
         NOTIFY = 1,
     }
     enum ConversationType {
-        NONE = -1,
-        CHATROOM = 0,
-        CUSTOMER_SERVICE = 1,
+        NONE = 0,
+        PRIVATE = 1,
         DISCUSSION = 2,
         GROUP = 3,
-        PRIVATE = 4,
-        SYSTEM = 5,
+        CHATROOM = 4,
+        CUSTOMER_SERVICE = 5,
+        SYSTEM = 6,
         APP_PUBLIC_SERVICE = 7,
         PUBLIC_SERVICE = 8,
     }
@@ -146,6 +165,10 @@ declare module RongIMLib {
          * 未知原因失败。
          */
         UNKNOWN = -2,
+        /**
+         * 发送频率过快
+         */
+        SEND_FREQUENCY_TOO_FAST = 20604,
         /**
          * 不在讨论组。
          */
@@ -174,6 +197,10 @@ declare module RongIMLib {
          *获取用户失败
          */
         GET_USERINFO_ERROR = 23407,
+        /**
+         *获取用户失败
+         */
+        FORBIDDEN_IN_CHATROOM = 23408,
         /**
          * 在黑名单中。
          */
@@ -394,6 +421,18 @@ declare module RongIMLib {
          * 关注公众号失败
          */
         SUBSCRIBE_ERROR = 39001,
+        /**
+         * 关注公众号失败
+         */
+        QNTKN_FILETYPE_ERROR = 41001,
+        /**
+         * 获取七牛token失败
+         */
+        QNTKN_GET_ERROR = 41002,
+        /**
+         * cookie被禁用
+         */
+        COOKIE_ENABLE = 51001,
     }
     enum MediaType {
         /**
@@ -422,6 +461,11 @@ declare module RongIMLib {
          * 接收消息。
          */
         RECEIVE = 2,
+    }
+    enum FileType {
+        IMAGE = 1,
+        AUDIO = 2,
+        VIDEO = 3,
     }
     enum RealTimeLocationErrorCode {
         /**
@@ -551,18 +595,76 @@ declare module RongIMLib {
     }
 }
 declare module RongIMLib {
+    class RongIMEmoji {
+        static emojis: any[];
+        private static emojiFactory;
+        private static regExpTag;
+        private static regExpName;
+        private static size;
+        private static url;
+        /**
+         * 是否支持高清屏幕
+         */
+        private static pixelRatio;
+        /**
+         * 判断是否支持emoji
+         */
+        private static supportEmoji;
+        /**
+         * 初始化CSS
+         */
+        private static initCSS();
+        private static createBTag(position);
+        private static createSpan(emojiObj);
+        private static calculateUTF(d);
+        static init(emoji?: any): void;
+        static emojiToSymbol(str: string): string;
+        /**
+         * 获取Emoji对象 发送消息使用
+         * @param  {string}     name  emoji名称
+         */
+        static symbolToEmoji(str: string): string;
+        /**
+         * @param  {string} str 字符串
+         */
+        static symbolToHTML(str: string): string;
+        /**
+         * 转换字符串中的emoji 接收消息使用
+         * @param  {string} str      包含emoji的字符串
+         */
+        static emojiToHTML(str: string): string;
+    }
+}
+declare module RongIMLib {
+    class RongIMVoice {
+        private static isIE;
+        private static element;
+        private static isInit;
+        static init(): void;
+        static play(data: string, duration: number): void;
+        static stop(base64Data: string): void;
+        static preLoaded(base64Data: string): void;
+        private static palyVoice(base64Data);
+        static onprogress(): void;
+        private static checkInit(position);
+        private static thisMovie();
+        private static onCompleted(duration);
+        private static base64ToBlob(base64Data, type);
+    }
+}
+declare module RongIMLib {
     class RongIMClient {
         /**
          * [schemeType 选择连接方式]
-         * SSL需要设置schemeType为ConnectionChannel.HTTPS
-         * HTTP或WS需要设置 schemeType为ConnectionChannel.HTTP(默认)
-         * 若改变连接方式此属性必须在RongIMClient.init之前赋值
-         * expmale:
-         * RongIMLib.RongIMClient.schemeType = RongIMLib.ConnectionChannel.HTTP
+         * SSL自动设置schemeType为ConnectionChannel.HTTPS
+         * HTTP或WS自动设置 schemeType为ConnectionChannel.HTTP
          * @type {number}
          */
         static schemeType: number;
         static MessageType: {
+            [s: string]: any;
+        };
+        static MessageParams: {
             [s: string]: any;
         };
         static RegisterMessage: {
@@ -578,7 +680,6 @@ declare module RongIMLib {
         /**
          * 初始化 SDK，在整个应用全局只需要调用一次。
          * @param appKey    开发者后台申请的 AppKey，用来标识应用。
-         * @param  choicePolling 是否选择comet方式连接，默认为false
          * @param dataAccessProvider 必须是DataAccessProvider的实例
          */
         static init(appKey: string, dataAccessProvider?: DataAccessProvider): void;
@@ -617,13 +718,17 @@ declare module RongIMLib {
          * 断开连接。
          */
         disconnect(): void;
+        startCustomService(custId: string, callback: any): void;
+        stopCustomeService(custId: string, callback: any): void;
+        switchToHumanMode(custId: string, callback: any): void;
+        evaluateRebotCustomService(custId: string, isRobotResolved: boolean, sugest: string, callback: any): void;
+        evaluateHumanCustomService(custId: string, humanValue: number, sugest: string, callback: any): void;
+        setCustomerWelcome(robotWelcome: string, humanWelcome: string): void;
+        private sendCustMessage(custId, msg, callback);
         /**
          * 获取当前连接的状态。
          */
         getCurrentConnectionStatus(): ConnectionStatus;
-        getFileToken(type: number, callback: any): void
-        getFileUrl(type: number, name: string, callback: any): void
-        getDeltaTime(): number
         /**
          * 获取当前使用的连接通道。
          */
@@ -633,29 +738,29 @@ declare module RongIMLib {
          */
         getStorageProvider(): string;
         /**
+         * 过滤聊天室消息（拉取最近聊天消息）
+         * @param {string[]} msgFilterNames
+         */
+        setFilterMessages(msgFilterNames: string[]): void;
+        /**
          * 获取当前连接用户的 UserId。
          */
         getCurrentUserId(): string;
         /**
          * [getCurrentUserInfo 获取当前用户信息]
          * @param  {ResultCallback<UserInfo>} callback [回调函数]
-         * TODO 待讨论
          */
-        getCurrentUserInfo(callback: ResultCallback<UserInfo>): void;
         /**
          * 获得用户信息
          * @param  {string}                   userId [用户Id]
          * @param  {ResultCallback<UserInfo>} callback [回调函数]
-         * TODO 待讨论
          */
-        getUserInfo(userId: string, callback: ResultCallback<UserInfo>): void;
         /**
-         * 获取本地时间与服务器时间的差值，单位为毫秒。
-         *
-         * @param callback  获取的回调，返回时间差值。
-         * TODO 问王平
+         * 获取服务器时间与本地时间的差值，单位为毫秒。
+         * 计算公式：差值 = 本地时间毫秒数 - 服务器时间毫秒数
+         * @param callback  获取的回调，返回差值。
          */
-        getDeltaTime(callback: ResultCallback<number>): void;
+        getDeltaTime(): number;
         clearMessages(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
         /**TODO 清楚本地存储的未读消息，目前清空内存中的未读消息
          * [clearMessagesUnreadStatus 清空指定会话未读消息]
@@ -671,9 +776,9 @@ declare module RongIMLib {
          * @param  {number[]}                messageIds       [description]
          * @param  {ResultCallback<boolean>} callback         [description]
          */
-        deleteMessages(conversationType: ConversationType, targetId: string, messageIds: number[], callback: ResultCallback<boolean>): void;
+        deleteMessages(conversationType: ConversationType, targetId: string, messageIds: string[], callback: ResultCallback<boolean>): void;
         sendLocalMessage(message: Message, callback: SendMessageCallback): void;
-        /**TODO callback
+        /**
          * [sendMessage 发送消息。]
          * @param  {ConversationType}        conversationType [会话类型]
          * @param  {string}                  targetId         [目标Id]
@@ -683,7 +788,8 @@ declare module RongIMLib {
          * @param  {string}                  pushContent      []
          * @param  {string}                  pushData         []
          */
-        sendMessage(conversationType: ConversationType, targetId: string, messageContent: MessageContent, sendCallback: SendMessageCallback, isFirstSendMsg?: boolean): void;
+        sendMessage(conversationType: ConversationType, targetId: string, messageContent: MessageContent, sendCallback: SendMessageCallback): void;
+        sendTypingStatusMessage(conversationType: ConversationType, targetId: string, messageName: string, sendCallback: SendMessageCallback): void;
         /**
          * [sendStatusMessage description]
          * @param  {MessageContent}          messageContent [description]
@@ -705,7 +811,7 @@ declare module RongIMLib {
          * @param  {MessageContent}          content          [description]
          * @param  {ResultCallback<Message>} callback         [description]
          */
-        insertMessage(conversationType: ConversationType, targetId: string, senderUserId: string, content: MessageContent, callback: ResultCallback<Message>): void;
+        insertMessage(conversationType: ConversationType, targetId: string, senderUserId: string, content: Message, callback: ResultCallback<Message>): void;
         /**
          * [getHistoryMessages 拉取历史消息记录。]
          * @param  {ConversationType}          conversationType [会话类型]
@@ -745,10 +851,13 @@ declare module RongIMLib {
          * @param  {string}           targetId         [用户Id]
          */
         getUnreadCount(conversationType: ConversationType, targetId: string, callback: ResultCallback<number>): void;
-
-
+        /**
+         * 清楚会话未读消息数
+         * @param  {ConversationType}        conversationType 会话类型
+         * @param  {string}                  targetId         目标Id
+         * @param  {ResultCallback<boolean>} callback         返回值，函数回调
+         */
         clearUnreadCount(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
-
         setMessageExtra(messageId: string, value: string, callback: ResultCallback<boolean>): void;
         setMessageReceivedStatus(messageId: string, receivedStatus: ReceivedStatus, callback: ResultCallback<boolean>): void;
         setMessageSentStatus(messageId: string, sentStatus: SentStatus, callback: ResultCallback<boolean>): void;
@@ -978,6 +1087,8 @@ declare module RongIMLib {
          * @param  {OperationCallback} callback [返回值，函数回调]
          */
         removeFromBlacklist(userId: string, callback: OperationCallback): void;
+        getFileToken(fileType: FileType, callback: ResultCallback<{ token: string }>): void;
+        getFileUrl(fileType: FileType, fileName: String, callback: ResultCallback<{ downloadUrl: string }>): void;
         addRealTimeLocationListener(conversationType: ConversationType, targetId: string, listener: RealTimeLocationListener): void;
         getRealTimeLocation(conversationType: ConversationType, targetId: string): void;
         getRealTimeLocationCurrentState(conversationType: ConversationType, targetId: string): void;
@@ -994,9 +1105,6 @@ declare module RongIMLib {
         AT_LEAST_ONCE = 1,
         EXACTLY_ONCE = 2,
         DEFAULT = 3,
-    }
-    enum FileType {
-        IMAGE = 1
     }
     enum Type {
         CONNECT = 1,
@@ -1024,7 +1132,7 @@ declare module RongIMLib {
         constructor(address: any, cb: any, self: Client);
         writeAndFlush(val: any): void;
         reconnect(callback: any): void;
-        disconnect(): void;
+        disconnect(status: number): void;
     }
     class Socket {
         static XHR_POLLING: string;
@@ -1038,16 +1146,16 @@ declare module RongIMLib {
         getTransport(transportType: string): any;
         send(data: any): void;
         onMessage(data: any): void;
-        disconnect(): void;
+        disconnect(status: number): any;
         reconnect(): any;
         /**
          * [checkTransport 返回通道类型]
          * WEB_XHR_POLLING:是否选择comet方式进行连接
          */
         checkTransport(): string;
-        fire(x: any, args?: any): void;
-        on(x: any, func: any): void;
-        removeEvent(x: any, fn: any): void;
+        fire(x: any, args?: any): any;
+        on(x: any, func: any): any;
+        removeEvent(x: any, fn: any): any;
         _encode(x: any): {
             url: string;
             data: any;
@@ -1076,7 +1184,7 @@ declare module RongIMLib {
         clearHeartbeat(): void;
         publishMessage(_topic: any, _data: any, _targetId: any, _callback: any, _msg: any): void;
         queryMessage(_topic: string, _data: any, _targetId: string, _qos: any, _callback: any, pbtype: any): void;
-        invoke(): void;
+        invoke(isPullMsg?: boolean): void;
         syncTime(_type?: any, pullTime?: any): void;
         __init(f: any): void;
     }
@@ -1092,13 +1200,14 @@ declare module RongIMLib {
     }
     class MessageHandler {
         map: any;
+        syncMsgMap: any;
         _onReceived: any;
         connectCallback: any;
         _client: Client;
         constructor(client: Client);
         putCallback(callbackObj: any, _publishMessageId: any, _msg: any): any;
         setConnectCallback(_connectCallback: any): void;
-        onReceived(msg: any): void;
+        onReceived(msg: any, pubAckItem?: any): void;
         handleMessage(msg: any): void;
     }
 }
@@ -1138,7 +1247,7 @@ declare module RongIMLib {
         _cb: any;
         _timeout: any;
         constructor(_cb: any, _timeout: any, client: Client);
-        process(status: number, userId: string): void;
+        process(status: number, userId: string, timestamp: number): void;
         readTimeOut(x?: any): void;
     }
 }
@@ -1211,15 +1320,18 @@ declare module RongIMLib {
         status: any;
         userId: string;
         MESSAGE_LENGTH: number;
+        timestrap: number;
         binaryHelper: BinaryHelper;
         constructor(header: any);
         messageLength(): number;
-        readMessage(_in: any, msglength: number): void;
+        readMessage(_in: RongIMStream, msglength: number): void;
         writeMessage(out: any): RongIMStream;
         setStatus(x: any): void;
         setUserId(_userId: string): void;
         getStatus(): any;
         getUserId(): string;
+        setTimestamp(x: number): void;
+        getTimestamp(): number;
     }
     /**
      *断开消息类型
@@ -1299,6 +1411,7 @@ declare module RongIMLib {
         targetId: string;
         date: any;
         binaryHelper: BinaryHelper;
+        syncMsg: boolean;
         constructor(header: any, two?: any, three?: any);
         messageLength(): number;
         writeMessage(Out: any): void;
@@ -1307,6 +1420,8 @@ declare module RongIMLib {
         setData(x: any): void;
         setTargetId(x: any): void;
         setDate(x: any): void;
+        setSyncMsg(x: boolean): void;
+        getSyncMsg(): boolean;
         getTopic(): any;
         getData(): any;
         getTargetId(): string;
@@ -1387,7 +1502,9 @@ declare module RongIMLib {
         retain: boolean;
         qos: any;
         dup: boolean;
+        syncMsg: boolean;
         constructor(_type: any, _retain?: any, _qos?: any, _dup?: any);
+        getSyncMsg(): boolean;
         getType(): number;
         encode(): any;
         toString(): string;
@@ -1414,6 +1531,8 @@ declare module RongIMLib {
         constructor(arr: any);
         check(): boolean;
         readInt(): number;
+        readLong(): number;
+        readTimestamp(): number;
         readUTF(): any;
         readByte(): any;
         read(bytesArray?: any): any;
@@ -1429,9 +1548,8 @@ declare module RongIMLib {
         createTransport(url: string, method: string): any;
         send(data: any, url?: string, method?: string): any;
         onData(data?: any): string;
-        onClose(): any;
+        onClose(ev?: any): any;
         onError(error: any): void;
-        addEvent(): void;
         disconnect(): void;
     }
 }
@@ -1444,6 +1562,7 @@ declare module RongIMLib {
         queue: Array<any>;
         empty: any;
         _socket: Socket;
+        _status: number;
         /**
          * [constructor]
          * @param  {string} url [连接地址：包含token、version]
@@ -1466,7 +1585,7 @@ declare module RongIMLib {
         /**
          * [onClose 通道关闭时触发的方法]
          */
-        onClose(): any;
+        onClose(ev: any): any;
         /**
          * [onError 通道报错时触发的方法]
          * @param {any} error [抛出异常]
@@ -1483,7 +1602,7 @@ declare module RongIMLib {
         /**
          * [disconnect 断开连接]
          */
-        disconnect(): void;
+        disconnect(status?: number): void;
         /**
          * [reconnect 重新连接]
          */
@@ -1492,53 +1611,39 @@ declare module RongIMLib {
 }
 declare module RongIMLib {
     class PollingTransportation implements Transportation {
-        allowWithCrendentials: boolean;
-        isXHR: boolean;
         empty: Function;
-        connected: boolean;
-        isClose: boolean;
-        requestParams: any;
         queue: Array<any>;
-        _sendXhr: any;
-        _xhr: any;
-        _socket: Socket;
+        sendxhr: any;
+        xhr: any;
+        socket: Socket;
+        url: string;
+        connected: boolean;
         constructor(socket: Socket);
-        /**
-         * [createTransport 创建Polling，打开请求连接]
-         */
         createTransport(url: string, method?: string): any;
-        private _request(url, method, multipart?);
-        private _get(url, args?);
+        private requestFactory(url, method, multipart?);
+        private getRequest(url, isconnect?);
         /**
          * [send 发送消息，Method:POST]
          * queue 为消息队列，待通道可用发送所有等待消息
          * @param  {string} data [需要传入comet格式数据，此处只负责通讯通道，数据转换在外层处理]
          */
-        send(data: any, url?: string, method?: string): void;
+        send(data: any): void;
         onData(data?: any, header?: any): string;
-        onClose(isrecon?: boolean): any;
-        onError(error: any): void;
         XmlHttpRequest(): any;
-        checkWithCredentials(): boolean;
-        doQueue(key?: string): void;
+        onClose(): void;
         disconnect(): void;
-        reconnect(): any;
-        onPollingSuccess(a: any, b?: any): void;
-        onPollingError(): void;
-        addEvent(): void;
-        private status200(text, arg);
-        private status400(self);
+        reconnect(): void;
+        onSuccess(responseText: string, isconnect?: any): void;
+        onError(): void;
     }
 }
-declare var mapping: any, typeMapping: {
+declare var typeMapping: {
     [s: string]: any;
 }, registerMessageTypeMapping: {
     [s: string]: any;
 }, HistoryMsgType: {
     [s: number]: any;
-}, C2S: {
-    [s: number]: any;
-}, S2C: {
+}, disconnectStatus: {
     [s: number]: any;
 };
 declare module RongIMLib {
@@ -1641,7 +1746,7 @@ declare module RongIMLib {
     abstract class StatusMessage extends MessageContent {
     }
     interface UserInfoAttachedMessage {
-        userInfo: UserInfo;
+        user: UserInfo;
     }
     interface ExtraAttachedMessage {
         extra: string;
@@ -1652,19 +1757,83 @@ declare module RongIMLib {
     }
 }
 declare module RongIMLib {
+    /**
+     * 客服转换响应消息的类型名
+     */
+    class ChangeModeResponseMessage implements MessageContent {
+        messageName: string;
+        code: number;
+        data: any;
+        msg: string;
+        constructor(message: any);
+        static obtain(): ChangeModeResponseMessage;
+        encode(): string;
+    }
+    /**
+     * 客服转换消息的类型名
+     * 此消息不计入未读消息数
+     */
+    class ChangeModeMessage implements MessageContent {
+        messageName: string;
+        uid: string;
+        sid: string;
+        pid: string;
+        constructor(message: any);
+        static obtain(): ChangeModeMessage;
+        encode(): string;
+    }
+    class HandShakeMessage implements MessageContent {
+        messageName: string;
+        constructor();
+        static obtain(): HandShakeMessage;
+        encode(): string;
+    }
+    class EvaluateMessage implements MessageContent {
+        messageName: string;
+        uid: string;
+        sid: string;
+        pid: string;
+        source: number;
+        suggest: string;
+        isRobotResolved: boolean;
+        type: number;
+        constructor(message: any);
+        static obtain(): EvaluateMessage;
+        encode(): string;
+    }
+    /**
+     * 客服握手响应消息的类型名
+     */
+    class HandShakeResponseMessage implements MessageContent {
+        messageName: string;
+        msg: string;
+        status: number;
+        data: any;
+        constructor(message: any);
+        static obtain(): HandShakeResponseMessage;
+        encode(): string;
+    }
+    class SuspendMessage implements MessageContent {
+        messageName: string;
+        uid: string;
+        sid: string;
+        pid: string;
+        constructor(message: any);
+        static obtain(): SuspendMessage;
+        encode(): string;
+    }
+    class TerminateMessage implements MessageContent {
+        messageName: string;
+        code: number;
+        msg: string;
+        sid: string;
+        constructor(message: any);
+        static obtain(): TerminateMessage;
+        encode(): string;
+    }
+}
+declare module RongIMLib {
     class IsTypingStatusMessage implements StatusMessage {
-        messageName: string;
-        constructor(data: string);
-        encode(): string;
-        getMessage(): any;
-    }
-    class HandshakeMessage implements NotificationMessage {
-        messageName: string;
-        constructor(data: string);
-        encode(): string;
-        getMessage(): any;
-    }
-    class SuspendMessage implements NotificationMessage {
         messageName: string;
         constructor(data: string);
         encode(): string;
@@ -1673,24 +1842,25 @@ declare module RongIMLib {
 }
 declare module RongIMLib {
     class InformationNotificationMessage implements NotificationMessage, UserInfoAttachedMessage, ExtraAttachedMessage {
-        userInfo: UserInfo;
-        content: string;
+        user: UserInfo;
+        message: string;
         extra: string;
         messageName: string;
         constructor(message: any);
-        static obtain(content: string): InformationNotificationMessage;
+        static obtain(message: string): InformationNotificationMessage;
         encode(): string;
     }
     class CommandMessage implements MessageContent, ExtraAttachedMessage {
-        content: string;
+        data: string;
         extra: string;
+        name: string;
         messageName: string;
         constructor(message: any);
-        static obtain(content: string): CommandMessage;
+        static obtain(data: string): CommandMessage;
         encode(): string;
     }
     class ContactNotificationMessage implements NotificationMessage, UserInfoAttachedMessage, ExtraAttachedMessage {
-        userInfo: UserInfo;
+        user: UserInfo;
         static CONTACT_OPERATION_ACCEPT_RESPONSE: string;
         static CONTACT_OPERATION_REJECT_RESPONSE: string;
         static CONTACT_OPERATION_REQUEST: string;
@@ -1698,15 +1868,14 @@ declare module RongIMLib {
         targetUserId: string;
         sourceUserId: string;
         message: string;
-        content: string;
         extra: string;
         messageName: string;
         constructor(message: any);
-        static obtain(operation: string, sourceUserId: string, targetUserId: string, content: string): InformationNotificationMessage;
+        static obtain(operation: string, sourceUserId: string, targetUserId: string, message: string): InformationNotificationMessage;
         encode(): string;
     }
     class ProfileNotificationMessage implements MessageContent, NotificationMessage, UserInfoAttachedMessage, ExtraAttachedMessage {
-        userInfo: UserInfo;
+        user: UserInfo;
         operation: string;
         data: string;
         extra: string;
@@ -1716,7 +1885,7 @@ declare module RongIMLib {
         encode(): string;
     }
     class CommandNotificationMessage implements MessageContent, NotificationMessage, UserInfoAttachedMessage, ExtraAttachedMessage {
-        userInfo: UserInfo;
+        user: UserInfo;
         data: string;
         name: string;
         extra: string;
@@ -1726,7 +1895,7 @@ declare module RongIMLib {
         encode(): string;
     }
     class DiscussionNotificationMessage implements MessageContent, NotificationMessage, UserInfoAttachedMessage, ExtraAttachedMessage {
-        userInfo: UserInfo;
+        user: UserInfo;
         extra: string;
         extension: string;
         type: number;
@@ -1739,7 +1908,7 @@ declare module RongIMLib {
 }
 declare module RongIMLib {
     class TextMessage implements MessageContent, UserInfoAttachedMessage, ExtraAttachedMessage {
-        userInfo: UserInfo;
+        user: UserInfo;
         extra: string;
         content: string;
         messageName: string;
@@ -1747,8 +1916,16 @@ declare module RongIMLib {
         static obtain(text: string): TextMessage;
         encode(): string;
     }
+    class TypingStatusMessage implements MessageContent {
+        typingContentType: string;
+        data: string;
+        messageName: string;
+        constructor(message: any);
+        static obtain(typingContentType: string, data: string): TypingStatusMessage;
+        encode(): string;
+    }
     class VoiceMessage implements MessageContent, UserInfoAttachedMessage, ExtraAttachedMessage {
-        userInfo: UserInfo;
+        user: UserInfo;
         content: string;
         duration: number;
         extra: string;
@@ -1758,7 +1935,7 @@ declare module RongIMLib {
         encode(): string;
     }
     class ImageMessage implements MessageContent, UserInfoAttachedMessage, ExtraAttachedMessage {
-        userInfo: UserInfo;
+        user: UserInfo;
         content: string;
         imageUri: string;
         extra: string;
@@ -1768,26 +1945,27 @@ declare module RongIMLib {
         encode(): string;
     }
     class LocationMessage implements MessageContent, UserInfoAttachedMessage, ExtraAttachedMessage {
-        userInfo: UserInfo;
+        user: UserInfo;
         latiude: number;
         longitude: number;
         poi: string;
-        imgUri: string;
+        content: string;
         extra: string;
         messageName: string;
         constructor(message: any);
-        static obtain(latitude: number, longitude: number, poi: string, imgUri: string): LocationMessage;
+        static obtain(latitude: number, longitude: number, poi: string, content: string): LocationMessage;
         encode(): string;
     }
     class RichContentMessage implements MessageContent, UserInfoAttachedMessage, ExtraAttachedMessage {
-        userInfo: UserInfo;
+        user: UserInfo;
         title: string;
         content: string;
         imageUri: string;
         extra: string;
+        url: string;
         messageName: string;
         constructor(message: any);
-        static obtain(title: string, content: string, imageUri: string): RichContentMessage;
+        static obtain(title: string, content: string, imageUri: string, url: string): RichContentMessage;
         encode(): string;
     }
     class UnknownMessage implements MessageContent {
@@ -1797,7 +1975,7 @@ declare module RongIMLib {
         encode(): string;
     }
     class PublicServiceCommandMessage implements MessageContent, UserInfoAttachedMessage, ExtraAttachedMessage {
-        userInfo: UserInfo;
+        user: UserInfo;
         menuItem: PublicServiceMenuItem;
         content: string;
         extra: string;
@@ -1807,14 +1985,14 @@ declare module RongIMLib {
         encode(): string;
     }
     class PublicServiceMultiRichContentMessage implements MessageContent, UserInfoAttachedMessage {
-        userInfo: UserInfo;
+        user: UserInfo;
         richContentMessages: Array<RichContentMessage>;
         messageName: string;
         constructor(messages: Array<RichContentMessage>);
         encode(): any;
     }
     class PublicServiceRichContentMessage implements MessageContent, UserInfoAttachedMessage {
-        userInfo: UserInfo;
+        user: UserInfo;
         richContentMessage: RichContentMessage;
         messageName: string;
         constructor(message: RichContentMessage);
@@ -1822,6 +2000,12 @@ declare module RongIMLib {
     }
 }
 declare module RongIMLib {
+    class CustomServiceConfig {
+        constructor(isBlack?: boolean, companyName?: string, companyUrl?: string);
+    }
+    class CustomServiceSession {
+        constructor(uid?: string, cid?: string, pid?: string, isQuited?: boolean, type?: number, adminHelloWord?: string, adminOfflineWord?: string);
+    }
     class Conversation {
         conversationTitle: string;
         conversationType: ConversationType;
@@ -1832,7 +2016,7 @@ declare module RongIMLib {
         notificationStatus: ConversationNotificationStatus;
         objectName: string;
         receivedStatus: ReceivedStatus;
-        receivedTime: Date;
+        receivedTime: number;
         senderUserId: string;
         senderUserName: string;
         sentStatus: SentStatus;
@@ -1840,7 +2024,7 @@ declare module RongIMLib {
         targetId: string;
         unreadMessageCount: number;
         senderPortraitUri: string;
-        constructor(conversationTitle?: string, conversationType?: ConversationType, draft?: string, isTop?: boolean, latestMessage?: any, latestMessageId?: string, notificationStatus?: ConversationNotificationStatus, objectName?: string, receivedStatus?: ReceivedStatus, receivedTime?: Date, senderUserId?: string, senderUserName?: string, sentStatus?: SentStatus, sentTime?: number, targetId?: string, unreadMessageCount?: number, senderPortraitUri?: string);
+        constructor(conversationTitle?: string, conversationType?: ConversationType, draft?: string, isTop?: boolean, latestMessage?: any, latestMessageId?: string, notificationStatus?: ConversationNotificationStatus, objectName?: string, receivedStatus?: ReceivedStatus, receivedTime?: number, senderUserId?: string, senderUserName?: string, sentStatus?: SentStatus, sentTime?: number, targetId?: string, unreadMessageCount?: number, senderPortraitUri?: string);
         setTop(): void;
     }
     class Discussion {
@@ -1872,7 +2056,9 @@ declare module RongIMLib {
         targetId: string;
         messageType: string;
         messageUId: string;
-        constructor(content?: MessageContent, conversationType?: ConversationType, extra?: string, objectName?: string, messageDirection?: MessageDirection, messageId?: string, receivedStatus?: ReceivedStatus, receivedTime?: number, senderUserId?: string, sentStatus?: SentStatus, sentTime?: number, targetId?: string, messageType?: string, messageUId?: string);
+        hasReceivedByOtherClient: boolean;
+        isLocalMessage: boolean;
+        constructor(content?: MessageContent, conversationType?: ConversationType, extra?: string, objectName?: string, messageDirection?: MessageDirection, messageId?: string, receivedStatus?: ReceivedStatus, receivedTime?: number, senderUserId?: string, sentStatus?: SentStatus, sentTime?: number, targetId?: string, messageType?: string, messageUId?: string, hasReceivedByOtherClient?: boolean, isLocalMessage?: boolean);
     }
     class MessageTag {
         isCounted: boolean;
@@ -1908,10 +2094,12 @@ declare module RongIMLib {
 }
 declare module RongIMLib {
     class ServerDataProvider implements DataAccessProvider {
+        database: DBUtil;
         addConversation(conversation: Conversation, callback: ResultCallback<boolean>): void;
         removeConversation(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
-        addMessage(conversationType: ConversationType, targetId: string, message: MessageContent, callback?: ResultCallback<Message>): void;
-        removeMessage(conversationType: ConversationType, targetId: string, messageIds: number[], callback: ResultCallback<boolean>): void;
+        addMessage(conversationType: ConversationType, targetId: string, message: Message, callback?: ResultCallback<Message>): void;
+        removeMessage(conversationType: ConversationType, targetId: string, messageIds: string[], callback: ResultCallback<boolean>): void;
+        removeLocalMessage(conversationType: ConversationType, targetId: string, timestamps: number[], callback: ResultCallback<boolean>): void;
         updateMessage(message: Message, callback?: ResultCallback<Message>): void;
         clearMessages(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
         updateMessages(conversationType: ConversationType, targetId: string, key: string, value: any, callback: ResultCallback<boolean>): void;
@@ -1922,6 +2110,7 @@ declare module RongIMLib {
         getTotalUnreadCount(callback: ResultCallback<number>): void;
         getConversationUnreadCount(conversationTypes: ConversationType[], callback: ResultCallback<number>): void;
         getUnreadCount(conversationType: ConversationType, targetId: string, callback: ResultCallback<number>): void;
+        clearUnreadCount(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
         setConversationToTop(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
         setMessageExtra(messageId: string, value: string, callback: ResultCallback<boolean>): void;
         setMessageReceivedStatus(messageId: string, receivedStatus: ReceivedStatus, callback: ResultCallback<boolean>): void;
@@ -1929,14 +2118,28 @@ declare module RongIMLib {
     }
 }
 declare module RongIMLib {
+    class DBUtil {
+        private db;
+        userId: string;
+        init(userId: string): boolean;
+        execSearchByParams(sql: string, values: string[], callback: any): void;
+        execSearch(sql: string, callback: any): void;
+        execUpdateByParams(sql: string, values: any[]): void;
+        execUpdate(sql: string): void;
+    }
+}
+declare module RongIMLib {
     class WebSQLDataProvider implements DataAccessProvider {
-        addConversation(conversation: Conversation, callback: ResultCallback<boolean>): void;
+        database: DBUtil;
+        private updateConversation(conversation, callback);
+        addConversation(conver: Conversation, callback: ResultCallback<boolean>): void;
         removeConversation(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
-        addMessage(conversationType: ConversationType, targetId: string, message: MessageContent, callback?: ResultCallback<Message>): void;
-        removeMessage(conversationType: ConversationType, targetId: string, messageIds: number[], callback: ResultCallback<boolean>): void;
+        addMessage(conversationType: ConversationType, targetId: string, message: Message, callback?: ResultCallback<Message>): void;
+        removeMessage(conversationType: ConversationType, targetId: string, messageIds: string[], callback: ResultCallback<boolean>): void;
+        removeLocalMessage(conversationType: ConversationType, targetId: string, messageIds: number[], callback: ResultCallback<boolean>): void;
         updateMessage(message: Message, callback?: ResultCallback<Message>): void;
-        clearMessages(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
         updateMessages(conversationType: ConversationType, targetId: string, key: string, value: any, callback: ResultCallback<boolean>): void;
+        clearMessages(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
         getConversation(conversationType: ConversationType, targetId: string): Conversation;
         getConversationList(callback: ResultCallback<Conversation[]>, conversationTypes?: ConversationType[]): void;
         clearConversations(conversationTypes: ConversationType[], callback: ResultCallback<boolean>): void;
@@ -1944,6 +2147,7 @@ declare module RongIMLib {
         getTotalUnreadCount(callback: ResultCallback<number>): void;
         getConversationUnreadCount(conversationTypes: ConversationType[], callback: ResultCallback<number>): void;
         getUnreadCount(conversationType: ConversationType, targetId: string, callback: ResultCallback<number>): void;
+        clearUnreadCount(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
         setConversationToTop(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
         setMessageExtra(messageId: string, value: string, callback: ResultCallback<boolean>): void;
         setMessageReceivedStatus(messageId: string, receivedStatus: ReceivedStatus, callback: ResultCallback<boolean>): void;
@@ -1952,10 +2156,12 @@ declare module RongIMLib {
 }
 declare module RongIMLib {
     interface DataAccessProvider {
+        database: DBUtil;
         addConversation(conversation: Conversation, callback: ResultCallback<boolean>): void;
         removeConversation(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
-        addMessage(conversationType: ConversationType, targetId: string, message: MessageContent, callback?: ResultCallback<Message>): void;
-        removeMessage(conversationType: ConversationType, targetId: string, messageId: number[], callback: ResultCallback<boolean>): void;
+        addMessage(conversationType: ConversationType, targetId: string, message: Message, callback?: ResultCallback<Message>): void;
+        removeMessage(conversationType: ConversationType, targetId: string, messageId: string[], callback: ResultCallback<boolean>): void;
+        removeLocalMessage(conversationType: ConversationType, targetId: string, timestamps: number[], callback: ResultCallback<boolean>): void;
         updateMessage(message: Message, callback?: ResultCallback<Message>): void;
         clearMessages(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
         updateMessages(conversationType: ConversationType, targetId: string, key: string, value: any, callback: ResultCallback<boolean>): void;
@@ -1966,6 +2172,7 @@ declare module RongIMLib {
         getTotalUnreadCount(callback: ResultCallback<number>): void;
         getConversationUnreadCount(conversationTypes: ConversationType[], callback: ResultCallback<number>): void;
         getUnreadCount(conversationType: ConversationType, targetId: string, callback: ResultCallback<number>): void;
+        clearUnreadCount(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
         setConversationToTop(conversationType: ConversationType, targetId: string, callback: ResultCallback<boolean>): void;
         setMessageExtra(messageId: string, value: string, callback: ResultCallback<boolean>): void;
         setMessageReceivedStatus(messageId: string, receivedStatus: ReceivedStatus, callback: ResultCallback<boolean>): void;
@@ -1973,24 +2180,23 @@ declare module RongIMLib {
     }
 }
 declare module RongIMLib {
-    class CookieProvider {
+    class CookieProvider implements StorageProvider {
         _host: string;
         setItem(composedKey: string, object: any): void;
         getItem(composedKey: string): string;
         removeItem(composedKey: string): void;
-        clearItem(): void;
         getItemKey(regStr: string): any;
+        clearItem(): void;
         onOutOfQuota(): number;
     }
 }
 declare module RongIMLib {
     class LocalStorageProvider implements StorageProvider {
+        static getInstance(): LocalStorageProvider;
         setItem(composedKey: string, object: any): void;
         getItem(composedKey: string): string;
         removeItem(composedKey: string): void;
         clearItem(): void;
-        getKeys(regStr: string, isUseDef?: boolean): string[];
-        getMsgKeys(regStr: string): string[];
         onOutOfQuota(): number;
     }
 }
@@ -2001,19 +2207,17 @@ declare module RongIMLib {
         removeItem(composedKey: string): void;
         clearItem(): void;
         onOutOfQuota(): number;
-        /**
-         * 获取keys方法
-         * @param  {string}  regStr   正则表达式内容
-         * @param  {boolean} isUseDef 不传使用默认，传true使用自定义正则表达式
-         */
-        getKeys(regStr: string, isUseDef?: boolean): any;
-        getMsgKeys(regStr: string, isUseDef?: boolean): any;
     }
     interface ComposeKeyFunc {
         (object: any): string;
     }
 }
 declare module RongIMLib {
+    class FeatureDectector {
+        script: any;
+        head: any;
+        constructor();
+    }
 }
 declare module RongIMLib {
     class FeaturePatcher {

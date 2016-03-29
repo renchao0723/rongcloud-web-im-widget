@@ -1,7 +1,7 @@
 var demo = angular.module("demo", ["RongWebIMWidget"]);
 
-demo.controller("main", ["$scope", "WebIMWidget", function($scope,
-  WebIMWidget) {
+demo.controller("main", ["$scope", "WebIMWidget","$http", function($scope,
+  WebIMWidget,$http) {
 
   $scope.show = function() {
     WebIMWidget.show();
@@ -25,7 +25,8 @@ demo.controller("main", ["$scope", "WebIMWidget", function($scope,
       token: "9yQ9dU/CnmCJpvUKnbrAQWmWxWM7S9FuTBrjDXeo1q6kuk+C3lpXDpLA8+ELH7yBGmRoBX2kgFCZjfEOfKApsQ==",
       style:{
         width:600,
-        positionFixed:true
+        positionFixed:true,
+        bottom:20,
       },
       displayConversationList:true,
       conversationListPosition:WebIMWidget.EnumConversationListPosition.right,
