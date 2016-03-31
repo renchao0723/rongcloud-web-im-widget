@@ -597,6 +597,7 @@ textarea {
     border-radius: 5px 5px 5px 5px;
     opacity: 1;
     overflow: hidden;
+    z-index: 99999;
 }
 .kefuChatBox.fullScreen{
     width: 100%!important;

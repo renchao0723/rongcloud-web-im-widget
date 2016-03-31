@@ -11,16 +11,18 @@ kefu.service("RongKefu", ["WebIMWidget", function(WebIMWidget: WebIMWidget) {
         angular.extend(defaultconfig, config)
         kefuServer._config = config;
         var style = <any>{
-            right: 10
+            right: 20
         }
         if (config.position) {
             if (config.position == KefuPostion.left) {
                 style = {
-                    left: 20
+                    left: 20,
+                    positionFixed: true
                 };
             } else {
                 style = {
-                    right: 20
+                    right: 20,
+                    positionFixed: true
                 };
             }
         }
@@ -35,7 +37,7 @@ kefu.service("RongKefu", ["WebIMWidget", function(WebIMWidget: WebIMWidget) {
         WebIMWidget.onShow = function() {
             WebIMWidget.setConversation(WidgetModule.EnumConversationType.CUSTOMER_SERVICE, config.kefuId, "客服");
         }
-        
+
     }
 
     kefuServer.show = function() {
