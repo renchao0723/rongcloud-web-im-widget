@@ -6,8 +6,8 @@
     <div id="rong-widget-minbtn" class="kefuBtnBox blueBg" ng-show="!main.display&&widgetConfig.displayMinButton" ng-click="showbtn()">
       <a class="kefuBtn" href="javascript: void(0);"  >
           <div class="sprite people"></div>
-          <span class="recent">最近联系人</span>
-          <div class="sprite arrow-up" ></div>
+          <span class="recent">{{widgetConfig.reminder||"最近联系人"}}</span>
+          <!-- <div class="sprite arrow-up" ></div> -->
       </a>
     </div>
 </div>

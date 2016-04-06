@@ -29,6 +29,7 @@ kefu.service("RongKefu", ["WebIMWidget", function(WebIMWidget: WebIMWidget) {
         WebIMWidget.init({
             appkey: config.appkey,
             token: config.token,
+            reminder: config.reminder,
             onSuccess: function(e) {
                 config.onSuccess && config.onSuccess(e);
             },
@@ -65,6 +66,7 @@ interface KefuConfig {
     appkey: string
     token: string
     kefuId: string
+    reminder: string
     position: KefuPostion
     onSuccess(par?: any): void
 }

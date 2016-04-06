@@ -178,6 +178,7 @@ textarea {
     border: none;
     line-height: 50px;
     float: none;
+    text-decoration: none !important;
 }
 .kefuBtn .people{
     vertical-align: middle;
@@ -675,7 +676,7 @@ textarea {
     padding: 30px 20px;
     position: absolute;
     top:36px;
-    bottom: 115px;
+    bottom: 114px;
 }
 
 #Messages.empty .emptyBox {
@@ -821,6 +822,8 @@ textarea {
 
 .Message-author > .author {
     color: #8e969f;
+    text-decoration: none !important;
+    cursor: default;
 }
 
 .Message-author > .time {
@@ -1107,6 +1110,7 @@ textarea {
     border: none;
     width: 60px;
     height: 24px;
+    line-height: 24px;
     border-radius: 40px;
     font-size: 9pt;
     color: rgb(255, 255, 255);

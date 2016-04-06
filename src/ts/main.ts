@@ -7,11 +7,11 @@ var widget = angular.module("RongWebIMWidget", ["RongWebIMWidget.conversationSer
 widget.run(["$http", "WebIMWidget", "widgetConfig", function($http: angular.IHttpService,
     WebIMWidget: WebIMWidget, widgetConfig: widgetConfig) {
     var protocol = location.protocol === "https:" ? "https:" : "http:";
-    $script.get(protocol + "//cdn.ronghub.com/RongIMLib-2.0.14.min.js", function() {
-        $script.get(protocol + "//cdn.ronghub.com/RongEmoji-2.0.14.min.js", function() {
+    $script.get(protocol + "//cdn.ronghub.com/RongIMLib-2.0.15.min.js", function() {
+        $script.get(protocol + "//cdn.ronghub.com/RongEmoji-2.0.15.min.js", function() {
             RongIMLib.RongIMEmoji && RongIMLib.RongIMEmoji.init();
         });
-        $script.get(protocol + "//cdn.ronghub.com/RongIMVoice-2.0.14.min.js", function() {
+        $script.get(protocol + "//cdn.ronghub.com/RongIMVoice-2.0.15.min.js", function() {
             RongIMLib.RongIMVoice && RongIMLib.RongIMVoice.init();
         });
         if (widgetConfig.config) {
@@ -175,6 +175,7 @@ widget.factory("WebIMWidget", ["$q", "conversationServer",
 
             widgetConfig.displayConversationList = defaultconfig.displayConversationList;
             widgetConfig.displayMinButton = defaultconfig.displayMinButton;
+            widgetConfig.reminder = defaultconfig.reminder;
 
             RongIMSDKServer.init(defaultconfig.appkey);
 
@@ -398,6 +399,7 @@ interface widgetConfig {
     displayConversationList: boolean
     displayMinButton: boolean
     config: any
+    reminder: string
 }
 
 interface providerdata {
@@ -416,6 +418,7 @@ interface Config {
     displayConversationList?: boolean;
     conversationListPosition?: any;
     displayMinButton?: boolean;
+    reminder?: string;
     style?: {
         positionFixed?: boolean;
         height?: number;

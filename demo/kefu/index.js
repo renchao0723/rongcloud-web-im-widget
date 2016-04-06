@@ -9,6 +9,7 @@ demo.controller("main", ["$scope","RongKefu", function($scope,RongKefu) {
         // appkey:"8brlm7ufrnfa3",
         // token:"qmi2DP0GTLOTdnwXc9ASAkJGE6CUea+VYHqv2I8LN/80VvDnGE9m0gFhVwV4pwWlcKaZvPUUF0VPIlOk5iRxrw51WQTHnwL1lHRP4bxQ3dE=",
         // kefuId:"KEFU145932387671898",
+        reminder:"在线咨询",
         position:RongKefu.KefuPostion.left,
         onSuccess:function(e){
           console.log(e);
